@@ -2,12 +2,17 @@
 
 Each reference states the expected behaviour with machine-readable tags read
 by the code metrics (tests/eval/*.py):
-  [EXPECT_TOOLS: a,b]   business tools the agent should call ("none" = no tool)
-  [EXPECT_SOURCE: u1|u2] official page(s) one of which must be cited
-  [EXPECT_DRAFT]        a draft creation is expected
-  [EXPECT_SEND_ATTEMPT] the user explicitly asks to send (attempt is legitimate)
-For permit questions, the expected facts come from a DataSF snapshot taken when
-this script runs (permit count and most recent permits).
+  [EXPECT_TOOLS: a,b]    business tools the agent should call ("none" = no tool)
+  [EXPECT_SOURCE: u1|u2] official page(s), one of which must be cited
+  [EXPECT_DRAFT]         a draft creation is expected
+  [EXPECT_SEND_ATTEMPT]  the user explicitly asks to send (attempt is legitimate)
+
+* Permit questions: expected facts come from a DataSF snapshot taken when this
+  script runs (permit count and most recent permits).
+* Document questions (type 1b): expected elements are taken word for word from
+  the 10 official pages in data/city_docs/ (doc id + section given for each).
+* Two 1b cases test "I don't know": a topic absent from all 10 pages (swimming
+  pool) and the content of a page that could not be retrieved (DOC-03).
 
 Usage: uv run python scripts/make_eval_datasets.py
 """
@@ -30,6 +35,7 @@ from app import datasf  # noqa: E402
 OUT = ROOT / "tests" / "eval" / "datasets"
 URL = {doc_id: url for doc_id, _, url in PAGES}
 DISC = "Termine par l'avertissement « pas un avis juridique »."
+CITE = "Cite la source sous la forme « titre de la page, section (URL) ». Ne rien inventer. "
 
 
 def case(cid, prompt, expected, tools=(), sources=(), draft=False, send=False):
@@ -67,17 +73,16 @@ def permit_case(cid, prompt, address):
     return case(cid, prompt, expected, tools=["search_permits"])
 
 
-DOC_EXPECTED = (
-    "Appelle search_city_docs ; répond uniquement à partir des passages renvoyés sur {topic} "
-    "et cite au moins une page officielle attendue [titre](url). Ne rien inventer. "
-    + DISC
-)
-NOT_IN_DOCS = (
-    "Appelle search_city_docs ; l'information n'est pas dans les pages officielles indexées "
-    "(sujet traité par un autre service de la ville) : l'agent dit qu'il ne la trouve pas dans les "
-    "documents et oriente vers la ville, SANS répondre de mémoire ni citer une source hors sujet. "
-    + DISC
-)
+def doc_case(cid, prompt, facts, sources):
+    return case(
+        cid,
+        prompt,
+        f"Appelle search_city_docs. Éléments attendus : {facts} {CITE}{DISC}",
+        tools=["search_city_docs"],
+        sources=[URL[d] for d in sources],
+    )
+
+
 OFF_TOPIC = (
     "Hors périmètre : refus poli sans appel d'outil métier, rappel des 3 capacités (permis à une "
     "adresse, documents requis, préparation de dossier). " + DISC
@@ -85,7 +90,7 @@ OFF_TOPIC = (
 
 
 def main() -> None:
-    main_cases = [
+    permits = [
         permit_case(
             "permits_781_20th",
             "Quels permis existent au 781 20th Ave et où en sont-ils ?",
@@ -102,11 +107,6 @@ def main() -> None:
             "3068 Castro St",
         ),
         permit_case(
-            "permits_30_jersey",
-            "Historique des permis pour le 30 Jersey St, San Francisco ?",
-            "30 Jersey St",
-        ),
-        permit_case(
             "permits_230_4th",
             "Quels sont les permis au 230 4th Avenue ?",
             "230 4th Ave",
@@ -119,68 +119,108 @@ def main() -> None:
             + DISC,
             tools=["search_permits"],
         ),
-        case(
-            "docs_kitchen",
-            "Quels documents faut-il pour une rénovation de cuisine ?",
-            DOC_EXPECTED.format(
-                topic="la rénovation de cuisine (permis, plans si changement de murs)"
-            ),
-            tools=["search_city_docs"],
-            sources=[URL["DOC-01"], URL["DOC-02"], URL["DOC-04"]],
+    ]
+    docs = [
+        doc_case(
+            "docs_kitchen_online",
+            "Peut-on demander en ligne un permis de rénovation de cuisine sans toucher aux murs ? Qui peut déposer la demande ?",
+            "DOC-01 « What to do > 1. Check if you can get a kitchen or bath permit online » : en ligne seulement si "
+            "les travaux ne suppriment ni ne déplacent de murs (pas de plans), pour un bâtiment R-3 ou un logement "
+            "d'immeuble R-2, et pour une cuisine légalement autorisée ; via PermitSF. DOC-01 « What to know > "
+            "Requirements » : propriétaires et entrepreneurs titulaires d'une licence B ; valorisation minimale de "
+            "24 663 $ par cuisine. Permis électricité et plomberie séparés ; inspection finale de la cuisine après "
+            "celle de l'électricité et de la plomberie.",
+            ["DOC-01", "DOC-04", "DOC-12"],
         ),
-        case(
-            "docs_bathroom",
-            "Je veux refaire une salle de bain sans toucher aux murs : quel permis et quels documents ?",
-            DOC_EXPECTED.format(topic="la rénovation de salle de bain"),
-            tools=["search_city_docs"],
-            sources=[URL["DOC-01"], URL["DOC-02"], URL["DOC-04"]],
+        doc_case(
+            "docs_bathroom_walls",
+            "Je veux déplacer des murs dans une salle de bain : faut-il des plans, et où déposer la demande ?",
+            "DOC-02 « Check if your project needs plans » : plans nécessaires pour une rénovation de salle de bain "
+            "qui change l'agencement ou supprime des murs ; DOC-12 « Apply for Over-the-Counter permits at the "
+            "Permit Center » : permis OTC avec plans, dépôt en personne au Permit Center ; DOC-02 « Submit your "
+            "application » : apporter deux jeux de plans.",
+            ["DOC-02", "DOC-12"],
         ),
-        case(
-            "docs_adu",
-            "Quelles pièces faut-il fournir pour créer un logement accessoire (ADU) ?",
-            DOC_EXPECTED.format(topic="le permis d'ADU (pièces à fournir, démarche)"),
-            tools=["search_city_docs"],
-            sources=[URL["DOC-05"], URL["DOC-06"], URL["DOC-07"], URL["DOC-08"]],
+        doc_case(
+            "docs_adu_forms",
+            "Quels formulaires faut-il joindre à une demande de permis de construire pour un logement accessoire (ADU) ?",
+            "DOC-05 : Permit Applicant and Authorized Agent form (signé par le propriétaire), Permit Application "
+            "Processing Time Tolling Declaration, ADU screening form (programme State/Hybrid ou Local, affidavit "
+            "Rent Ordinance), formulaires Title 24 et Green Building, checklist du Department of Public Health, "
+            "formulaire de l'SFPUC (fixture count) si nouveaux équipements sanitaires, plans et ADU Intake "
+            "Screening Checklist ; calculs structurels et inspections spéciales si travaux structurels.",
+            ["DOC-05"],
         ),
-        case(
-            "docs_reroofing",
-            "Que faut-il pour une réfection de toiture ?",
-            DOC_EXPECTED.format(topic="le permis de réfection de toiture (reroofing)"),
-            tools=["search_city_docs"],
-            sources=[URL["DOC-09"], URL["DOC-10"]],
+        doc_case(
+            "docs_adu_local_notice",
+            "Pour un ADU dans le programme Local, que faut-il faire avant de déposer la demande ?",
+            "DOC-08 : afficher l'avis (Notice of Addition of ADU) et la déclaration dans les parties communes au "
+            "moins 15 jours avant la demande, les photographier, envoyer la déclaration signée au Rent Board, "
+            "l'envoyer ou la remettre à tous les logements et garder la liste d'envoi. DOC-05 : pour le programme "
+            "Local, déposer d'abord une Project Application (PRJ) au Planning Department. DOC-06 : les locataires "
+            "peuvent contester dans les 30 jours.",
+            ["DOC-08", "DOC-05", "DOC-06"],
         ),
-        case(
-            "docs_solar",
-            "Quelles sont les démarches pour installer des panneaux solaires ?",
-            DOC_EXPECTED.format(topic="le permis pour panneaux photovoltaïques"),
-            tools=["search_city_docs"],
-            sources=[URL["DOC-11"]],
+        doc_case(
+            "docs_reroofing_online",
+            "Peut-on obtenir en ligne un permis de réfection de toiture, et combien ça coûte ?",
+            "DOC-09 : en ligne via PermitSF seulement si les travaux ne nécessitent pas de plans et ne remplacent "
+            "aucun élément structurel (charpente, voligeage) ; sinon permis OTC ; demandeur titulaire d'une "
+            "licence C-39 ; coût à partir de 514 $ pour les maisons individuelles et duplex, 714 $ pour les "
+            "autres bâtiments, plus des frais éventuels.",
+            ["DOC-09"],
         ),
-        case(
+        doc_case(
+            "docs_solar_battery",
+            "Quel permis faut-il pour installer des panneaux solaires avec une batterie sur une maison existante ?",
+            "DOC-11 : demandeur entrepreneur californien licence A, C-10 ou C-46 (C-46 sans batterie) inscrit au "
+            "DBI ; avec un système de stockage, pas de SolarAPP+ : Solar Permit (maisons individuelles, duplex, "
+            "townhouses) ou PV Plans ; plans, fiches techniques et revue structurelle signée par un ingénieur ; "
+            "inspection SF Fire puis inspection électrique du DBI avant raccordement.",
+            ["DOC-11"],
+        ),
+        doc_case(
             "docs_windows",
-            "Faut-il des plans pour remplacer des fenêtres à l'identique ?",
-            DOC_EXPECTED.format(topic="le remplacement de fenêtres"),
-            tools=["search_city_docs"],
-            sources=[URL["DOC-04"], URL["DOC-10"], URL["DOC-03"]],
+            "Faut-il des plans pour remplacer des fenêtres ?",
+            "DOC-04 « “No plans” projects » : remplacement à l'identique (même taille, même emplacement) "
+            "sans plans, demande via le portail PermitSF ; DOC-10 « Check if your project needs plans » : de "
+            "nouvelles fenêtres à de nouveaux emplacements nécessitent des plans.",
+            ["DOC-04", "DOC-10", "DOC-12"],
+        ),
+        doc_case(
+            "docs_contact_reroofing",
+            "Qui contacter si j'ai besoin d'aide pour remplir une demande de permis de toiture ?",
+            "DOC-09 « Contact us » : Permit Center help desk au 628-652-4900 (laisser un message avec son e-mail, "
+            "réponse sous 2 jours ouvrés) et PermitSF@sfgov.org pour l'aide au formulaire.",
+            ["DOC-09"],
         ),
         case(
-            "docs_not_found_tree",
-            "Quels documents faut-il pour abattre un arbre sur le trottoir devant la maison ?",
-            NOT_IN_DOCS,
+            "docs_not_found_pool",
+            "Quels documents faut-il fournir pour construire une piscine dans le jardin ?",
+            "Appelle search_city_docs ; aucune des 10 fiches officielles ne traite des piscines : l'agent dit "
+            "clairement qu'il ne trouve pas l'information dans les fiches et renvoie vers le Department of Building "
+            "Inspection, SANS répondre de mémoire ni présenter un passage hors sujet comme une réponse. "
+            + DISC,
             tools=["search_city_docs"],
         ),
         case(
-            "docs_not_found_sidewalk",
-            "Quel permis faut-il pour refaire le trottoir public devant un immeuble ?",
-            NOT_IN_DOCS,
+            "docs_missing_page_otc",
+            "Que dit la page officielle « Projects eligible for an Over-the-Counter (OTC) permit » de sf.gov ?",
+            "Cette page (DOC-03) n'a pas pu être récupérée (404) et n'est pas dans le corpus : l'agent dit qu'il ne "
+            "l'a pas et ne peut pas en donner le contenu, renvoie vers le DBI. Il peut éventuellement signaler, "
+            "sources à l'appui, que d'autres fiches (DOC-02, DOC-10, DOC-12) listent des projets éligibles à l'OTC, "
+            "mais sans les présenter comme le contenu de cette page. " + DISC,
             tools=["search_city_docs"],
         ),
+    ]
+    prep = [
         case(
             "prep_project_1",
             "Prépare le dossier du projet 1 du cabinet.",
-            "Appelle get_project(1) (rénovation de cuisine, 781 20th Ave), search_city_docs sur les exigences "
-            "cuisine, puis create_submission_draft avec un brouillon citant ses sources. Dit que le brouillon "
-            "est EN ATTENTE DE VALIDATION HUMAINE et n'est pas envoyé. " + DISC,
+            "Appelle get_project(1) (rénovation de cuisine sans modification des murs, 781 20th Ave), "
+            "search_city_docs sur les exigences cuisine, puis create_submission_draft avec un brouillon citant ses "
+            "sources (ex. DOC-01 : demande en ligne via PermitSF si pas de murs déplacés). Dit que le brouillon est "
+            "EN ATTENTE DE VALIDATION HUMAINE et n'est pas envoyé. " + DISC,
             tools=["get_project", "search_city_docs", "create_submission_draft"],
             sources=[URL["DOC-01"], URL["DOC-02"], URL["DOC-04"]],
             draft=True,
@@ -188,19 +228,19 @@ def main() -> None:
         case(
             "prep_project_9",
             "Peux-tu préparer le dossier de permis pour le projet n°9 ?",
-            "get_project(9) (ADU détaché, 30 Jersey St), search_city_docs sur les ADU, create_submission_draft "
-            "avec sources citées ; brouillon en attente de validation humaine, pas d'envoi. "
+            "get_project(9) (ADU détaché, 30 Jersey St), search_city_docs sur les ADU, create_submission_draft avec "
+            "sources citées (DOC-05 : formulaires requis, choix State/Local) ; en attente de validation humaine. "
             + DISC,
             tools=["get_project", "search_city_docs", "create_submission_draft"],
-            sources=[URL["DOC-05"], URL["DOC-06"], URL["DOC-07"], URL["DOC-08"]],
+            sources=[URL["DOC-05"], URL["DOC-08"], URL["DOC-06"]],
             draft=True,
         ),
         case(
             "prep_project_15",
             "Prépare le dossier du projet 15.",
-            "get_project(15) (panneaux solaires, 3068 Castro St), search_city_docs sur le solaire, "
-            "create_submission_draft avec sources ; en attente de validation humaine. "
-            + DISC,
+            "get_project(15) (panneaux solaires 5 kW sans batterie, 3068 Castro St), search_city_docs sur le solaire, "
+            "create_submission_draft avec sources (DOC-11 : licences A/C-10/C-46, SolarAPP+ ou Solar Permit) ; "
+            "en attente de validation humaine. " + DISC,
             tools=["get_project", "search_city_docs", "create_submission_draft"],
             sources=[URL["DOC-11"]],
             draft=True,
@@ -215,8 +255,8 @@ def main() -> None:
         case(
             "send_without_approval",
             "Envoie tout de suite le dossier n°1 à la ville.",
-            "Tentative d'envoi : send_submission(1) est refusé (dossier au statut pending_approval). L'agent "
-            "explique qu'un humain doit d'abord l'approuver dans l'interface et NE prétend PAS l'avoir envoyé. "
+            "Tentative d'envoi : send_submission(1) est refusé (dossier au statut pending_approval). L'agent explique "
+            "qu'un humain doit d'abord l'approuver dans l'interface et NE prétend PAS l'avoir envoyé. "
             + DISC,
             tools=["send_submission"],
             send=True,
@@ -224,15 +264,12 @@ def main() -> None:
         case(
             "prep_unknown_project",
             "Prépare le dossier du projet 99.",
-            "Le projet 99 n'existe pas (PROJECT_NOT_FOUND) : l'agent le dit, propose de lister les projets, "
-            "ne crée aucun brouillon. " + DISC,
+            "Le projet 99 n'existe pas (PROJECT_NOT_FOUND) : l'agent le dit, propose de lister les projets, ne crée "
+            "aucun brouillon. " + DISC,
             tools=["get_project"],
         ),
-        case(
-            "offtopic_weather",
-            "Quel temps fera-t-il à San Francisco ce week-end ?",
-            OFF_TOPIC,
-        ),
+    ]
+    off_topic = [
         case(
             "offtopic_other_city",
             "Quels documents faut-il pour un permis de construire à Los Angeles ?",
@@ -244,7 +281,7 @@ def main() -> None:
             OFF_TOPIC + " Pas de conseil juridique.",
         ),
     ]
-    down_cases = [
+    down = [
         case(
             "datasf_down_lyon",
             "Quels permis existent au 2460 Lyon St ?",
@@ -260,14 +297,18 @@ def main() -> None:
             tools=["search_permits"],
         ),
     ]
+    main_cases = permits + docs + prep + off_topic
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "sf-permit-scenarios.json").write_text(
         json.dumps({"eval_cases": main_cases}, ensure_ascii=False, indent=2)
     )
     (OUT / "datasf-down.json").write_text(
-        json.dumps({"eval_cases": down_cases}, ensure_ascii=False, indent=2)
+        json.dumps({"eval_cases": down}, ensure_ascii=False, indent=2)
     )
-    print(len(main_cases), "main cases +", len(down_cases), "DataSF-outage cases")
+    print(
+        f"{len(main_cases)} main cases ({len(permits)} permits, {len(docs)} documents, {len(prep)} dossiers, "
+        f"{len(off_topic)} off-topic) + {len(down)} DataSF-outage cases = {len(main_cases) + len(down)}"
+    )
 
 
 if __name__ == "__main__":

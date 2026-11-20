@@ -64,27 +64,6 @@
       }
     },
     {
-      "eval_case_id": "permits_30_jersey",
-      "prompt": {
-        "role": "user",
-        "parts": [
-          {
-            "text": "Historique des permis pour le 30 Jersey St, San Francisco ?"
-          }
-        ]
-      },
-      "reference": {
-        "response": {
-          "role": "model",
-          "parts": [
-            {
-              "text": "[EXPECT_TOOLS: search_permits] Appelle search_permits. D'après DataSF (instantané du 2026-11-20), 28 permis à cette adresse ; les plus récents : 202606022362 (otc alterations permit, statut filed); 202602256479 (otc alterations permit, statut issued); 202601143808 (otc alterations permit, statut issued). Les chiffres peuvent évoluer : la réponse doit correspondre au résultat de l'outil dans la trace, citer la source DataSF, et ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
-            }
-          ]
-        }
-      }
-    },
-    {
       "eval_case_id": "permits_230_4th",
       "prompt": {
         "role": "user",
@@ -127,12 +106,12 @@
       }
     },
     {
-      "eval_case_id": "docs_kitchen",
+      "eval_case_id": "docs_kitchen_online",
       "prompt": {
         "role": "user",
         "parts": [
           {
-            "text": "Quels documents faut-il pour une rénovation de cuisine ?"
+            "text": "Peut-on demander en ligne un permis de rénovation de cuisine sans toucher aux murs ? Qui peut déposer la demande ?"
           }
         ]
       },
@@ -141,19 +120,19 @@
           "role": "model",
           "parts": [
             {
-              "text": "[EXPECT_TOOLS: search_city_docs] [EXPECT_SOURCE: https://www.sf.gov/apply-kitchen-or-bath-remodel-permit|https://www.sf.gov/step-by-step--get-otc-permit-your-interior-residential-remodel|https://www.sf.gov/information/check-if-your-building-permit-needs-plans] Appelle search_city_docs ; répond uniquement à partir des passages renvoyés sur la rénovation de cuisine (permis, plans si changement de murs) et cite au moins une page officielle attendue [titre](url). Ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
+              "text": "[EXPECT_TOOLS: search_city_docs] [EXPECT_SOURCE: https://www.sf.gov/apply-kitchen-or-bath-remodel-permit|https://www.sf.gov/information/check-if-your-building-permit-needs-plans|https://www.sf.gov/where-to-apply-for-your-permit] Appelle search_city_docs. Éléments attendus : DOC-01 « What to do > 1. Check if you can get a kitchen or bath permit online » : en ligne seulement si les travaux ne suppriment ni ne déplacent de murs (pas de plans), pour un bâtiment R-3 ou un logement d'immeuble R-2, et pour une cuisine légalement autorisée ; via PermitSF. DOC-01 « What to know > Requirements » : propriétaires et entrepreneurs titulaires d'une licence B ; valorisation minimale de 24 663 $ par cuisine. Permis électricité et plomberie séparés ; inspection finale de la cuisine après celle de l'électricité et de la plomberie. Cite la source sous la forme « titre de la page, section (URL) ». Ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
             }
           ]
         }
       }
     },
     {
-      "eval_case_id": "docs_bathroom",
+      "eval_case_id": "docs_bathroom_walls",
       "prompt": {
         "role": "user",
         "parts": [
           {
-            "text": "Je veux refaire une salle de bain sans toucher aux murs : quel permis et quels documents ?"
+            "text": "Je veux déplacer des murs dans une salle de bain : faut-il des plans, et où déposer la demande ?"
           }
         ]
       },
@@ -162,19 +141,19 @@
           "role": "model",
           "parts": [
             {
-              "text": "[EXPECT_TOOLS: search_city_docs] [EXPECT_SOURCE: https://www.sf.gov/apply-kitchen-or-bath-remodel-permit|https://www.sf.gov/step-by-step--get-otc-permit-your-interior-residential-remodel|https://www.sf.gov/information/check-if-your-building-permit-needs-plans] Appelle search_city_docs ; répond uniquement à partir des passages renvoyés sur la rénovation de salle de bain et cite au moins une page officielle attendue [titre](url). Ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
+              "text": "[EXPECT_TOOLS: search_city_docs] [EXPECT_SOURCE: https://www.sf.gov/step-by-step--get-otc-permit-your-interior-residential-remodel|https://www.sf.gov/where-to-apply-for-your-permit] Appelle search_city_docs. Éléments attendus : DOC-02 « Check if your project needs plans » : plans nécessaires pour une rénovation de salle de bain qui change l'agencement ou supprime des murs ; DOC-12 « Apply for Over-the-Counter permits at the Permit Center » : permis OTC avec plans, dépôt en personne au Permit Center ; DOC-02 « Submit your application » : apporter deux jeux de plans. Cite la source sous la forme « titre de la page, section (URL) ». Ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
             }
           ]
         }
       }
     },
     {
-      "eval_case_id": "docs_adu",
+      "eval_case_id": "docs_adu_forms",
       "prompt": {
         "role": "user",
         "parts": [
           {
-            "text": "Quelles pièces faut-il fournir pour créer un logement accessoire (ADU) ?"
+            "text": "Quels formulaires faut-il joindre à une demande de permis de construire pour un logement accessoire (ADU) ?"
           }
         ]
       },
@@ -183,19 +162,19 @@
           "role": "model",
           "parts": [
             {
-              "text": "[EXPECT_TOOLS: search_city_docs] [EXPECT_SOURCE: https://www.sf.gov/get-a-building-permit-for-an-accessory-dwelling-unit-adu|https://www.sf.gov/information--accessory-dwelling-units-adus|https://sf.gov/step-by-step/add-accessory-dwelling-unit-adu-your-property|https://www.sf.gov/post-notice-your-adu] Appelle search_city_docs ; répond uniquement à partir des passages renvoyés sur le permis d'ADU (pièces à fournir, démarche) et cite au moins une page officielle attendue [titre](url). Ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
+              "text": "[EXPECT_TOOLS: search_city_docs] [EXPECT_SOURCE: https://www.sf.gov/get-a-building-permit-for-an-accessory-dwelling-unit-adu] Appelle search_city_docs. Éléments attendus : DOC-05 : Permit Applicant and Authorized Agent form (signé par le propriétaire), Permit Application Processing Time Tolling Declaration, ADU screening form (programme State/Hybrid ou Local, affidavit Rent Ordinance), formulaires Title 24 et Green Building, checklist du Department of Public Health, formulaire de l'SFPUC (fixture count) si nouveaux équipements sanitaires, plans et ADU Intake Screening Checklist ; calculs structurels et inspections spéciales si travaux structurels. Cite la source sous la forme « titre de la page, section (URL) ». Ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
             }
           ]
         }
       }
     },
     {
-      "eval_case_id": "docs_reroofing",
+      "eval_case_id": "docs_adu_local_notice",
       "prompt": {
         "role": "user",
         "parts": [
           {
-            "text": "Que faut-il pour une réfection de toiture ?"
+            "text": "Pour un ADU dans le programme Local, que faut-il faire avant de déposer la demande ?"
           }
         ]
       },
@@ -204,19 +183,19 @@
           "role": "model",
           "parts": [
             {
-              "text": "[EXPECT_TOOLS: search_city_docs] [EXPECT_SOURCE: https://www.sf.gov/apply-reroofing-permit|https://www.sf.gov/step-by-step--get-otc-permit-your-exterior-residential-project] Appelle search_city_docs ; répond uniquement à partir des passages renvoyés sur le permis de réfection de toiture (reroofing) et cite au moins une page officielle attendue [titre](url). Ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
+              "text": "[EXPECT_TOOLS: search_city_docs] [EXPECT_SOURCE: https://www.sf.gov/post-notice-your-adu|https://www.sf.gov/get-a-building-permit-for-an-accessory-dwelling-unit-adu|https://www.sf.gov/information--accessory-dwelling-units-adus] Appelle search_city_docs. Éléments attendus : DOC-08 : afficher l'avis (Notice of Addition of ADU) et la déclaration dans les parties communes au moins 15 jours avant la demande, les photographier, envoyer la déclaration signée au Rent Board, l'envoyer ou la remettre à tous les logements et garder la liste d'envoi. DOC-05 : pour le programme Local, déposer d'abord une Project Application (PRJ) au Planning Department. DOC-06 : les locataires peuvent contester dans les 30 jours. Cite la source sous la forme « titre de la page, section (URL) ». Ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
             }
           ]
         }
       }
     },
     {
-      "eval_case_id": "docs_solar",
+      "eval_case_id": "docs_reroofing_online",
       "prompt": {
         "role": "user",
         "parts": [
           {
-            "text": "Quelles sont les démarches pour installer des panneaux solaires ?"
+            "text": "Peut-on obtenir en ligne un permis de réfection de toiture, et combien ça coûte ?"
           }
         ]
       },
@@ -225,7 +204,28 @@
           "role": "model",
           "parts": [
             {
-              "text": "[EXPECT_TOOLS: search_city_docs] [EXPECT_SOURCE: https://www.sf.gov/step-by-step--get-permit-solar-photovoltaic-system] Appelle search_city_docs ; répond uniquement à partir des passages renvoyés sur le permis pour panneaux photovoltaïques et cite au moins une page officielle attendue [titre](url). Ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
+              "text": "[EXPECT_TOOLS: search_city_docs] [EXPECT_SOURCE: https://www.sf.gov/apply-reroofing-permit] Appelle search_city_docs. Éléments attendus : DOC-09 : en ligne via PermitSF seulement si les travaux ne nécessitent pas de plans et ne remplacent aucun élément structurel (charpente, voligeage) ; sinon permis OTC ; demandeur titulaire d'une licence C-39 ; coût à partir de 514 $ pour les maisons individuelles et duplex, 714 $ pour les autres bâtiments, plus des frais éventuels. Cite la source sous la forme « titre de la page, section (URL) ». Ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "docs_solar_battery",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Quel permis faut-il pour installer des panneaux solaires avec une batterie sur une maison existante ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_TOOLS: search_city_docs] [EXPECT_SOURCE: https://www.sf.gov/step-by-step--get-permit-solar-photovoltaic-system] Appelle search_city_docs. Éléments attendus : DOC-11 : demandeur entrepreneur californien licence A, C-10 ou C-46 (C-46 sans batterie) inscrit au DBI ; avec un système de stockage, pas de SolarAPP+ : Solar Permit (maisons individuelles, duplex, townhouses) ou PV Plans ; plans, fiches techniques et revue structurelle signée par un ingénieur ; inspection SF Fire puis inspection électrique du DBI avant raccordement. Cite la source sous la forme « titre de la page, section (URL) ». Ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
             }
           ]
         }
@@ -237,7 +237,7 @@
         "role": "user",
         "parts": [
           {
-            "text": "Faut-il des plans pour remplacer des fenêtres à l'identique ?"
+            "text": "Faut-il des plans pour remplacer des fenêtres ?"
           }
         ]
       },
@@ -246,19 +246,19 @@
           "role": "model",
           "parts": [
             {
-              "text": "[EXPECT_TOOLS: search_city_docs] [EXPECT_SOURCE: https://www.sf.gov/information/check-if-your-building-permit-needs-plans|https://www.sf.gov/step-by-step--get-otc-permit-your-exterior-residential-project|https://www.sf.gov/information--projects-eligible-over-counter-otc-permit] Appelle search_city_docs ; répond uniquement à partir des passages renvoyés sur le remplacement de fenêtres et cite au moins une page officielle attendue [titre](url). Ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
+              "text": "[EXPECT_TOOLS: search_city_docs] [EXPECT_SOURCE: https://www.sf.gov/information/check-if-your-building-permit-needs-plans|https://www.sf.gov/step-by-step--get-otc-permit-your-exterior-residential-project|https://www.sf.gov/where-to-apply-for-your-permit] Appelle search_city_docs. Éléments attendus : DOC-04 « “No plans” projects » : remplacement à l'identique (même taille, même emplacement) sans plans, demande via le portail PermitSF ; DOC-10 « Check if your project needs plans » : de nouvelles fenêtres à de nouveaux emplacements nécessitent des plans. Cite la source sous la forme « titre de la page, section (URL) ». Ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
             }
           ]
         }
       }
     },
     {
-      "eval_case_id": "docs_not_found_tree",
+      "eval_case_id": "docs_contact_reroofing",
       "prompt": {
         "role": "user",
         "parts": [
           {
-            "text": "Quels documents faut-il pour abattre un arbre sur le trottoir devant la maison ?"
+            "text": "Qui contacter si j'ai besoin d'aide pour remplir une demande de permis de toiture ?"
           }
         ]
       },
@@ -267,19 +267,19 @@
           "role": "model",
           "parts": [
             {
-              "text": "[EXPECT_TOOLS: search_city_docs] Appelle search_city_docs ; l'information n'est pas dans les pages officielles indexées (sujet traité par un autre service de la ville) : l'agent dit qu'il ne la trouve pas dans les documents et oriente vers la ville, SANS répondre de mémoire ni citer une source hors sujet. Termine par l'avertissement « pas un avis juridique »."
+              "text": "[EXPECT_TOOLS: search_city_docs] [EXPECT_SOURCE: https://www.sf.gov/apply-reroofing-permit] Appelle search_city_docs. Éléments attendus : DOC-09 « Contact us » : Permit Center help desk au 628-652-4900 (laisser un message avec son e-mail, réponse sous 2 jours ouvrés) et PermitSF@sfgov.org pour l'aide au formulaire. Cite la source sous la forme « titre de la page, section (URL) ». Ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
             }
           ]
         }
       }
     },
     {
-      "eval_case_id": "docs_not_found_sidewalk",
+      "eval_case_id": "docs_not_found_pool",
       "prompt": {
         "role": "user",
         "parts": [
           {
-            "text": "Quel permis faut-il pour refaire le trottoir public devant un immeuble ?"
+            "text": "Quels documents faut-il fournir pour construire une piscine dans le jardin ?"
           }
         ]
       },
@@ -288,7 +288,28 @@
           "role": "model",
           "parts": [
             {
-              "text": "[EXPECT_TOOLS: search_city_docs] Appelle search_city_docs ; l'information n'est pas dans les pages officielles indexées (sujet traité par un autre service de la ville) : l'agent dit qu'il ne la trouve pas dans les documents et oriente vers la ville, SANS répondre de mémoire ni citer une source hors sujet. Termine par l'avertissement « pas un avis juridique »."
+              "text": "[EXPECT_TOOLS: search_city_docs] Appelle search_city_docs ; aucune des 10 fiches officielles ne traite des piscines : l'agent dit clairement qu'il ne trouve pas l'information dans les fiches et renvoie vers le Department of Building Inspection, SANS répondre de mémoire ni présenter un passage hors sujet comme une réponse. Termine par l'avertissement « pas un avis juridique »."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "docs_missing_page_otc",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Que dit la page officielle « Projects eligible for an Over-the-Counter (OTC) permit » de sf.gov ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_TOOLS: search_city_docs] Cette page (DOC-03) n'a pas pu être récupérée (404) et n'est pas dans le corpus : l'agent dit qu'il ne l'a pas et ne peut pas en donner le contenu, renvoie vers le DBI. Il peut éventuellement signaler, sources à l'appui, que d'autres fiches (DOC-02, DOC-10, DOC-12) listent des projets éligibles à l'OTC, mais sans les présenter comme le contenu de cette page. Termine par l'avertissement « pas un avis juridique »."
             }
           ]
         }
@@ -309,7 +330,7 @@
           "role": "model",
           "parts": [
             {
-              "text": "[EXPECT_TOOLS: get_project,search_city_docs,create_submission_draft] [EXPECT_SOURCE: https://www.sf.gov/apply-kitchen-or-bath-remodel-permit|https://www.sf.gov/step-by-step--get-otc-permit-your-interior-residential-remodel|https://www.sf.gov/information/check-if-your-building-permit-needs-plans] [EXPECT_DRAFT] Appelle get_project(1) (rénovation de cuisine, 781 20th Ave), search_city_docs sur les exigences cuisine, puis create_submission_draft avec un brouillon citant ses sources. Dit que le brouillon est EN ATTENTE DE VALIDATION HUMAINE et n'est pas envoyé. Termine par l'avertissement « pas un avis juridique »."
+              "text": "[EXPECT_TOOLS: get_project,search_city_docs,create_submission_draft] [EXPECT_SOURCE: https://www.sf.gov/apply-kitchen-or-bath-remodel-permit|https://www.sf.gov/step-by-step--get-otc-permit-your-interior-residential-remodel|https://www.sf.gov/information/check-if-your-building-permit-needs-plans] [EXPECT_DRAFT] Appelle get_project(1) (rénovation de cuisine sans modification des murs, 781 20th Ave), search_city_docs sur les exigences cuisine, puis create_submission_draft avec un brouillon citant ses sources (ex. DOC-01 : demande en ligne via PermitSF si pas de murs déplacés). Dit que le brouillon est EN ATTENTE DE VALIDATION HUMAINE et n'est pas envoyé. Termine par l'avertissement « pas un avis juridique »."
             }
           ]
         }
@@ -330,7 +351,7 @@
           "role": "model",
           "parts": [
             {
-              "text": "[EXPECT_TOOLS: get_project,search_city_docs,create_submission_draft] [EXPECT_SOURCE: https://www.sf.gov/get-a-building-permit-for-an-accessory-dwelling-unit-adu|https://www.sf.gov/information--accessory-dwelling-units-adus|https://sf.gov/step-by-step/add-accessory-dwelling-unit-adu-your-property|https://www.sf.gov/post-notice-your-adu] [EXPECT_DRAFT] get_project(9) (ADU détaché, 30 Jersey St), search_city_docs sur les ADU, create_submission_draft avec sources citées ; brouillon en attente de validation humaine, pas d'envoi. Termine par l'avertissement « pas un avis juridique »."
+              "text": "[EXPECT_TOOLS: get_project,search_city_docs,create_submission_draft] [EXPECT_SOURCE: https://www.sf.gov/get-a-building-permit-for-an-accessory-dwelling-unit-adu|https://www.sf.gov/post-notice-your-adu|https://www.sf.gov/information--accessory-dwelling-units-adus] [EXPECT_DRAFT] get_project(9) (ADU détaché, 30 Jersey St), search_city_docs sur les ADU, create_submission_draft avec sources citées (DOC-05 : formulaires requis, choix State/Local) ; en attente de validation humaine. Termine par l'avertissement « pas un avis juridique »."
             }
           ]
         }
@@ -351,7 +372,7 @@
           "role": "model",
           "parts": [
             {
-              "text": "[EXPECT_TOOLS: get_project,search_city_docs,create_submission_draft] [EXPECT_SOURCE: https://www.sf.gov/step-by-step--get-permit-solar-photovoltaic-system] [EXPECT_DRAFT] get_project(15) (panneaux solaires, 3068 Castro St), search_city_docs sur le solaire, create_submission_draft avec sources ; en attente de validation humaine. Termine par l'avertissement « pas un avis juridique »."
+              "text": "[EXPECT_TOOLS: get_project,search_city_docs,create_submission_draft] [EXPECT_SOURCE: https://www.sf.gov/step-by-step--get-permit-solar-photovoltaic-system] [EXPECT_DRAFT] get_project(15) (panneaux solaires 5 kW sans batterie, 3068 Castro St), search_city_docs sur le solaire, create_submission_draft avec sources (DOC-11 : licences A/C-10/C-46, SolarAPP+ ou Solar Permit) ; en attente de validation humaine. Termine par l'avertissement « pas un avis juridique »."
             }
           ]
         }
@@ -415,27 +436,6 @@
           "parts": [
             {
               "text": "[EXPECT_TOOLS: get_project] Le projet 99 n'existe pas (PROJECT_NOT_FOUND) : l'agent le dit, propose de lister les projets, ne crée aucun brouillon. Termine par l'avertissement « pas un avis juridique »."
-            }
-          ]
-        }
-      }
-    },
-    {
-      "eval_case_id": "offtopic_weather",
-      "prompt": {
-        "role": "user",
-        "parts": [
-          {
-            "text": "Quel temps fera-t-il à San Francisco ce week-end ?"
-          }
-        ]
-      },
-      "reference": {
-        "response": {
-          "role": "model",
-          "parts": [
-            {
-              "text": "[EXPECT_TOOLS: none] Hors périmètre : refus poli sans appel d'outil métier, rappel des 3 capacités (permis à une adresse, documents requis, préparation de dossier). Termine par l'avertissement « pas un avis juridique »."
             }
           ]
         }

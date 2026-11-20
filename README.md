@@ -82,7 +82,7 @@ flowchart LR
 | API DataSF | [app/datasf.py](app/datasf.py) | Analyse de l'adresse (`230 4th Ave` → `04th`), requête SoQL (`$where`, `$order`, `$limit`), dédoublonnage par `permit_number`, **cache SQLite (24 h)**, cache périmé servi et signalé si l'API tombe. Erreurs : `ADDRESS_NOT_FOUND`, `DATASF_TIMEOUT`, `DATASF_UNAVAILABLE` |
 | Base SQL | [scripts/build_projects_db.py](scripts/build_projects_db.py), [app/db.py](app/db.py) | `projects` (20 projets fictifs à de **vraies adresses** de SF) et `submissions` (`pending_approval`, `approved`, `rejected`, `sent`). Lectures sur une connexion **read-only** |
 | Serveur MCP | [mcp_server/server.py](mcp_server/server.py) | SDK MCP officiel (FastMCP, renommé `MCPServer` en v2). 5 outils, que l'agent **découvre** via `McpToolset` |
-| RAG | [app/rag.py](app/rag.py), [data/city_docs/](data/city_docs/) | Une fiche officielle par fichier, avec son URL et son titre. Découpage par section, embeddings `gemini-embedding-001`, **Chroma**, top 3 au-dessus d'un seuil de pertinence, sinon `NO_RELEVANT_DOCUMENT` |
+| RAG | [app/rag.py](app/rag.py), [data/city_docs/](data/city_docs/) | 10 fiches officielles, une par fichier, avec URL et titre. Étiquette de type de page (« Step-by-step », « Info Page ») passée en métadonnée `page_type`. Découpage par `##` puis `###` (111 morceaux), sections « Related » et listes de liens exclues, « Contact us » gardé en un seul morceau. Embeddings `gemini-embedding-001`, **Chroma**, top 3 au-dessus d'un seuil de pertinence, sinon `NO_RELEVANT_DOCUMENT`. Chaque passage porte `doc_id`, `title`, `section` et `url`, et l'agent cite « titre de la page, section (URL) » |
 | Skills | [app/skills.py](app/skills.py) | Registre de 3 skills : `permit_search`, `document_requirements`, `submission_prep`, chacune avec ses instructions et ses outils autorisés |
 | Constructeur de contexte | [app/skills.py](app/skills.py) `build_instruction` | `InstructionProvider` ADK. Il n'injecte que les règles, le catalogue, les instructions de la skill active et les faits du dossier utiles à cette skill |
 | Garde-fous | [app/guardrails.py](app/guardrails.py), [app/schemas.py](app/schemas.py) | Voir la section suivante |
@@ -129,15 +129,17 @@ attendus, les éléments de réponse et la source attendue.
 
 | Type | Nb | Comportement attendu |
 |---|---|---|
-| Permis à une adresse réelle | 5 | `search_permits`, faits conformes à DataSF (instantané à la génération) |
+| Permis à une adresse réelle | 4 | `search_permits`, faits conformes à DataSF (instantané à la génération) |
 | Adresse inexistante | 1 | Aucun permis trouvé, rien d'inventé |
-| Documents requis (6 types de travaux) | 6 | `search_city_docs`, réponse sourcée, page officielle attendue citée |
-| Réponse absente des documents | 2 | L'assistant dit qu'il ne trouve pas, sans répondre de mémoire |
+| Documents requis (cuisine, salle de bain, 2 × ADU, toiture, solaire, fenêtres) | 7 | `search_city_docs`, éléments attendus repris mot pour mot des fiches, page attendue citée |
+| Qui contacter (toiture) | 1 | Passage « Contact us » de la fiche toiture |
+| Sujet absent des 10 fiches (piscine) | 1 | L'assistant dit qu'il ne trouve pas, sans répondre de mémoire |
+| Contenu d'une page manquante (DOC-03, projets éligibles OTC) | 1 | L'assistant dit qu'il n'a pas cette page, sans l'inventer |
 | Préparation de dossier | 3 | `get_project` → `search_city_docs` → `create_submission_draft`, en attente de validation |
 | Liste des projets | 1 | `list_projects`, sans action |
 | Envoi d'un dossier non validé | 1 | `send_submission` refusé, aucune prétention d'envoi |
 | Projet inconnu | 1 | Refus, aucun brouillon |
-| Hors périmètre (météo, autre ville, conseil juridique) | 3 | Refus poli, sans outil |
+| Hors périmètre (autre ville, conseil juridique) | 2 | Refus poli, sans outil |
 | **API DataSF en panne** | 2 | Indisponibilité signalée, aucun permis inventé |
 
 Métriques ([tests/eval/eval_config.yaml](tests/eval/eval_config.yaml)) :
@@ -160,19 +162,22 @@ Résultats : lancer `bash scripts/run_eval.sh`, qui écrit le tableau ici et dan
 | Donnée | Source | Licence / droits |
 |---|---|---|
 | Permis de construire | [DataSF — Building Permits](https://data.sf.gov/d/i98e-djp9) (API Socrata `https://data.sf.gov/resource/i98e-djp9.json`), sans clé | **ODC Public Domain Dedication and License (PDDL) 1.0** |
-| Exigences documentaires | 12 pages officielles de [sf.gov](https://www.sf.gov) (Department of Building Inspection, Planning Department), listées dans [scripts/fetch_city_docs.py](scripts/fetch_city_docs.py) | © City and County of San Francisco. Extraits reproduits à titre d'information, chacun avec le lien vers sa page source |
+| Exigences documentaires | 10 pages officielles de [sf.gov](https://www.sf.gov) (Department of Building Inspection, Rent Board), copiées mot pour mot depuis un navigateur le 2026-11-20. Liste et URL dans [data/city_docs/README.md](data/city_docs/README.md) | © City and County of San Francisco. Extraits reproduits à titre d'information, chacun avec le lien vers sa page source |
 | Projets du cabinet | [scripts/build_projects_db.py](scripts/build_projects_db.py) | **Fictifs**. Seules les adresses sont réelles (issues de DataSF) |
 
-**Récupérer les pages officielles.** sf.gov répond aux clients automatisés par une page de
-vérification anti-robots. Le script ne la contourne pas. Si `scripts/fetch_city_docs.py`
-échoue :
-1. ouvre chaque URL de la liste dans un navigateur ;
-2. fais *Enregistrer sous… → Page web, HTML uniquement* dans un même dossier ;
-3. lance `uv run python scripts/import_city_docs.py <dossier>`.
+**Pages officielles indisponibles.** Deux pages prévues n'ont pas pu être récupérées. Elles ne
+sont remplacées par aucun autre contenu :
+- *Projects eligible for an Over-the-Counter (OTC) permit* : erreur 404, page supprimée de sf.gov ;
+- *Add an accessory dwelling unit (ADU) to your property* : redirige vers une page en erreur 404.
 
-Le script d'import retrouve chaque page par son URL canonique, convertit le contenu tel quel et
-conserve son URL et son titre. Il liste aussi les pages manquantes. Aucune page n'est remplacée
-par un autre contenu.
+Si on lui demande leur contenu, l'assistant répond qu'il ne les a pas.
+
+**Rafraîchir le corpus.** sf.gov répond aux clients automatisés par une page de vérification
+anti-robots, que nos scripts ne contournent pas. Il faut donc copier les pages depuis un
+navigateur, au même format que les fichiers de [data/city_docs/](data/city_docs/) : en-tête YAML,
+puis texte recopié tel quel. Pour des pages enregistrées en HTML, utilise
+`uv run python scripts/import_city_docs.py <dossier>`, qui retrouve chaque page par son URL
+canonique.
 
 ## Démarrage rapide (local)
 
@@ -184,8 +189,7 @@ uv sync --extra eval
 cp .env.example .env    # GEMINI_API_KEY=... (et commenter les 3 lignes GOOGLE_*)
                         # ou GOOGLE_CLOUD_PROJECT=... + gcloud auth application-default login
 
-# Pages officielles -> data/city_docs/, puis index Chroma
-uv run python scripts/fetch_city_docs.py || uv run python scripts/import_city_docs.py ~/Downloads/sf_pages
+# Index Chroma des 10 fiches officielles (data/city_docs/)
 uv run python -m app.rag
 
 uv run uvicorn app.fast_api_app:app --port 8000      # API + playground ADK (/dev-ui)
@@ -195,8 +199,8 @@ uv run streamlit run frontend/streamlit_app.py       # interface
 ## Tests
 
 ```bash
-uv run pytest tests/unit          # 59 tests, sans clé : DataSF (simulé : timeout, panne, cache),
-                                  # SQL, MCP (vrai serveur stdio), RAG, skills, garde-fous,
+uv run pytest tests/unit          # 66 tests, sans clé : DataSF (simulé : timeout, panne, cache),
+                                  # SQL, MCP (vrai serveur stdio), RAG (corpus réel + test), skills, garde-fous,
                                   # validation humaine, métriques d'évaluation
 uv run pytest tests/integration   # appelle Gemini (ignoré si aucune clé n'est configurée)
 bash scripts/run_eval.sh          # évaluation complète assistant vs baseline (LLM juge)

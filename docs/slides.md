@@ -33,7 +33,7 @@ Cours GenAI, sujet 1 : Domain Specific Agent Harness
 | Demande | Source |
 |---|---|
 | a) Permis existants à une adresse et leur statut | **API DataSF** (open data, cache) |
-| b) Documents requis : cuisine, salle de bain, ADU, toiture, solaire, fenêtres | **RAG** sur les pages officielles de sf.gov, sources citées |
+| b) Documents requis : cuisine, salle de bain, ADU, toiture, solaire, fenêtres | **RAG** sur 10 fiches officielles de sf.gov, cite « titre, section (URL) » |
 | c) Préparer le dossier d'un projet du cabinet | **SQL** + brouillon, **validation humaine** |
 
 Tout le reste : refus poli
@@ -91,7 +91,7 @@ Le prompt est **reconstruit avant chaque appel** : règles + catalogue + instruc
 
 ## Évaluation : 25 scénarios, LLM juge
 
-6 permis (dont 1 adresse inexistante) · 8 documents (dont 2 sans réponse) · 6 dossiers (dont 1 envoi non validé et 1 projet inconnu) · 3 hors périmètre · **2 avec DataSF en panne**
+5 permis (dont 1 adresse inexistante) · 10 documents (dont 1 sujet absent et 1 page manquante) · 6 dossiers (dont 1 envoi non validé et 1 projet inconnu) · 2 hors périmètre · **2 avec DataSF en panne**
 
 | Métrique | Baseline simple prompt | Assistant |
 |---|---|---|

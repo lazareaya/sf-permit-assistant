@@ -122,10 +122,12 @@ def test_send_refused_unless_approved(state):
 
 def test_output_guardrail_adds_disclaimer_and_sources():
     out = enforce_output(
-        "Il faut des plans.", [("https://example.test/kitchen-remodel", "Kitchen")]
+        "Il faut des plans.",
+        [("https://example.test/kitchen-remodel", "Kitchen — Plans")],
     )
     assert (
-        "[Kitchen](https://example.test/kitchen-remodel)" in out and DISCLAIMER in out
+        "Kitchen — Plans (https://example.test/kitchen-remodel)" in out
+        and DISCLAIMER in out
     )
     ok = f"Voir https://x.test.\n\n⚠️ {DISCLAIMER}"
     assert (

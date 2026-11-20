@@ -197,7 +197,16 @@ def update_case(
         if passages:
             state["rag_sources_this_request"] = {
                 "invocation": invocation_id,
-                "sources": list({p["url"]: p["title"] for p in passages}.items()),
+                # (url, "page title — section"), as cited in the answer
+                "sources": list(
+                    dict.fromkeys(
+                        (
+                            p["url"],
+                            f"{p['title']} — {p.get('section', '')}".rstrip(" —"),
+                        )
+                        for p in passages
+                    )
+                ),
             }
     elif tool_name == "create_submission_draft":
         case["submission_id"] = payload.get("submission_id")
@@ -222,7 +231,7 @@ def enforce_output(text: str, rag_sources: list[tuple[str, str]] | None) -> str:
     out = text.rstrip()
     if rag_sources and not URL_RE.search(out):
         out += "\n\n**Sources :**\n" + "\n".join(
-            f"- [{title}]({url})" for url, title in rag_sources
+            f"- {label} ({url})" for url, label in rag_sources
         )
     if "pas un avis juridique" not in out.lower():
         out += f"\n\n⚠️ {DISCLAIMER}"

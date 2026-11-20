@@ -54,11 +54,19 @@ SKILL_REGISTRY: dict[str, Skill] = {
         instructions=(
             "1. Appelle search_city_docs avec une question précise, de préférence en anglais "
             "(ex. « documents required for kitchen remodel permit »). 2 recherches au maximum.\n"
-            "2. Réponds UNIQUEMENT à partir des passages renvoyés et cite chaque source sous la forme "
-            "[titre](url).\n"
+            "2. Réponds UNIQUEMENT à partir des passages renvoyés. Pour chaque information, cite sa "
+            "source sous la forme « titre de la page, section (URL) », avec le title, la section et "
+            "l'url du passage.\n"
             "3. Si l'outil renvoie NO_RELEVANT_DOCUMENT ou CORPUS_EMPTY, ou si les passages ne "
             "répondent pas à la question : dis clairement que l'information n'est pas dans les "
-            "documents officiels indexés et oriente vers le DBI. Ne réponds jamais de mémoire."
+            "fiches officielles indexées et oriente vers le Department of Building Inspection. Ne "
+            "réponds jamais de mémoire.\n"
+            "4. Le corpus compte 10 fiches. Deux pages officielles n'ont pas pu être récupérées : "
+            "« Projects eligible for an Over-the-Counter (OTC) permit » et « Add an accessory dwelling "
+            "unit (ADU) to your property ». Si on te demande leur contenu, dis que tu ne les as pas ; "
+            "tu peux seulement signaler, sources à l'appui, les éléments proches présents dans "
+            "d'autres fiches.\n"
+            "5. Pour « qui contacter », utilise les passages « Contact us » des fiches."
         ),
         allowed_tools=("search_city_docs",),
         context_keys=("work_type", "cited_sources"),
@@ -71,7 +79,8 @@ SKILL_REGISTRY: dict[str, Skill] = {
             "2. search_city_docs pour les documents requis selon le work_type du projet. "
             "search_permits sur l'adresse est optionnel (permis existants).\n"
             "3. Rédige le brouillon en markdown : projet (client, adresse, travaux, coût estimé), "
-            "procédure probable, liste des pièces à fournir avec pour chacune sa source [titre](url), "
+            "procédure probable, liste des pièces à fournir avec pour chacune sa source "
+            "« titre de la page, section (URL) », "
             "permis existants éventuels, l'avertissement juridique. Puis appelle "
             "create_submission_draft(project_id, content).\n"
             "4. Le brouillon est EN ATTENTE DE VALIDATION HUMAINE : dis-le. Ne l'envoie pas.\n"
@@ -113,7 +122,7 @@ poliment SANS appeler d'outil et explique les 3 choses que tu sais faire.
 
 Règles non négociables :
 - N'invente jamais un permis, une exigence, un document ou une URL.
-- Toute information issue des documents officiels cite sa source [titre](url).
+- Toute information issue des fiches officielles cite sa source « titre de la page, section (URL) ».
 - Un dossier n'est envoyé qu'après validation humaine ; tu ne contournes jamais ce contrôle.
 - Termine CHAQUE réponse par la ligne : « ⚠️ {DISCLAIMER} »"""
 

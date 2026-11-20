@@ -1,10 +1,12 @@
 """RAG over official City of San Francisco pages (sf.gov: DBI, Planning).
 
 Pipeline: data/city_docs/*.md (one official page each, with a front-matter
-header: doc_id, title, url) -> chunks by heading (max ~1,500 characters) ->
+header: doc_id, title, url) -> page-type label moved to metadata -> chunks by
+``##`` then ``###`` heading (max ~1,500 characters; "Related"/"Topics" link
+lists dropped, "Contact us" kept as one chunk) ->
 Gemini embeddings (``gemini-embedding-001``) -> Chroma (local persistent vector
-store) -> top-3 passages above a relevance threshold, **each with its source
-URL and title**.
+store) -> top-3 passages above a relevance threshold, **each with its page
+title, section and URL** so the answer can cite "title, section (URL)".
 
 If nothing relevant is found, the tool says so (``NO_RELEVANT_DOCUMENT``)
 instead of returning weak passages. If no Gemini backend is configured (CI,
@@ -38,7 +40,14 @@ class Chunk:
     title: str
     url: str
     section: str
+    page_type: str
     text: str
+
+
+# Sections that only list links to other pages: never indexed.
+SKIPPED_SECTIONS = {"related", "topics", "departments", "partner agencies"}
+# Sections whose sub-sections (###) are kept together in a single chunk.
+SINGLE_CHUNK_SECTIONS = {"contact us"}
 
 
 # ----------------------------------------------------------------- loading
@@ -53,18 +62,67 @@ def parse_front_matter(raw: str) -> tuple[dict[str, str], str]:
     return meta, body
 
 
+def split_page_header(body: str) -> tuple[str, str]:
+    """Return (page_type, body without the label and the H1 title).
+
+    sf.gov pages show a page-type label ("Step-by-step", "Info Page"...) just
+    before the H1. It is kept as metadata and removed from the indexed text.
+    """
+    lines = body.strip().splitlines()
+    h1 = next((i for i, line in enumerate(lines) if line.startswith("# ")), None)
+    if h1 is None:
+        return "", body
+    label = " ".join(line.strip() for line in lines[:h1] if line.strip())
+    return label, "\n".join(lines[h1 + 1 :])
+
+
 def _split_long(text: str) -> list[str]:
+    """Split on paragraphs, then on sentences for a single very long paragraph."""
     if len(text) <= MAX_CHUNK_CHARS:
         return [text]
-    parts, cur = [], ""
+    units: list[str] = []
     for para in text.split("\n\n"):
-        if cur and len(cur) + len(para) > MAX_CHUNK_CHARS:
+        if len(para) <= MAX_CHUNK_CHARS:
+            units.append(para)
+        else:
+            units.extend(re.split(r"(?<=[.!?])\s+(?=[A-Z])", para))
+    parts, cur = [], ""
+    for unit in units:
+        if cur and len(cur) + len(unit) > MAX_CHUNK_CHARS:
             parts.append(cur.strip())
             cur = ""
-        cur += para + "\n\n"
+        cur += unit + ("\n\n" if unit in text.split("\n\n") else " ")
     if cur.strip():
         parts.append(cur.strip())
     return parts
+
+
+def _sections(body: str) -> list[tuple[str, str]]:
+    """(section label, text) pairs, cut at ## then ###.
+
+    A ### section is labelled "H2 > H3". "Related"-like sections are dropped,
+    "Contact us" is kept whole.
+    """
+    out: list[tuple[str, str]] = []
+    h2, h3, buf = "Introduction", None, []
+
+    def flush():
+        text = "\n".join(buf).strip()
+        if text and h2.lower() not in SKIPPED_SECTIONS:
+            out.append((h2 if h3 is None else f"{h2} > {h3}", text))
+        buf.clear()
+
+    for line in body.splitlines():
+        if line.startswith("## "):
+            flush()
+            h2, h3 = line[3:].strip(), None
+        elif line.startswith("### ") and h2.lower() not in SINGLE_CHUNK_SECTIONS:
+            flush()
+            h3 = line[4:].strip()
+        else:
+            buf.append(line)
+    flush()
+    return out
 
 
 def load_chunks(docs_dir: Path | None = None) -> list[Chunk]:
@@ -75,13 +133,10 @@ def load_chunks(docs_dir: Path | None = None) -> list[Chunk]:
         if not meta.get("url") or not meta.get("title"):
             continue  # a page without its source is never indexed
         doc_id = meta.get("doc_id", path.stem)
-        sections = re.split(r"^(#{1,3} .+)$", body, flags=re.MULTILINE)
-        current, n = "Introduction", 0
-        for piece in sections:
-            if re.match(r"^#{1,3} ", piece):
-                current = piece.lstrip("# ").strip()
-                continue
-            for part in _split_long(piece.strip()):
+        page_type, body = split_page_header(body)
+        n = 0
+        for section, text in _sections(body):
+            for part in _split_long(text):
                 if len(part) < 40:
                     continue
                 chunks.append(
@@ -90,8 +145,9 @@ def load_chunks(docs_dir: Path | None = None) -> list[Chunk]:
                         doc_id=doc_id,
                         title=meta["title"],
                         url=meta["url"],
-                        section=current,
-                        text=f"{meta['title']} — {current}\n{part}",
+                        section=section,
+                        page_type=page_type,
+                        text=f"{meta['title']} — {section}\n{part}",
                     )
                 )
                 n += 1
@@ -181,9 +237,11 @@ class CityDocsIndex:
 
     def build(self, force: bool = False) -> int:
         chunks = load_chunks(self.docs_dir)
-        if self.collection.count() == len(chunks) and not force:
-            return len(chunks)
-        existing = self.collection.get()["ids"]
+        current = self.collection.get(include=["documents"])
+        stored = dict(zip(current["ids"], current["documents"], strict=True))
+        if not force and stored == {c.chunk_id: c.text for c in chunks}:
+            return len(chunks)  # index already up to date with the corpus
+        existing = current["ids"]
         if existing:
             self.collection.delete(ids=existing)
         if chunks:
@@ -197,6 +255,7 @@ class CityDocsIndex:
                         "title": c.title,
                         "url": c.url,
                         "section": c.section,
+                        "page_type": c.page_type,
                     }
                     for c in chunks
                 ],
@@ -223,6 +282,7 @@ class CityDocsIndex:
                         "title": meta["title"],
                         "url": meta["url"],
                         "section": meta["section"],
+                        "page_type": meta.get("page_type", ""),
                         "score": score,
                         "text": doc,
                     }

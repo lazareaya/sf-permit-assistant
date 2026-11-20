@@ -42,8 +42,15 @@ Toute autre demande est refusée.
 - **Base SQL** (SQLite) : 20 projets fictifs à de vraies adresses de San Francisco, et une table
   `submissions` qui sert de journal des dossiers.
 - **RAG** :
-  - une page officielle par fichier, avec son URL et son titre ;
-  - découpage par section ;
+  - 10 pages officielles de sf.gov, copiées mot pour mot le 2026-11-20, une par fichier, avec URL
+    et titre. Deux pages prévues n'ont pas pu être récupérées : DOC-03 (projets éligibles au permis
+    OTC, erreur 404) et DOC-07 (étapes pour ajouter un ADU, redirection vers une erreur 404). Elles
+    ne sont pas remplacées ;
+  - l'étiquette de type de page passe en métadonnée (`page_type`) ;
+  - découpage par `##` puis `###` (111 morceaux), sections « Related » exclues, « Contact us »
+    gardé en un seul morceau ;
+  - chaque morceau porte `doc_id`, `title`, `section` et `url`, et l'agent cite « titre de la
+    page, section (URL) » ;
   - embeddings `gemini-embedding-001` et base Chroma ;
   - seuil de pertinence : en dessous, l'outil répond `NO_RELEVANT_DOCUMENT`.
 
@@ -100,10 +107,13 @@ sources sont ajoutées.
 
 **Protocole.** 25 scénarios, chacun avec les outils attendus, les éléments de réponse et la
 source attendue :
-- 5 permis à une adresse réelle (vérité terrain : instantané DataSF) et 1 adresse inexistante ;
-- 6 questions sur les documents requis et 2 questions sans réponse dans les documents ;
+- 4 permis à une adresse réelle (vérité terrain : instantané DataSF) et 1 adresse inexistante ;
+- 7 questions sur les documents requis et 1 question « qui contacter », dont les éléments attendus
+  sont repris mot pour mot des fiches ;
+- 1 question sur un sujet absent des fiches (piscine) et 1 question sur le contenu d'une page
+  manquante (DOC-03) ;
 - 3 préparations de dossier, 1 liste de projets, 1 envoi sans validation, 1 projet inconnu ;
-- 3 demandes hors périmètre ;
+- 2 demandes hors périmètre ;
 - 2 cas avec l'API DataSF en panne.
 
 L'assistant et la baseline à simple prompt (même modèle, même périmètre, sans outils) sont
@@ -149,8 +159,8 @@ servis par le même serveur. `agents-cli eval generate` produit les traces, puis
 - Envoi simulé, sans dépôt réel.
 - SQLite embarqué : on passerait à Cloud SQL en production.
 - Les pages de la ville évoluent : il faut rafraîchir le corpus.
-- sf.gov bloque les clients automatisés : les pages s'importent depuis un navigateur
-  (`scripts/import_city_docs.py`).
+- sf.gov bloque les clients automatisés : le corpus se met à jour en copiant les pages depuis un
+  navigateur. Deux pages prévues sont introuvables (erreur 404).
 - Pistes :
   - suivi automatique des changements de statut d'un permis ;
   - checklists par type de travaux ;

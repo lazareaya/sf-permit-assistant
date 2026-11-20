@@ -25,7 +25,8 @@ from markdownify import markdownify
 
 OUT = Path(__file__).resolve().parents[1] / "data" / "city_docs"
 
-# (doc_id, work types covered, official URL)
+# (doc_id, work types covered, official URL) — the 10 pages of the corpus.
+# DOC-03 and DOC-07 are listed in UNAVAILABLE below.
 PAGES = [
     (
         "DOC-01",
@@ -38,11 +39,6 @@ PAGES = [
         "https://www.sf.gov/step-by-step--get-otc-permit-your-interior-residential-remodel",
     ),
     (
-        "DOC-03",
-        "general,otc",
-        "https://www.sf.gov/information--projects-eligible-over-counter-otc-permit",
-    ),
-    (
         "DOC-04",
         "general,plans,windows",
         "https://www.sf.gov/information/check-if-your-building-permit-needs-plans",
@@ -53,11 +49,6 @@ PAGES = [
         "https://www.sf.gov/get-a-building-permit-for-an-accessory-dwelling-unit-adu",
     ),
     ("DOC-06", "adu", "https://www.sf.gov/information--accessory-dwelling-units-adus"),
-    (
-        "DOC-07",
-        "adu",
-        "https://sf.gov/step-by-step/add-accessory-dwelling-unit-adu-your-property",
-    ),
     ("DOC-08", "adu", "https://www.sf.gov/post-notice-your-adu"),
     ("DOC-09", "reroofing", "https://www.sf.gov/apply-reroofing-permit"),
     (
@@ -71,6 +62,20 @@ PAGES = [
         "https://www.sf.gov/step-by-step--get-permit-solar-photovoltaic-system",
     ),
     ("DOC-12", "general", "https://www.sf.gov/where-to-apply-for-your-permit"),
+]
+
+# Official pages that could NOT be retrieved on 2026-11-20 (not replaced):
+UNAVAILABLE = [
+    (
+        "DOC-03",
+        "https://www.sf.gov/information--projects-eligible-over-counter-otc-permit",
+        "HTTP 404: page removed from sf.gov",
+    ),
+    (
+        "DOC-07",
+        "https://sf.gov/step-by-step/add-accessory-dwelling-unit-adu-your-property",
+        "redirects to a page returning HTTP 404",
+    ),
 ]
 
 HEADERS = {
