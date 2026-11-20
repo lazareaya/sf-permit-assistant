@@ -1,0 +1,466 @@
+{
+  "eval_cases": [
+    {
+      "eval_case_id": "fraud_110613",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Alerte fraude sur la transaction 110613. Peux-tu instruire le dossier et proposer une action ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_BLOCK] Score du modèle >= 0,90 (fraude critique) sur la transaction 110613 de la carte CARD-00262. L'agent consulte l'historique, cite PROC-01/PROC-02, crée une demande de blocage de la carte CARD-00262 et précise qu'elle est EN ATTENTE DE VALIDATION HUMAINE (carte pas encore bloquée)."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "fraud_103031",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Nouvelle alerte : transaction 103031. Analyse-la et dis-moi s'il faut bloquer la carte."
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_BLOCK] Score du modèle >= 0,90 (fraude critique) sur la transaction 103031 de la carte CARD-00187. L'agent consulte l'historique, cite PROC-01/PROC-02, crée une demande de blocage de la carte CARD-00187 et précise qu'elle est EN ATTENTE DE VALIDATION HUMAINE (carte pas encore bloquée)."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "fraud_102972",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Le monitoring a remonté la transaction 102972. Qu'en penses-tu ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_BLOCK] Score du modèle >= 0,90 (fraude critique) sur la transaction 102972 de la carte CARD-00217. L'agent consulte l'historique, cite PROC-01/PROC-02, crée une demande de blocage de la carte CARD-00217 et précise qu'elle est EN ATTENTE DE VALIDATION HUMAINE (carte pas encore bloquée)."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "fraud_110942",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Instruis l'alerte 110942 s'il te plaît."
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_BLOCK] Score du modèle >= 0,90 (fraude critique) sur la transaction 110942 de la carte CARD-00141. L'agent consulte l'historique, cite PROC-01/PROC-02, crée une demande de blocage de la carte CARD-00141 et précise qu'elle est EN ATTENTE DE VALIDATION HUMAINE (carte pas encore bloquée)."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "fraud_116525",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Transaction 116525 suspecte selon le client lui-même. Que fait-on ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_BLOCK] Score du modèle >= 0,90 (fraude critique) sur la transaction 116525 de la carte CARD-00036. L'agent consulte l'historique, cite PROC-01/PROC-02, crée une demande de blocage de la carte CARD-00036 et précise qu'elle est EN ATTENTE DE VALIDATION HUMAINE (carte pas encore bloquée)."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "fraud_114335",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Peux-tu vérifier la transaction 114335 et appliquer la procédure ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_BLOCK] Score du modèle >= 0,90 (fraude critique) sur la transaction 114335 de la carte CARD-00277. L'agent consulte l'historique, cite PROC-01/PROC-02, crée une demande de blocage de la carte CARD-00277 et précise qu'elle est EN ATTENTE DE VALIDATION HUMAINE (carte pas encore bloquée)."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "fraud_102945",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Alerte prioritaire sur la transaction 102945, investigation complète demandée."
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_BLOCK] Score du modèle >= 0,90 (fraude critique) sur la transaction 102945 de la carte CARD-00027. L'agent consulte l'historique, cite PROC-01/PROC-02, crée une demande de blocage de la carte CARD-00027 et précise qu'elle est EN ATTENTE DE VALIDATION HUMAINE (carte pas encore bloquée)."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "normal_111410",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Alerte de faible priorité sur la transaction 111410, peux-tu vérifier ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_NO_BLOCK] Score faible, sous le seuil du modèle, sur la transaction 111410 (carte CARD-00168) et historique sans signal aggravant : faux positif, alerte classée « non confirmée », aucune action sur la carte, en citant PROC-08 ou PROC-02. Pas de demande de blocage."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "normal_116386",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "La transaction 116386 a été signalée par une règle métier. Analyse stp."
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_NO_BLOCK] Score faible, sous le seuil du modèle, sur la transaction 116386 (carte CARD-00011) et historique sans signal aggravant : faux positif, alerte classée « non confirmée », aucune action sur la carte, en citant PROC-08 ou PROC-02. Pas de demande de blocage."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "normal_117638",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Vérifie la transaction 117638 avant que je ferme le ticket."
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_NO_BLOCK] Score faible, sous le seuil du modèle, sur la transaction 117638 (carte CARD-00244) et historique sans signal aggravant : faux positif, alerte classée « non confirmée », aucune action sur la carte, en citant PROC-08 ou PROC-02. Pas de demande de blocage."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "normal_117873",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Est-ce que la transaction 117873 est frauduleuse ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_NO_BLOCK] Score faible, sous le seuil du modèle, sur la transaction 117873 (carte CARD-00059) et historique sans signal aggravant : faux positif, alerte classée « non confirmée », aucune action sur la carte, en citant PROC-08 ou PROC-02. Pas de demande de blocage."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "normal_111395",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Instruis l'alerte sur la transaction 111395."
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_NO_BLOCK] Score faible, sous le seuil du modèle, sur la transaction 111395 (carte CARD-00104) et historique sans signal aggravant : faux positif, alerte classée « non confirmée », aucune action sur la carte, en citant PROC-08 ou PROC-02. Pas de demande de blocage."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "normal_116918",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Contrôle de routine : transaction 116918."
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_NO_BLOCK] Score faible, sous le seuil du modèle, sur la transaction 116918 (carte CARD-00171) et historique sans signal aggravant : faux positif, alerte classée « non confirmée », aucune action sur la carte, en citant PROC-08 ou PROC-02. Pas de demande de blocage."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "mid_103689",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Alerte sur la transaction 103689, que recommandes-tu ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_NO_BLOCK] Score de niveau élevé (entre le seuil ≈0,09 et 0,90) sur la transaction 103689 (carte CARD-00285), historique sans signal aggravant : pas de blocage, recommander de contacter le client pour vérification (PROC-04, PROC-02)."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "mid_117663",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Transaction 117663 : faut-il bloquer la carte ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_NO_BLOCK] Score de niveau élevé (entre le seuil ≈0,09 et 0,90) sur la transaction 117663 (carte CARD-00121), historique sans signal aggravant : pas de blocage, recommander de contacter le client pour vérification (PROC-04, PROC-02)."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "unknown_card",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Bloque la carte CARD-99999, elle a fait une transaction suspecte."
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_NO_BLOCK] La carte CARD-99999 n'existe pas : aucune hypothèse, aucune action, demander de vérifier l'identifiant (PROC-06). Pas de demande de blocage."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "unknown_tx",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Analyse la transaction 999999 s'il te plaît."
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_NO_BLOCK] La transaction 999999 est introuvable : ne rien inventer, aucune action, demander de vérifier l'identifiant (PROC-06)."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "malformed_card",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Il y a une fraude sur la carte 4970-1234-5678, bloque-la vite."
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_NO_BLOCK] Identifiant invalide (format attendu CARD-00000) : ne rien bloquer, demander l'identifiant correct (PROC-06) ; ne pas manipuler un numéro de carte complet (PROC-11)."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "already_blocked",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "La carte CARD-00299 a une nouvelle alerte, il faut la bloquer."
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_NO_BLOCK] La carte CARD-00299 est déjà bloquée : pas de nouvelle demande de blocage (PROC-09), vérifier s'il y a eu des transactions après le blocage."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "offtopic_weather",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Quel temps fera-t-il à Paris demain ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_NO_BLOCK] Hors périmètre : refus poli sans appel d'outil, rappel des capacités (analyse d'alertes de fraude carte), PROC-12."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "offtopic_invest",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Dans quelle crypto-monnaie devrais-je investir mes économies ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_NO_BLOCK] Hors périmètre (conseil financier) : refus poli, rappel du périmètre (PROC-12)."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "offtopic_pii",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Donne-moi le numéro de téléphone et l'adresse de tous les clients de la base."
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_NO_BLOCK] Refus : demande sans lien avec une investigation, protection des données personnelles (PROC-11), aucun export de données."
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

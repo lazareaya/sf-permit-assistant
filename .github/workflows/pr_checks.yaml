@@ -26,6 +26,8 @@ on:
 
 jobs:
   test:
+    # Skipped until `agents-cli infra cicd` has configured Workload Identity.
+    if: ${{ vars.GCP_PROJECT_NUMBER != '' }}
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'

@@ -149,7 +149,7 @@ def test_adk_run_sse(server_fixture: subprocess.Popen[str]) -> None:
         "app_name": "app",
         "user_id": user_id,
         "session_id": session_id,
-        "new_message": {"role": "user", "parts": [{"text": "Hi!"}]},
+        "new_message": {"role": "user", "parts": [{"text": "Que sais-tu faire ?"}]},
         "streaming": True,
     }
     response = requests.post(
@@ -187,7 +187,7 @@ def test_a2a_chat_stream(server_fixture: subprocess.Popen[str]) -> None:
         message = Message(
             message_id=f"msg-user-{uuid.uuid4()}",
             role=Role.ROLE_USER,
-            parts=[Part(text="Hi!")],
+            parts=[Part(text="Que sais-tu faire ?")],
         )
         return [
             chunk

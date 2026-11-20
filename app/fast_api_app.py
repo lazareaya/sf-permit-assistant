@@ -24,12 +24,18 @@ from google.adk.runners import Runner
 
 from app.app_utils import services
 from app.app_utils.a2a import attach_a2a_routes
+from app.approvals import router as approvals_router
 
 load_dotenv()
 allow_origins = (
     os.getenv("ALLOW_ORIGINS", "").split(",") if os.getenv("ALLOW_ORIGINS") else None
 )
-otel_to_cloud = True
+# Traces/logs to Cloud Trace + Cloud Logging. Always on in Cloud Run (K_SERVICE is
+# set there); locally opt in with OTEL_TO_CLOUD=true once `gcloud auth
+# application-default login` is done.
+otel_to_cloud = os.getenv(
+    "OTEL_TO_CLOUD", "true" if os.getenv("K_SERVICE") else "false"
+).lower() == "true"
 
 AGENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -68,6 +74,8 @@ app: FastAPI = get_fast_api_app(
 )
 app.title = "fraud-analyst-agent"
 app.description = "API for interacting with the Agent fraud-analyst-agent"
+# Human-in-the-loop: approve / reject the actions requested by the agent.
+app.include_router(approvals_router)
 
 
 # Main execution

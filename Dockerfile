@@ -22,6 +22,10 @@ WORKDIR /code
 COPY ./pyproject.toml ./README.md ./uv.lock* ./
 
 COPY ./app ./app
+COPY ./mcp_server ./mcp_server
+COPY ./baseline ./baseline
+COPY ./data/bank.db ./data/bank.db
+COPY ./data/procedures ./data/procedures
 
 RUN uv sync --frozen
 
