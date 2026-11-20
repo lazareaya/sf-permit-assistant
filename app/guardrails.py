@@ -1,32 +1,43 @@
-"""Guardrails, implemented as ADK tool callbacks.
+"""Guardrails, implemented as ADK callbacks.
 
-``before_tool`` runs before every tool call and can veto it (returning a dict
-short-circuits the tool and the dict becomes the tool result the LLM sees):
+``before_tool`` (input guardrails) runs before every tool call and can veto it;
+the returned dict becomes the tool result the model sees:
   1. budget: max N business tool calls per user request;
-  2. skill allowlist: a tool can only run if the active skill allows it;
-  3. input validation with Pydantic (``app/schemas.py``);
-  4. refusal if the card does not exist;
-  5. no ``block_card`` without a procedure retrieved by ``search_procedures``.
+  2. skill allowlist: a tool runs only if the active skill allows it;
+  3. Pydantic validation of the arguments (``app/schemas.py``);
+  4. unknown project refused;
+  5. ``create_submission_draft`` must cite at least one official source
+     retrieved by ``search_city_docs`` (no RAG content without its source);
+  6. ``send_submission`` refused unless the submission is ``approved`` by a human.
 
-``after_tool`` updates the *case memory* (``state["case"]``) used by the
-context builder, and never alters the tool result.
+``after_tool`` updates the case memory used by the context builder.
+
+``after_model`` (output guardrail) runs on every final answer: it appends the
+legal disclaimer when missing, and the retrieved sources when official
+documents were used in this request but no source URL is cited.
 """
 
 from __future__ import annotations
 
 import json
 import logging
+import re
 from typing import Any
 
+from google.adk.agents.callback_context import CallbackContext
+from google.adk.models import LlmResponse
 from google.adk.tools import BaseTool, ToolContext
+from google.genai import types
 from pydantic import ValidationError
 
 from app import config, db
+from app.config import DISCLAIMER
 from app.schemas import TOOL_ARG_MODELS
 from app.skills import SKILL_REGISTRY
 
-logger = logging.getLogger("fraud_agent.guardrails")
+logger = logging.getLogger("sf_permit_assistant.guardrails")
 UNCOUNTED_TOOLS = {"activate_skill"}
+URL_RE = re.compile(r"https?://\S+")
 
 
 def _refuse(code: str, message: str, tool_name: str) -> dict[str, Any]:
@@ -56,8 +67,8 @@ def check_tool_call(
     if budget["count"] > config.MAX_TOOL_CALLS_PER_REQUEST:
         return _refuse(
             "GUARDRAIL_TOOL_BUDGET",
-            f"Limite de {config.MAX_TOOL_CALLS_PER_REQUEST} appels d'outils atteinte pour cette demande. "
-            "Conclus avec les informations disponibles.",
+            f"Limite de {config.MAX_TOOL_CALLS_PER_REQUEST} appels d'outils atteinte pour cette "
+            "demande. Conclus avec les informations disponibles.",
             tool_name,
         )
 
@@ -74,6 +85,7 @@ def check_tool_call(
 
     # 3. input validation
     model = TOOL_ARG_MODELS.get(tool_name)
+    parsed = None
     if model is not None:
         try:
             parsed = model(**args)
@@ -82,26 +94,42 @@ def check_tool_call(
                 f"{'.'.join(map(str, e['loc']))}: {e['msg']}" for e in exc.errors()
             )
             return _refuse("INVALID_INPUT", details, tool_name)
-    else:
-        parsed = None
 
-    # 4. unknown card
-    card_id = getattr(parsed, "card_id", None)
-    if card_id and not db.card_exists(card_id):
+    # 4. unknown project
+    project_id = getattr(parsed, "project_id", None)
+    if project_id is not None and not db.project_exists(project_id):
         return _refuse(
-            "CARD_NOT_FOUND",
-            f"La carte {card_id} n'existe pas. Aucune action possible (PROC-06).",
+            "PROJECT_NOT_FOUND",
+            f"Le projet {project_id} n'existe pas dans la base du cabinet.",
             tool_name,
         )
 
-    # 5. no risky action without a cited procedure
-    if tool_name == "block_card":
-        cited = (state.get("case") or {}).get("cited_procedures", [])
-        if parsed.procedure_id not in cited:
+    # 5. a draft must cite at least one official source retrieved in this conversation
+    if tool_name == "create_submission_draft":
+        cited = (state.get("case") or {}).get("cited_sources", [])
+        if not cited or not any(url in parsed.content for url in cited):
             return _refuse(
-                "GUARDRAIL_NO_PROCEDURE",
-                f"block_card exige une procédure retrouvée via search_procedures. "
-                f"Procédures consultées : {cited or 'aucune'}.",
+                "GUARDRAIL_NO_SOURCE",
+                "Le brouillon doit citer au moins une source officielle (URL) retrouvée par "
+                f"search_city_docs. Sources disponibles : {cited or 'aucune'}.",
+                tool_name,
+            )
+
+    # 6. risky action: only an approved submission can be sent
+    if tool_name == "send_submission":
+        try:
+            status = db.get_submission(parsed.submission_id)["status"]
+        except db.SubmissionNotFoundError:
+            return _refuse(
+                "SUBMISSION_NOT_FOUND",
+                f"Le dossier {parsed.submission_id} n'existe pas.",
+                tool_name,
+            )
+        if status != "approved":
+            return _refuse(
+                "GUARDRAIL_NOT_APPROVED",
+                f"Envoi refusé : le dossier {parsed.submission_id} est au statut « {status} ». "
+                "Seul un dossier approuvé par un humain dans l'interface peut être envoyé.",
                 tool_name,
             )
     return None
@@ -139,31 +167,40 @@ def unwrap_tool_response(resp: Any) -> dict[str, Any]:
 
 
 def update_case(
-    tool_name: str, args: dict[str, Any], payload: dict[str, Any], state: Any
+    tool_name: str,
+    args: dict[str, Any],
+    payload: dict[str, Any],
+    state: Any,
+    invocation_id: str = "",
 ) -> None:
     case = dict(state.get("case") or {})
     if "error" in payload:
-        case["errors"] = [*case.get("errors", []), f"{tool_name}: {payload['error']}"]
-    elif tool_name == "score_transaction":
+        case["errors"] = [*case.get("errors", []), f"{tool_name}: {payload['error']}"][
+            -5:
+        ]
+    elif tool_name == "search_permits":
         case.update(
-            tx_id=payload.get("tx_id"),
-            card_id=payload.get("card_id"),
-            fraud_probability=payload.get("fraud_probability"),
+            address=payload.get("address"), permit_count=payload.get("permit_count")
         )
-    elif tool_name == "get_card_status":
-        case.update(card_id=payload.get("card_id"), card_status=payload.get("status"))
-    elif tool_name == "get_transaction_history":
-        case["card_id"] = payload.get("card_id", case.get("card_id"))
-    elif tool_name == "search_procedures":
-        ids = [p["procedure_id"] for p in payload.get("passages", [])]
-        case["cited_procedures"] = sorted(
-            set(case.get("cited_procedures", [])) | set(ids)
+    elif tool_name == "get_project":
+        case.update(
+            project_id=payload.get("id"),
+            address=payload.get("address"),
+            work_type=payload.get("work_type"),
         )
-    elif tool_name == "block_card":
-        case["pending_action"] = {
-            "action_id": payload.get("action_id"),
-            "status": payload.get("status"),
-        }
+    elif tool_name == "search_city_docs":
+        passages = payload.get("passages", [])
+        urls = [p["url"] for p in passages]
+        case["cited_sources"] = list(
+            dict.fromkeys([*case.get("cited_sources", []), *urls])
+        )
+        if passages:
+            state["rag_sources_this_request"] = {
+                "invocation": invocation_id,
+                "sources": list({p["url"]: p["title"] for p in passages}.items()),
+            }
+    elif tool_name == "create_submission_draft":
+        case["submission_id"] = payload.get("submission_id")
     state["case"] = case
 
 
@@ -171,6 +208,50 @@ def after_tool(
     tool: BaseTool, args: dict[str, Any], tool_context: ToolContext, tool_response: Any
 ) -> None:
     update_case(
-        tool.name, args, unwrap_tool_response(tool_response), tool_context.state
+        tool.name,
+        args,
+        unwrap_tool_response(tool_response),
+        tool_context.state,
+        tool_context.invocation_id,
     )
     return None
+
+
+def enforce_output(text: str, rag_sources: list[tuple[str, str]] | None) -> str:
+    """Pure output guardrail: add missing sources and the disclaimer."""
+    out = text.rstrip()
+    if rag_sources and not URL_RE.search(out):
+        out += "\n\n**Sources :**\n" + "\n".join(
+            f"- [{title}]({url})" for url, title in rag_sources
+        )
+    if "pas un avis juridique" not in out.lower():
+        out += f"\n\n⚠️ {DISCLAIMER}"
+    return out
+
+
+def after_model(
+    callback_context: CallbackContext, llm_response: LlmResponse
+) -> LlmResponse | None:
+    content = llm_response.content
+    if llm_response.partial or not content or not content.parts:
+        return None
+    if any(p.function_call for p in content.parts):
+        return None  # intermediate step, not the final answer
+    texts = [p for p in content.parts if p.text and not p.thought]
+    if not texts:
+        return None
+    rag = callback_context.state.get("rag_sources_this_request") or {}
+    sources = (
+        rag.get("sources")
+        if rag.get("invocation") == callback_context.invocation_id
+        else None
+    )
+    full = "".join(p.text for p in texts)
+    fixed = enforce_output(full, sources)
+    if fixed == full:
+        return None
+    other = [p for p in content.parts if not (p.text and not p.thought)]
+    llm_response.content = types.Content(
+        role=content.role, parts=[*other, types.Part(text=fixed)]
+    )
+    return llm_response

@@ -1,12 +1,9 @@
-"""SQL access to the bank database (SQLite).
+"""SQL access to the firm's projects database (SQLite).
 
-Reads go through a **read-only** connection (``mode=ro``), so a tool that only
-needs to look at data physically cannot modify it. The only writes are:
-
-* ``create_pending_action``: the agent *requests* an action (status
-  ``pending_approval``), it never executes it;
-* ``decide_action``: called by the human reviewer from the UI/API, never
-  exposed to the agent.
+Reads use a **read-only** connection (``mode=ro``). Writes are limited to:
+* ``create_submission_draft`` -> status ``pending_approval`` (agent);
+* ``decide_submission`` -> ``approved`` / ``rejected`` (human only, via the API);
+* ``send_submission`` -> ``sent``, and only from ``approved``.
 """
 
 from __future__ import annotations
@@ -19,19 +16,21 @@ from typing import Any
 
 from app import config
 
-FEATURE_COLS = ["time_raw", "amount"] + [f"V{i}" for i in range(1, 29)]
 
-
-class CardNotFoundError(LookupError):
+class ProjectNotFoundError(LookupError):
     pass
 
 
-class TransactionNotFoundError(LookupError):
+class SubmissionNotFoundError(LookupError):
+    pass
+
+
+class NotApprovedError(PermissionError):
     pass
 
 
 def _db_path() -> Path:
-    return Path(config.BANK_DB_PATH)
+    return Path(config.PROJECTS_DB_PATH)
 
 
 @contextmanager
@@ -60,154 +59,127 @@ def _now() -> str:
 
 
 # --------------------------------------------------------------------- reads
-def card_exists(card_id: str) -> bool:
+def project_exists(project_id: int) -> bool:
     with read_conn() as con:
         return (
-            con.execute("SELECT 1 FROM cards WHERE card_id = ?", (card_id,)).fetchone()
+            con.execute("SELECT 1 FROM projects WHERE id = ?", (project_id,)).fetchone()
             is not None
         )
 
 
-def get_card_status(card_id: str) -> dict[str, Any]:
+def list_projects() -> list[dict[str, Any]]:
+    with read_conn() as con:
+        rows = con.execute(
+            "SELECT id, client, address, work_type, status FROM projects ORDER BY id"
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def get_project(project_id: int) -> dict[str, Any]:
     with read_conn() as con:
         row = con.execute(
-            "SELECT card_id, customer_name, status, daily_limit, opened_at FROM cards WHERE card_id = ?",
-            (card_id,),
+            "SELECT * FROM projects WHERE id = ?", (project_id,)
         ).fetchone()
         if row is None:
-            raise CardNotFoundError(card_id)
-        pending = con.execute(
-            "SELECT action_id, action_type, status, created_at FROM actions "
-            "WHERE card_id = ? ORDER BY action_id DESC LIMIT 5",
-            (card_id,),
+            raise ProjectNotFoundError(project_id)
+        subs = con.execute(
+            "SELECT id, status, created_at, sent_at FROM submissions WHERE project_id = ? ORDER BY id DESC",
+            (project_id,),
         ).fetchall()
-    return {**dict(row), "recent_actions": [dict(p) for p in pending]}
+    return {**dict(row), "submissions": [dict(s) for s in subs]}
 
 
-def get_transaction_history(card_id: str, limit: int = 20) -> dict[str, Any]:
-    """Latest transactions of a card + aggregate stats (no ground-truth label)."""
-    with read_conn() as con:
-        if (
-            con.execute("SELECT 1 FROM cards WHERE card_id = ?", (card_id,)).fetchone()
-            is None
-        ):
-            raise CardNotFoundError(card_id)
-        rows = con.execute(
-            "SELECT tx_id, ts, amount, merchant_category, country FROM transactions "
-            "WHERE card_id = ? ORDER BY ts DESC LIMIT ?",
-            (card_id, limit),
-        ).fetchall()
-        stats = con.execute(
-            "SELECT COUNT(*) AS n_tx, ROUND(AVG(amount), 2) AS avg_amount, "
-            "ROUND(MAX(amount), 2) AS max_amount, "
-            "SUM(CASE WHEN country <> 'FR' THEN 1 ELSE 0 END) AS n_foreign "
-            "FROM transactions WHERE card_id = ?",
-            (card_id,),
-        ).fetchone()
-    return {
-        "card_id": card_id,
-        "stats": dict(stats),
-        "transactions": [dict(r) for r in rows],
-    }
-
-
-def get_transaction(tx_id: int) -> dict[str, Any]:
+def get_submission(submission_id: int) -> dict[str, Any]:
     with read_conn() as con:
         row = con.execute(
-            f"SELECT tx_id, card_id, ts, amount, merchant_category, country, {', '.join(FEATURE_COLS)} "
-            "FROM transactions WHERE tx_id = ?",
-            (tx_id,),
+            "SELECT * FROM submissions WHERE id = ?", (submission_id,)
         ).fetchone()
     if row is None:
-        raise TransactionNotFoundError(tx_id)
+        raise SubmissionNotFoundError(submission_id)
     return dict(row)
 
 
-def fraud_api_payload(tx: dict[str, Any]) -> dict[str, float]:
-    """Map a DB row to the Project 2 API contract (Time, Amount, V1..V28)."""
-    payload = {"Time": float(tx["time_raw"]), "Amount": float(tx["amount"])}
-    payload.update({f"V{i}": float(tx[f"V{i}"]) for i in range(1, 29)})
-    return payload
-
-
-def list_actions(status: str | None = None) -> list[dict[str, Any]]:
+def list_submissions(status: str | None = None) -> list[dict[str, Any]]:
+    sql = (
+        "SELECT s.*, p.address, p.client, p.work_type FROM submissions s "
+        "JOIN projects p ON p.id = s.project_id"
+    )
     with read_conn() as con:
         if status:
             rows = con.execute(
-                "SELECT * FROM actions WHERE status = ? ORDER BY action_id DESC",
-                (status,),
+                sql + " WHERE s.status = ? ORDER BY s.id DESC", (status,)
             ).fetchall()
         else:
-            rows = con.execute(
-                "SELECT * FROM actions ORDER BY action_id DESC"
-            ).fetchall()
+            rows = con.execute(sql + " ORDER BY s.id DESC").fetchall()
     return [dict(r) for r in rows]
 
 
 # -------------------------------------------------------------------- writes
-def create_pending_action(
-    card_id: str,
-    justification: str,
-    procedure_id: str,
-    tx_id: int | None = None,
-    action_type: str = "block_card",
-    requested_by: str = "fraud_analyst_agent",
-) -> dict[str, Any]:
-    """Record a *request* for a risky action. Nothing is executed here."""
+def create_submission_draft(project_id: int, content: str) -> dict[str, Any]:
     with write_conn() as con:
         if (
-            con.execute("SELECT 1 FROM cards WHERE card_id = ?", (card_id,)).fetchone()
+            con.execute("SELECT 1 FROM projects WHERE id = ?", (project_id,)).fetchone()
             is None
         ):
-            raise CardNotFoundError(card_id)
-        existing = con.execute(
-            "SELECT action_id FROM actions WHERE card_id = ? AND action_type = ? AND status = 'pending_approval'",
-            (card_id, action_type),
+            raise ProjectNotFoundError(project_id)
+        pending = con.execute(
+            "SELECT id FROM submissions WHERE project_id = ? AND status = 'pending_approval'",
+            (project_id,),
         ).fetchone()
-        if existing:
+        if pending:  # one pending draft per project: update it instead of piling up
+            con.execute(
+                "UPDATE submissions SET draft = ?, created_at = ? WHERE id = ?",
+                (content, _now(), pending["id"]),
+            )
             return {
-                "action_id": existing["action_id"],
+                "submission_id": pending["id"],
                 "status": "pending_approval",
-                "duplicate": True,
+                "updated_existing": True,
             }
         cur = con.execute(
-            "INSERT INTO actions (card_id, tx_id, action_type, justification, procedure_id, status, requested_by, created_at) "
-            "VALUES (?, ?, ?, ?, ?, 'pending_approval', ?, ?)",
-            (
-                card_id,
-                tx_id,
-                action_type,
-                justification,
-                procedure_id,
-                requested_by,
-                _now(),
-            ),
+            "INSERT INTO submissions (project_id, draft, status, created_at) VALUES (?, ?, 'pending_approval', ?)",
+            (project_id, content, _now()),
         )
         return {
-            "action_id": cur.lastrowid,
+            "submission_id": cur.lastrowid,
             "status": "pending_approval",
-            "duplicate": False,
+            "updated_existing": False,
         }
 
 
-def decide_action(action_id: int, approve: bool, reviewer: str) -> dict[str, Any]:
-    """Human decision. Only an approval actually executes the action."""
+def decide_submission(
+    submission_id: int, approve: bool, reviewer: str
+) -> dict[str, Any]:
+    """Human decision on a pending draft."""
     with write_conn() as con:
         row = con.execute(
-            "SELECT * FROM actions WHERE action_id = ?", (action_id,)
+            "SELECT * FROM submissions WHERE id = ?", (submission_id,)
         ).fetchone()
         if row is None:
-            raise LookupError(f"action {action_id} not found")
+            raise SubmissionNotFoundError(submission_id)
         if row["status"] != "pending_approval":
-            raise ValueError(f"action {action_id} already {row['status']}")
-        new_status = "executed" if approve else "rejected"
-        if approve and row["action_type"] == "block_card":
-            con.execute(
-                "UPDATE cards SET status = 'blocked' WHERE card_id = ?",
-                (row["card_id"],),
-            )
+            raise ValueError(f"submission {submission_id} is already {row['status']}")
+        status = "approved" if approve else "rejected"
         con.execute(
-            "UPDATE actions SET status = ?, decided_by = ?, decided_at = ? WHERE action_id = ?",
-            (new_status, reviewer, _now(), action_id),
+            "UPDATE submissions SET status = ?, decided_by = ?, decided_at = ? WHERE id = ?",
+            (status, reviewer, _now(), submission_id),
         )
-    return {"action_id": action_id, "status": new_status, "card_id": row["card_id"]}
+    return {"submission_id": submission_id, "status": status}
+
+
+def send_submission(submission_id: int) -> dict[str, Any]:
+    """Send (simulated) an APPROVED submission. Any other status is refused."""
+    with write_conn() as con:
+        row = con.execute(
+            "SELECT * FROM submissions WHERE id = ?", (submission_id,)
+        ).fetchone()
+        if row is None:
+            raise SubmissionNotFoundError(submission_id)
+        if row["status"] != "approved":
+            raise NotApprovedError(row["status"])
+        sent_at = _now()
+        con.execute(
+            "UPDATE submissions SET status = 'sent', sent_at = ? WHERE id = ?",
+            (sent_at, submission_id),
+        )
+    return {"submission_id": submission_id, "status": "sent", "sent_at": sent_at}

@@ -33,9 +33,10 @@ allow_origins = (
 # Traces/logs to Cloud Trace + Cloud Logging. Always on in Cloud Run (K_SERVICE is
 # set there); locally opt in with OTEL_TO_CLOUD=true once `gcloud auth
 # application-default login` is done.
-otel_to_cloud = os.getenv(
-    "OTEL_TO_CLOUD", "true" if os.getenv("K_SERVICE") else "false"
-).lower() == "true"
+otel_to_cloud = (
+    os.getenv("OTEL_TO_CLOUD", "true" if os.getenv("K_SERVICE") else "false").lower()
+    == "true"
+)
 
 AGENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -72,9 +73,9 @@ app: FastAPI = get_fast_api_app(
     otel_to_cloud=otel_to_cloud,
     lifespan=lifespan,
 )
-app.title = "fraud-analyst-agent"
-app.description = "API for interacting with the Agent fraud-analyst-agent"
-# Human-in-the-loop: approve / reject the actions requested by the agent.
+app.title = "sf-permit-assistant"
+app.description = "API for interacting with the Agent sf-permit-assistant"
+# Human-in-the-loop: approve / reject / send the drafts prepared by the agent.
 app.include_router(approvals_router)
 
 

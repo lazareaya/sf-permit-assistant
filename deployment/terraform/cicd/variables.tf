@@ -15,7 +15,7 @@
 variable "project_name" {
   type        = string
   description = "Project name used as a base for resource naming"
-  default     = "fraud-analyst-agent"
+  default     = "sf-permit-assistant"
 }
 
 variable "prod_project_id" {
@@ -42,7 +42,7 @@ variable "region" {
 variable "host_connection_name" {
   description = "Name of the host connection to create in Cloud Build"
   type        = string
-  default     = "fraud-analyst-agent-github-connection"
+  default     = "sf-permit-assistant-github-connection"
 }
 
 variable "repository_name" {

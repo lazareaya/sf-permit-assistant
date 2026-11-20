@@ -80,7 +80,7 @@ jobs:
       - name: Fetch Staging Service URL
         id: fetch-url
         run: |
-          _STAGING_URL=$(gcloud run services describe fraud-analyst-agent \
+          _STAGING_URL=$(gcloud run services describe sf-permit-assistant \
             --region ${{ vars.REGION }} --project ${{ vars.STAGING_PROJECT_ID }} --format="value(status.url)")
           echo "_staging_url=${_STAGING_URL}" >> $GITHUB_OUTPUT
 

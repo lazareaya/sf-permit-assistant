@@ -1,51 +1,39 @@
 #!/usr/bin/env bash
-# Full evaluation: fraud analyst agent vs. single-prompt baseline, 25 scenarios,
-# LLM-as-a-judge. Needs a Gemini backend in .env (GEMINI_API_KEY or a GCP project).
+# Full evaluation: SF permit assistant vs. single-prompt baseline, 25 scenarios,
+# LLM-as-a-judge. Needs a Gemini backend in .env (GEMINI_API_KEY or a GCP project)
+# and the official pages indexed in data/city_docs/.
 #
 #   bash scripts/run_eval.sh
 #
-# 1. starts the Project 2 fraud API if it is not running (FRAUD_API_URL)
-# 2. serves both agents (app + baseline) on a COPY of the bank DB
-# 3. 22 normal scenarios, then 3 scenarios with the fraud API down
-# 4. grades the traces (agents-cli eval grade) and compares (agents-cli eval compare)
-# 5. writes docs/eval_results.md
+# 1. serves both agents (app + baseline) on a COPY of the projects DB
+# 2. 23 scenarios with the real DataSF API, then 2 with DataSF "down"
+#    (unreachable URL, cache off)
+# 3. grades the traces (agents-cli eval grade) and compares (agents-cli eval compare)
+# 4. writes docs/eval_results.md and the README table
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 ACLI="uvx google-agents-cli"
 PORT=8010
-FRAUD_API_URL="${FRAUD_API_URL:-http://localhost:8001}"
-P2_DIR="${P2_DIR:-../../PROJET 2 - ML /fraud-detection-mlops}"
 WORK=$(mktemp -d)
 OUT=artifacts/eval_$(date +%Y%m%d_%H%M%S)
 mkdir -p "$OUT"
-cp data/bank.db "$WORK/bank.db"
-PIDS=()
-cleanup() { for p in "${PIDS[@]:-}"; do kill "$p" 2>/dev/null || true; done; }
-trap cleanup EXIT
+cp data/projects.db "$WORK/projects.db"
+trap 'kill ${SERVER:-} 2>/dev/null || true' EXIT
 
 wait_http() { for _ in $(seq 1 60); do curl -sf "$1" >/dev/null && return 0; sleep 1; done; echo "timeout $1"; return 1; }
 
-if ! curl -sf "$FRAUD_API_URL/health" >/dev/null; then
-  echo ">> starting Project 2 fraud API from $P2_DIR"
-  ( cd "$P2_DIR" && MLOPS_DATASET=creditcard \
-      MODEL_URI="$(pwd)/$(python3 -c "import json;print('mlruns/1/'+json.load(open('models/creditcard/run_info.json'))['run_id']+'/artifacts/model')")" \
-      MLFLOW_TRACKING_URI="sqlite:///mlflow-data/mlflow.db" PREDICTION_LOG_PATH="$WORK/pred.jsonl" \
-      .venv/bin/uvicorn api.main:app --port 8001 >"$WORK/fraud_api.log" 2>&1 ) &
-  PIDS+=($!)
-  wait_http "$FRAUD_API_URL/health"
-fi
-
-serve() {  # $1 = fraud API url
-  BANK_DB_PATH="$WORK/bank.db" FRAUD_API_URL="$1" CHROMA_DIR="$WORK/chroma" \
-    uv run uvicorn app.fast_api_app:app --port $PORT >"$WORK/agent_$PORT.log" 2>&1 &
+serve() {  # $1 = DataSF url, $2 = cache on/off
+  PROJECTS_DB_PATH="$WORK/projects.db" DATASF_URL="$1" DATASF_CACHE="$2" \
+    DATASF_CACHE_PATH="$WORK/datasf.sqlite" CHROMA_DIR="$WORK/chroma" \
+    uv run uvicorn app.fast_api_app:app --port $PORT >"$WORK/agent_$2.log" 2>&1 &
   SERVER=$!
   wait_http "http://localhost:$PORT/list-apps"
 }
 
 for phase in main down; do
-  if [ "$phase" = main ]; then serve "$FRAUD_API_URL"; DS=tests/eval/datasets/fraud-scenarios.json
-  else serve "http://127.0.0.1:9"; DS=tests/eval/datasets/fraud-api-down.json; fi
+  if [ "$phase" = main ]; then serve "https://data.sf.gov/resource/i98e-djp9.json" on; DS=tests/eval/datasets/sf-permit-scenarios.json
+  else serve "http://127.0.0.1:9/resource.json" off; DS=tests/eval/datasets/datasf-down.json; fi
   for agent in app baseline; do
     echo ">> generate $agent / $phase"
     $ACLI eval generate --url "http://localhost:$PORT" --app-name "$agent" \

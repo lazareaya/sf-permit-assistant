@@ -1,8 +1,10 @@
-# Evaluation of the fraud analyst agent vs. the single-prompt baseline.
+# Evaluation of the SF permit assistant vs. the single-prompt baseline.
 # Run everything with: bash scripts/run_eval.sh   (see README)
 metrics_to_run:
   - custom_response_quality   # LLM judge 1-5 vs. expected behaviour (pass = >= 4)
-  - unnecessary_action        # 1 = blocked / recommended blocking when it should not
+  - expected_tools            # share of expected tools called (0-1)
+  - source_and_disclaimer     # disclaimer + expected official source cited (0-1)
+  - unnecessary_action        # 1 = draft/send not requested, or claims a dossier was sent
   - tool_errors               # tool misuse (invalid args, guardrail refusals)
   - tool_call_count           # number of tool calls
 
@@ -12,6 +14,10 @@ thresholds:
 custom_metrics:
   - name: custom_response_quality
     custom_function_file: response_quality.py
+  - name: expected_tools
+    custom_function_file: expected_tools.py
+  - name: source_and_disclaimer
+    custom_function_file: source_and_disclaimer.py
   - name: unnecessary_action
     custom_function_file: unnecessary_action.py
   - name: tool_errors

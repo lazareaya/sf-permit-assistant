@@ -1,161 +1,166 @@
-# Rapport — Agent IA d'analyse de fraude
+# Rapport — Assistant permis de construire pour San Francisco
 
-*Cours GenAI, sujet 1 : agent avec outils et skills. Projet de groupe (4 personnes).*
+*Cours GenAI, sujet 1 : Domain Specific Agent Harness. Projet de groupe (4 personnes).*
+
+> ⚠️ Information générale, pas un avis juridique. Vérifier auprès du Department of Building Inspection.
 
 ## 1. Problème et objectif
 
-Un analyste fraude reçoit chaque jour des alertes sur des transactions par carte. Pour chacune, il
-doit rassembler les faits (historique, score du modèle), retrouver la procédure interne
-applicable, puis décider : bloquer la carte, contacter le client, escalader ou classer l'alerte.
-Ce travail est répétitif, et une erreur coûte cher dans les deux sens : une fraude ratée, ou un
-client légitime bloqué.
+Dans un cabinet d'architectes, une partie du temps passe en recherches administratives :
+- l'historique des permis d'une adresse ;
+- les pièces exigées pour un type de travaux ;
+- le montage du dossier d'un projet.
 
-**Objectif :** un agent qui instruit l'alerte de bout en bout et **prépare** la décision avec
-sa justification et la procédure citée. Il laisse la décision irréversible à un humain.
+Ces informations sont publiques mais dispersées entre l'open data de la ville (DataSF) et les
+pages du Department of Building Inspection (DBI) et du Planning Department.
 
-**Lien avec le projet 2 :** le modèle de détection de fraude (XGBoost, PR-AUC 0,83, rappel 83 %)
-servi par une API FastAPI devient un **outil** de l'agent, exposé via un serveur MCP.
+**Objectif :** un assistant spécialisé, pour un cabinet **fictif**, limité à 3 demandes :
+- a) les permis existants à une adresse et leur statut ;
+- b) les documents requis pour 6 types de travaux, avec les sources citées ;
+- c) la préparation du dossier d'un projet du cabinet, envoyé seulement après validation humaine.
+
+Toute autre demande est refusée.
 
 ## 2. Architecture
 
-- **Squelette** généré avec `google/agents-cli` : agent Google ADK, serveur FastAPI, Dockerfile,
-  tests, évaluation avec LLM juge, Terraform, CI/CD GitHub Actions, déploiement Cloud Run.
+- **Squelette** généré avec `google/agents-cli` : agent Google ADK, FastAPI, Dockerfile, tests,
+  évaluation avec LLM juge, Terraform, CI/CD, déploiement Cloud Run.
 - **Agent** Google ADK avec Gemini (`temperature=0`).
-- **Outils via MCP** : un serveur MCP (SDK Python officiel, FastMCP) expose
-  `score_transaction` (appel HTTP à l'API du projet 2), `get_transaction_history` et
-  `get_card_status` (SQL en lecture seule), et `block_card` (action risquée). L'agent les
-  découvre au démarrage avec `McpToolset`, au lieu de les avoir écrits en dur.
-- **Base SQL** (SQLite) : 20 000 transactions réelles du jeu de données du projet 2, dont les
-  492 fraudes. Les colonnes métier (carte, client, date, catégorie, pays) sont synthétiques.
-  Tables `cards`, `transactions` et `actions`, qui sert de journal des décisions.
-- **RAG** : 12 procédures fictives découpées par section (19 morceaux), embeddings
-  `gemini-embedding-001`, base vectorielle Chroma. L'outil renvoie les 3 passages les plus
-  proches avec leur source (`PROC-XX`, section, fichier).
-- **Interface** Streamlit : chat, trace des outils appelés et validation humaine.
+- **Outils via MCP** : un serveur MCP (SDK Python officiel, FastMCP) expose 5 outils :
+  - `search_permits` : API DataSF ;
+  - `list_projects` et `get_project` : SQL en lecture seule ;
+  - `create_submission_draft` : brouillon au statut `pending_approval` ;
+  - `send_submission` : action risquée.
+
+  L'agent les découvre avec `McpToolset`.
+- **API DataSF** (« Building Permits », Socrata, sans clé) :
+  - analyse de l'adresse et requête SoQL ;
+  - dédoublonnage par numéro de permis ;
+  - cache SQLite de 24 h ;
+  - erreurs explicites (délai dépassé, API indisponible, adresse introuvable) ;
+  - cache périmé servi et signalé en cas de panne.
+- **Base SQL** (SQLite) : 20 projets fictifs à de vraies adresses de San Francisco, et une table
+  `submissions` qui sert de journal des dossiers.
+- **RAG** :
+  - une page officielle par fichier, avec son URL et son titre ;
+  - découpage par section ;
+  - embeddings `gemini-embedding-001` et base Chroma ;
+  - seuil de pertinence : en dessous, l'outil répond `NO_RELEVANT_DOCUMENT`.
+
+  Il reste un outil ADK direct (pas MCP), car l'index vit déjà dans le processus de l'agent.
+- **Interface** Streamlit : avertissement juridique, chat, trace des outils, validation des dossiers.
 
 ## 3. Registre d'outils, registre de skills, constructeur de contexte
 
-**Registre d'outils** : les 4 outils MCP, plus `search_procedures` et `activate_skill`. Chaque
-outil a un modèle Pydantic d'entrée (`app/schemas.py`, dictionnaire `TOOL_ARG_MODELS`).
-
-**Registre de skills** (`app/skills.py`, dictionnaire `SKILL_REGISTRY`) :
-
 | Skill | Rôle | Outils autorisés |
 |---|---|---|
-| `investigation` | Statut, historique, score | `get_card_status`, `get_transaction_history`, `score_transaction` |
-| `procedure_lookup` | Trouver la procédure applicable | `search_procedures` |
-| `decision_prep` | Proposer une action justifiée | `block_card`, `get_card_status` |
+| `permit_search` | Permis à une adresse (point a) | `search_permits` |
+| `document_requirements` | Exigences documentaires, sources citées (point b) | `search_city_docs` |
+| `submission_prep` | Brouillon de dossier (point c) | `list_projects`, `get_project`, `search_city_docs`, `search_permits`, `create_submission_draft`, `send_submission` |
 
-**Constructeur de contexte** : l'instruction système est une fonction (`InstructionProvider`
-d'ADK) recalculée avant chaque appel au modèle. Elle injecte uniquement :
-1. les règles de base ;
-2. le catalogue des skills (une ligne chacune) ;
-3. les instructions complètes de la **seule** skill active ;
-4. les faits du dossier dont cette skill a besoin (`context_keys`). Par exemple,
-   `procedure_lookup` voit le score mais pas l'action en attente.
+Chaque outil a son modèle Pydantic d'entrée (`TOOL_ARG_MODELS`).
 
-Le dossier est tenu à jour par un callback après chaque outil (`after_tool`).
+Le **constructeur de contexte** est un `InstructionProvider` d'ADK, recalculé avant chaque appel
+au modèle. Il injecte :
+1. les règles de base : périmètre, refus, avertissement, citations ;
+2. le catalogue des skills ;
+3. les instructions de la **seule** skill active ;
+4. les faits du dossier utiles à cette skill (`context_keys`). Par exemple,
+   `document_requirements` reçoit le type de travaux et les sources déjà trouvées, pas l'identifiant
+   du dossier.
 
 ## 4. Garde-fous et validation humaine
 
-Ils sont implémentés dans un `before_tool_callback` ADK : un outil refusé n'est pas exécuté, et
-le modèle reçoit le motif du refus.
+**Garde-fous en entrée** (`before_tool_callback`) :
+- budget de 10 appels d'outils par demande ;
+- outil hors skill refusé ;
+- validation Pydantic des arguments ;
+- projet inconnu refusé ;
+- brouillon refusé s'il ne cite aucune URL retrouvée par le RAG ;
+- envoi refusé si le dossier n'est pas `approved` (revérifié côté MCP).
 
-1. **Budget** : 10 appels d'outils métier au maximum par demande.
-2. **Allowlist par skill** : un outil hors de la skill active est refusé.
-3. **Validation Pydantic** des arguments (format `CARD-00000`, bornes, longueur de la
-   justification).
-4. **Carte inconnue** : refus, sans appel à la base en écriture.
-5. **Pas d'action sans procédure** : `block_card` est refusé si la procédure citée n'a pas été
-   retrouvée par `search_procedures` dans la conversation.
+**Garde-fou en sortie** (`after_model_callback`) : l'avertissement juridique est imposé dans
+chaque réponse finale. Si des documents ont été consultés sans qu'aucune URL ne soit citée, les
+sources sont ajoutées.
 
-Une défense en profondeur s'ajoute côté serveur MCP : l'outil revalide les entrées, refuse une
-procédure inexistante et une carte déjà bloquée.
-
-**Validation humaine** : `block_card` n'exécute rien. L'outil écrit une demande
-`pending_approval` dans la table `actions`. L'analyste approuve ou refuse dans Streamlit
-(`POST /actions/{id}/approve|reject`). Seule l'approbation passe la carte à `blocked`. Une
-décision ne peut être prise qu'une fois. ADK propose aussi un mécanisme de confirmation des
-outils, mais l'état « en attente » en base a été préféré : il survit à la session, il est
-auditable et il est partagé avec l'interface.
+**Validation humaine :**
+- l'agent prépare le brouillon ;
+- l'architecte approuve ou refuse dans Streamlit ;
+- seul un dossier approuvé peut être envoyé, et chaque décision ne peut être prise qu'une fois ;
+- l'envoi est simulé.
 
 ## 5. Traces et observabilité
 
-- **Dans l'interface** : chaque appel d'outil, ses arguments et son résultat, étape par étape.
-- **En production** : traces OpenTelemetry exportées vers Cloud Trace (une span par appel au
-  modèle et par outil, avec la latence et les tokens), journaux vers Cloud Logging.
-- **Journal métier** : la table `actions` (qui a demandé quoi, avec quelle procédure, qui a
-  décidé, et quand).
+- **Interface** : chaque appel d'outil, ses arguments et son résultat.
+- **Production** : traces OpenTelemetry dans Cloud Trace (spans du modèle et des outils, latence,
+  tokens) et journaux dans Cloud Logging.
+- **Journal métier** : la table `submissions` (qui a validé, quand, date d'envoi).
 
 ## 6. Évaluation
 
-**Protocole.** 25 scénarios, chacun avec le comportement attendu :
-- 7 fraudes évidentes ;
-- 6 transactions normales ;
-- 2 scores intermédiaires ;
-- 3 cartes ou transactions inconnues ou mal formées ;
-- 1 carte déjà bloquée ;
-- 3 demandes hors sujet ou portant sur des données personnelles ;
-- 3 cas avec l'API de fraude en panne (serveur relancé avec une URL injoignable).
+**Protocole.** 25 scénarios, chacun avec les outils attendus, les éléments de réponse et la
+source attendue :
+- 5 permis à une adresse réelle (vérité terrain : instantané DataSF) et 1 adresse inexistante ;
+- 6 questions sur les documents requis et 2 questions sans réponse dans les documents ;
+- 3 préparations de dossier, 1 liste de projets, 1 envoi sans validation, 1 projet inconnu ;
+- 3 demandes hors périmètre ;
+- 2 cas avec l'API DataSF en panne.
 
-Les deux systèmes sont servis par le même serveur, avec le même modèle et la même consigne métier :
-- **l'agent** : outils, skills, RAG et garde-fous ;
-- **la baseline à simple prompt** : sans outils.
-
-`agents-cli eval generate` produit les traces, puis `agents-cli eval grade` les note et
-`agents-cli eval compare` compare les deux systèmes.
+L'assistant et la baseline à simple prompt (même modèle, même périmètre, sans outils) sont
+servis par le même serveur. `agents-cli eval generate` produit les traces, puis
+`agents-cli eval grade` les note et `agents-cli eval compare` compare les deux.
 
 **Métriques :**
-- **LLM juge** (Gemini) de 1 à 5, avec une grille propre au domaine. Un fait absent de la trace
-  compte comme inventé. Un scénario est réussi si la note est d'au moins 4.
-- **Actions inutiles** : blocage demandé ou recommandé alors qu'il ne fallait pas.
-- **Erreurs d'outils** : arguments invalides ou refus des garde-fous.
-- **Nombre d'appels d'outils.**
+- LLM juge de 1 à 5 (réussite si la note est d'au moins 4) ;
+- outils attendus appelés ;
+- conformité (avertissement + source citée) ;
+- actions inutiles ;
+- erreurs d'outils ;
+- nombre d'appels d'outils.
 
 **Résultats** : voir [eval_results.md](eval_results.md), généré par `bash scripts/run_eval.sh`.
 
-| Métrique | Baseline | Agent |
+| Métrique | Baseline | Assistant |
 |---|---|---|
 | Taux de réussite | _xx %_ | _xx %_ |
+| Conformité (avertissement + source) | _xx %_ | _xx %_ |
 | Actions inutiles | _x_ | _x_ |
 | Erreurs d'outils | — | _x_ |
 
 **Analyse attendue :**
-- La baseline n'a accès à aucune donnée. Elle ne peut que demander des informations ou inventer
-  un score, et elle ne sait ni qu'une carte est inconnue ni qu'une API est en panne.
-- L'agent répond à partir des faits et cite la procédure.
-- Les principaux risques de l'agent sont un nombre d'appels d'outils plus élevé (latence, coût)
-  et des erreurs de séquencement des skills. Ces erreurs sont captées par les garde-fous et
-  mesurées par la métrique d'erreurs d'outils.
+- La baseline n'a ni données ni sources. Elle ne peut pas connaître les permis d'une adresse et
+  risque d'inventer des exigences ou des URL. Elle ne sait pas non plus qu'un projet n'existe pas.
+- L'assistant répond à partir de la trace et cite ses sources.
+- Ses risques sont un nombre d'appels d'outils plus élevé (latence, coût) et des erreurs de
+  séquencement des skills. Les garde-fous les captent et la métrique d'erreurs d'outils les mesure.
 
 ## 7. Déploiement
 
-- Les deux services tournent sur **Cloud Run** : l'agent (`agents-cli deploy`) et l'API du
-  projet 2 (image construite par Cloud Build).
-- La clé de l'API de fraude est rangée dans **Secret Manager** et injectée dans les deux services
-  sous forme de variable d'environnement. Elle n'apparaît jamais dans le code.
+- **Cloud Run**, via `agents-cli deploy`.
+- **Secret Manager** pour le jeton DataSF, qui est optionnel.
+- Gemini est appelé via Vertex AI avec l'identité du service, sans clé.
 - **CI/CD** :
-  - `ci.yaml` lance le lint et les 44 tests unitaires sans identifiants cloud ;
-  - les workflows générés par `agents-cli infra cicd` lancent les tests sur chaque PR, puis
-    déploient en staging et en production au merge.
+  - `ci.yaml` lance le lint et les tests unitaires sans identifiants cloud ;
+  - les workflows générés par `agents-cli infra cicd` lancent les tests sur PR, puis déploient en
+    staging et en production au merge.
 
 ## 8. Limites et pistes
 
-- SQLite embarqué : chaque instance Cloud Run a sa copie. En production, on passerait à
-  Cloud SQL ou PostgreSQL.
-- Les colonnes métier sont synthétiques. Les signaux contextuels (catégorie, pays) restent
-  volontairement imparfaits : de 33 à 40 % de fraudes dans les catégories à risque.
-- La notification du client et la commande d'une nouvelle carte ne sont pas implémentées.
+- Envoi simulé, sans dépôt réel.
+- SQLite embarqué : on passerait à Cloud SQL en production.
+- Les pages de la ville évoluent : il faut rafraîchir le corpus.
+- sf.gov bloque les clients automatisés : les pages s'importent depuis un navigateur
+  (`scripts/import_city_docs.py`).
 - Pistes :
-  - mémoire long terme (Memory Bank) pour retrouver les dossiers précédents d'un client ;
-  - optimisation des prompts avec `agents-cli eval optimize` ;
+  - suivi automatique des changements de statut d'un permis ;
+  - checklists par type de travaux ;
   - authentification de l'interface (IAP).
 
 ## 9. Répartition du travail
 
 | Membre | Partie |
 |---|---|
-| _moi_ | Serveur MCP + intégration de l'API du projet 2, évaluation contre la baseline, déploiement Cloud Run et CI/CD |
-| _membre 2_ | RAG (procédures, embeddings, Chroma) |
-| _membre 3_ | Interface Streamlit |
-| _membre 4_ | Rédaction des procédures et des scénarios, rapport |
+| _moi_ | Serveur MCP (DataSF, base projets), évaluation contre la baseline, déploiement Cloud Run et CI/CD |
+| _membre 2_ | RAG (corpus officiel, embeddings, Chroma) |
+| _membre 3_ | Interface Streamlit et validation humaine |
+| _membre 4_ | Scénarios d'évaluation, rapport, slides |

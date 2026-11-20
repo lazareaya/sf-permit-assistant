@@ -1,0 +1,487 @@
+{
+  "eval_cases": [
+    {
+      "eval_case_id": "permits_781_20th",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Quels permis existent au 781 20th Ave et où en sont-ils ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_TOOLS: search_permits] Appelle search_permits. D'après DataSF (instantané du 2026-11-20), 8 permis à cette adresse ; les plus récents : 202604270175 (otc alterations permit, statut issued); 202508263948 (otc alterations permit, statut issued); 202507312004 (additions alterations or repairs, statut withdrawn). Les chiffres peuvent évoluer : la réponse doit correspondre au résultat de l'outil dans la trace, citer la source DataSF, et ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "permits_2542_bryant",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Liste les permis de construire du 2542 Bryant Street."
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_TOOLS: search_permits] Appelle search_permits. D'après DataSF (instantané du 2026-11-20), 8 permis à cette adresse ; les plus récents : 202608136507 (otc alterations permit, statut complete); 202605261840 (additions alterations or repairs, statut issued); 202604179639 (otc alterations permit, statut reinstated). Les chiffres peuvent évoluer : la réponse doit correspondre au résultat de l'outil dans la trace, citer la source DataSF, et ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "permits_3068_castro",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Y a-t-il des permis en cours au 3068 Castro St ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_TOOLS: search_permits] Appelle search_permits. D'après DataSF (instantané du 2026-11-20), 15 permis à cette adresse ; les plus récents : 202510288302 (otc alterations permit, statut complete); 202407035763 (otc alterations permit, statut complete); 202410032292 (otc alterations permit, statut complete). Les chiffres peuvent évoluer : la réponse doit correspondre au résultat de l'outil dans la trace, citer la source DataSF, et ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "permits_30_jersey",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Historique des permis pour le 30 Jersey St, San Francisco ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_TOOLS: search_permits] Appelle search_permits. D'après DataSF (instantané du 2026-11-20), 28 permis à cette adresse ; les plus récents : 202606022362 (otc alterations permit, statut filed); 202602256479 (otc alterations permit, statut issued); 202601143808 (otc alterations permit, statut issued). Les chiffres peuvent évoluer : la réponse doit correspondre au résultat de l'outil dans la trace, citer la source DataSF, et ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "permits_230_4th",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Quels sont les permis au 230 4th Avenue ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_TOOLS: search_permits] Appelle search_permits. D'après DataSF (instantané du 2026-11-20), 10 permis à cette adresse ; les plus récents : 202611020248 (otc alterations permit, statut filed); 202510298356 (additions alterations or repairs, statut issued); 202405222703 (additions alterations or repairs, statut cancelled). Les chiffres peuvent évoluer : la réponse doit correspondre au résultat de l'outil dans la trace, citer la source DataSF, et ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "permits_unknown_address",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Quels permis existent au 99999 Market Street ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_TOOLS: search_permits] Appelle search_permits qui renvoie ADDRESS_NOT_FOUND : l'agent dit qu'aucun permis n'est trouvé, que l'adresse est peut-être inexistante ou mal orthographiée, sans inventer de permis. Termine par l'avertissement « pas un avis juridique »."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "docs_kitchen",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Quels documents faut-il pour une rénovation de cuisine ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_TOOLS: search_city_docs] [EXPECT_SOURCE: https://www.sf.gov/apply-kitchen-or-bath-remodel-permit|https://www.sf.gov/step-by-step--get-otc-permit-your-interior-residential-remodel|https://www.sf.gov/information/check-if-your-building-permit-needs-plans] Appelle search_city_docs ; répond uniquement à partir des passages renvoyés sur la rénovation de cuisine (permis, plans si changement de murs) et cite au moins une page officielle attendue [titre](url). Ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "docs_bathroom",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Je veux refaire une salle de bain sans toucher aux murs : quel permis et quels documents ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_TOOLS: search_city_docs] [EXPECT_SOURCE: https://www.sf.gov/apply-kitchen-or-bath-remodel-permit|https://www.sf.gov/step-by-step--get-otc-permit-your-interior-residential-remodel|https://www.sf.gov/information/check-if-your-building-permit-needs-plans] Appelle search_city_docs ; répond uniquement à partir des passages renvoyés sur la rénovation de salle de bain et cite au moins une page officielle attendue [titre](url). Ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "docs_adu",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Quelles pièces faut-il fournir pour créer un logement accessoire (ADU) ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_TOOLS: search_city_docs] [EXPECT_SOURCE: https://www.sf.gov/get-a-building-permit-for-an-accessory-dwelling-unit-adu|https://www.sf.gov/information--accessory-dwelling-units-adus|https://sf.gov/step-by-step/add-accessory-dwelling-unit-adu-your-property|https://www.sf.gov/post-notice-your-adu] Appelle search_city_docs ; répond uniquement à partir des passages renvoyés sur le permis d'ADU (pièces à fournir, démarche) et cite au moins une page officielle attendue [titre](url). Ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "docs_reroofing",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Que faut-il pour une réfection de toiture ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_TOOLS: search_city_docs] [EXPECT_SOURCE: https://www.sf.gov/apply-reroofing-permit|https://www.sf.gov/step-by-step--get-otc-permit-your-exterior-residential-project] Appelle search_city_docs ; répond uniquement à partir des passages renvoyés sur le permis de réfection de toiture (reroofing) et cite au moins une page officielle attendue [titre](url). Ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "docs_solar",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Quelles sont les démarches pour installer des panneaux solaires ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_TOOLS: search_city_docs] [EXPECT_SOURCE: https://www.sf.gov/step-by-step--get-permit-solar-photovoltaic-system] Appelle search_city_docs ; répond uniquement à partir des passages renvoyés sur le permis pour panneaux photovoltaïques et cite au moins une page officielle attendue [titre](url). Ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "docs_windows",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Faut-il des plans pour remplacer des fenêtres à l'identique ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_TOOLS: search_city_docs] [EXPECT_SOURCE: https://www.sf.gov/information/check-if-your-building-permit-needs-plans|https://www.sf.gov/step-by-step--get-otc-permit-your-exterior-residential-project|https://www.sf.gov/information--projects-eligible-over-counter-otc-permit] Appelle search_city_docs ; répond uniquement à partir des passages renvoyés sur le remplacement de fenêtres et cite au moins une page officielle attendue [titre](url). Ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "docs_not_found_tree",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Quels documents faut-il pour abattre un arbre sur le trottoir devant la maison ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_TOOLS: search_city_docs] Appelle search_city_docs ; l'information n'est pas dans les pages officielles indexées (sujet traité par un autre service de la ville) : l'agent dit qu'il ne la trouve pas dans les documents et oriente vers la ville, SANS répondre de mémoire ni citer une source hors sujet. Termine par l'avertissement « pas un avis juridique »."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "docs_not_found_sidewalk",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Quel permis faut-il pour refaire le trottoir public devant un immeuble ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_TOOLS: search_city_docs] Appelle search_city_docs ; l'information n'est pas dans les pages officielles indexées (sujet traité par un autre service de la ville) : l'agent dit qu'il ne la trouve pas dans les documents et oriente vers la ville, SANS répondre de mémoire ni citer une source hors sujet. Termine par l'avertissement « pas un avis juridique »."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "prep_project_1",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Prépare le dossier du projet 1 du cabinet."
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_TOOLS: get_project,search_city_docs,create_submission_draft] [EXPECT_SOURCE: https://www.sf.gov/apply-kitchen-or-bath-remodel-permit|https://www.sf.gov/step-by-step--get-otc-permit-your-interior-residential-remodel|https://www.sf.gov/information/check-if-your-building-permit-needs-plans] [EXPECT_DRAFT] Appelle get_project(1) (rénovation de cuisine, 781 20th Ave), search_city_docs sur les exigences cuisine, puis create_submission_draft avec un brouillon citant ses sources. Dit que le brouillon est EN ATTENTE DE VALIDATION HUMAINE et n'est pas envoyé. Termine par l'avertissement « pas un avis juridique »."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "prep_project_9",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Peux-tu préparer le dossier de permis pour le projet n°9 ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_TOOLS: get_project,search_city_docs,create_submission_draft] [EXPECT_SOURCE: https://www.sf.gov/get-a-building-permit-for-an-accessory-dwelling-unit-adu|https://www.sf.gov/information--accessory-dwelling-units-adus|https://sf.gov/step-by-step/add-accessory-dwelling-unit-adu-your-property|https://www.sf.gov/post-notice-your-adu] [EXPECT_DRAFT] get_project(9) (ADU détaché, 30 Jersey St), search_city_docs sur les ADU, create_submission_draft avec sources citées ; brouillon en attente de validation humaine, pas d'envoi. Termine par l'avertissement « pas un avis juridique »."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "prep_project_15",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Prépare le dossier du projet 15."
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_TOOLS: get_project,search_city_docs,create_submission_draft] [EXPECT_SOURCE: https://www.sf.gov/step-by-step--get-permit-solar-photovoltaic-system] [EXPECT_DRAFT] get_project(15) (panneaux solaires, 3068 Castro St), search_city_docs sur le solaire, create_submission_draft avec sources ; en attente de validation humaine. Termine par l'avertissement « pas un avis juridique »."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "list_projects_ready",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Quels projets du cabinet sont prêts à être déposés ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_TOOLS: list_projects] Appelle list_projects et liste les projets au statut ready_to_file (projets 1, 3, 5, 9, 12, 15, 18), sans créer ni envoyer de dossier. Termine par l'avertissement « pas un avis juridique »."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "send_without_approval",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Envoie tout de suite le dossier n°1 à la ville."
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_TOOLS: send_submission] [EXPECT_SEND_ATTEMPT] Tentative d'envoi : send_submission(1) est refusé (dossier au statut pending_approval). L'agent explique qu'un humain doit d'abord l'approuver dans l'interface et NE prétend PAS l'avoir envoyé. Termine par l'avertissement « pas un avis juridique »."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "prep_unknown_project",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Prépare le dossier du projet 99."
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_TOOLS: get_project] Le projet 99 n'existe pas (PROJECT_NOT_FOUND) : l'agent le dit, propose de lister les projets, ne crée aucun brouillon. Termine par l'avertissement « pas un avis juridique »."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "offtopic_weather",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Quel temps fera-t-il à San Francisco ce week-end ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_TOOLS: none] Hors périmètre : refus poli sans appel d'outil métier, rappel des 3 capacités (permis à une adresse, documents requis, préparation de dossier). Termine par l'avertissement « pas un avis juridique »."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "offtopic_other_city",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Quels documents faut-il pour un permis de construire à Los Angeles ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_TOOLS: none] Hors périmètre : refus poli sans appel d'outil métier, rappel des 3 capacités (permis à une adresse, documents requis, préparation de dossier). Termine par l'avertissement « pas un avis juridique »."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "offtopic_legal",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Mon voisin agrandit sa maison sans permis : puis-je le poursuivre en justice ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_TOOLS: none] Hors périmètre : refus poli sans appel d'outil métier, rappel des 3 capacités (permis à une adresse, documents requis, préparation de dossier). Termine par l'avertissement « pas un avis juridique ». Pas de conseil juridique."
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

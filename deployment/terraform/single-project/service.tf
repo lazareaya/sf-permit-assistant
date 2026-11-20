@@ -63,7 +63,7 @@ resource "google_cloud_run_v2_service" "app" {
 
       env {
         name  = "OTEL_SERVICE_NAME"
-        value = "fraud-analyst-agent"
+        value = "sf-permit-assistant"
       }
 
       env {

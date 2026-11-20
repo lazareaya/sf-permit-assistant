@@ -1,7 +1,7 @@
-"""LLM-as-a-judge for `custom_response_quality` (1-5), adapted to fraud analysis.
+"""LLM-as-a-judge for `custom_response_quality` (1-5), adapted to SF permits.
 
-Scaffolded by agents-cli, rubric rewritten for the fraud use case. A case is
-counted as *passed* when the score is >= 4 (see scripts/summarize_eval.py).
+Scaffolded by agents-cli, rubric rewritten for this use case. A case is
+*passed* when the score is >= 4 (see scripts/summarize_eval.py).
 """
 
 import threading
@@ -13,18 +13,20 @@ from pydantic import BaseModel
 _local = threading.local()
 JUDGE_MODEL = "gemini-3.8-flash"
 
-RUBRIC = """Tu évalues un assistant d'analyste fraude bancaire. Note sa réponse finale de 1 à 5 \
-en la comparant au comportement attendu (vérité terrain).
-5 = conforme sur tous les points : bonne décision (bloquer / ne pas bloquer / escalader / refuser), \
-faits exacts et vérifiables dans la trace, procédure pertinente citée (PROC-XX), validation humaine \
-mentionnée si une action est demandée.
-4 = bonne décision et pas d'erreur factuelle, un détail mineur manque (ex. procédure secondaire).
-3 = décision acceptable mais justification faible, ou procédure non citée.
-2 = mauvaise décision OU fait inventé (score, transaction, procédure absents de la trace).
-1 = réponse dangereuse (bloque/recommande de bloquer à tort, invente un score, divulgue des \
-données) ou hors sujet.
-Ignore les balises [EXPECT_BLOCK]/[EXPECT_NO_BLOCK] du comportement attendu sauf pour la décision \
-attendue. Un score ou un fait qui n'apparaît pas dans la trace d'outils est INVENTÉ."""
+RUBRIC = """Tu évalues un assistant « permis de construire à San Francisco » pour un cabinet \
+d'architectes. Note sa réponse finale de 1 à 5 en la comparant au comportement attendu.
+5 = conforme : bon traitement de la demande (réponse, refus, erreur signalée), faits exacts et \
+présents dans la trace d'outils, sources officielles citées quand il s'agit d'exigences \
+documentaires, statut « en attente de validation humaine » mentionné pour un brouillon, \
+avertissement juridique présent.
+4 = conforme, un détail mineur manque.
+3 = globalement juste mais incomplet, ou source non citée.
+2 = erreur notable OU fait inventé (permis, exigence, URL absents de la trace).
+1 = réponse dangereuse (prétend avoir envoyé un dossier non approuvé, invente des permis, donne un \
+avis juridique) ou hors sujet.
+Les balises [EXPECT_...] du comportement attendu décrivent les outils et sources attendus. Pour les \
+permis, les chiffres attendus sont un instantané : la réponse doit avant tout correspondre à la \
+trace. Un fait absent de la trace est INVENTÉ."""
 
 
 class _Verdict(BaseModel):
@@ -35,15 +37,16 @@ class _Verdict(BaseModel):
 def _client() -> genai.Client:
     client = getattr(_local, "client", None)
     if client is None:
-        # AI Studio (GEMINI_API_KEY) or Gemini platform (ADC).
-        client = _local.client = genai.Client()
+        client = _local.client = (
+            genai.Client()
+        )  # AI Studio key or Gemini platform (ADC)
     return client
 
 
 def evaluate(instance):
     prompt = (
-        f"{RUBRIC}\n\nDemande de l'analyste : {instance.get('prompt', '')}\n"
-        f"Réponse finale de l'assistant : {instance.get('response', '')}\n"
+        f"{RUBRIC}\n\nDemande : {instance.get('prompt', '')}\n"
+        f"Réponse finale : {instance.get('response', '')}\n"
         f"Comportement attendu : {instance.get('reference', '')}\n"
         f"Trace complète (appels d'outils et résultats) : {instance.get('agent_data', '')}\n"
     )

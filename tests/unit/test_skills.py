@@ -1,31 +1,34 @@
 from types import SimpleNamespace
 
+from app.config import DISCLAIMER
 from app.skills import SKILL_REGISTRY, activate_skill, build_instruction
 
 
-def test_registry_has_three_skills_with_disjoint_purposes():
-    assert set(SKILL_REGISTRY) == {"investigation", "procedure_lookup", "decision_prep"}
-    assert "block_card" in SKILL_REGISTRY["decision_prep"].allowed_tools
-    assert "block_card" not in SKILL_REGISTRY["investigation"].allowed_tools
+def test_registry_has_three_skills():
+    assert set(SKILL_REGISTRY) == {
+        "permit_search",
+        "document_requirements",
+        "submission_prep",
+    }
+    assert SKILL_REGISTRY["permit_search"].allowed_tools == ("search_permits",)
+    assert (
+        "send_submission" not in SKILL_REGISTRY["document_requirements"].allowed_tools
+    )
 
 
 def test_context_builder_injects_only_active_skill():
     ctx = SimpleNamespace(
         state={
-            "active_skill": "procedure_lookup",
-            "case": {
-                "card_id": "CARD-00001",
-                "fraud_probability": 0.95,
-                "pending_action": {"action_id": 1},
-            },
+            "active_skill": "document_requirements",
+            "case": {"work_type": "adu", "submission_id": 4, "address": "x"},
         }
     )
     prompt = build_instruction(ctx)
-    assert "Skill active : procedure_lookup" in prompt
-    assert SKILL_REGISTRY["procedure_lookup"].instructions in prompt
-    assert SKILL_REGISTRY["decision_prep"].instructions not in prompt
-    assert "fraud_probability : 0.95" in prompt
-    assert "pending_action" not in prompt  # not needed by this skill
+    assert "Skill active : document_requirements" in prompt
+    assert SKILL_REGISTRY["document_requirements"].instructions in prompt
+    assert SKILL_REGISTRY["submission_prep"].instructions not in prompt
+    assert "work_type : adu" in prompt and "submission_id" not in prompt
+    assert DISCLAIMER in prompt
 
 
 def test_context_builder_without_skill():
@@ -37,9 +40,9 @@ def test_context_builder_without_skill():
 
 def test_activate_skill_sets_state():
     tc = SimpleNamespace(state={})
-    assert activate_skill("decision_prep", tc)["allowed_tools"] == [
-        "block_card",
-        "get_card_status",
-    ]
-    assert tc.state["active_skill"] == "decision_prep"
+    assert (
+        "create_submission_draft"
+        in activate_skill("submission_prep", tc)["allowed_tools"]
+    )
+    assert tc.state["active_skill"] == "submission_prep"
     assert activate_skill("hack", tc)["error"] == "UNKNOWN_SKILL"

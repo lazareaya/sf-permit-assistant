@@ -10,14 +10,25 @@ from dotenv import load_dotenv
 ROOT = Path(__file__).resolve().parents[1]
 load_dotenv(ROOT / ".env")
 
-BANK_DB_PATH = Path(os.getenv("BANK_DB_PATH", ROOT / "data" / "bank.db"))
-PROCEDURES_DIR = Path(os.getenv("PROCEDURES_DIR", ROOT / "data" / "procedures"))
+DISCLAIMER = (
+    "Information générale, pas un avis juridique. "
+    "Vérifier auprès du Department of Building Inspection."
+)
+
+PROJECTS_DB_PATH = Path(os.getenv("PROJECTS_DB_PATH", ROOT / "data" / "projects.db"))
+CITY_DOCS_DIR = Path(os.getenv("CITY_DOCS_DIR", ROOT / "data" / "city_docs"))
 CHROMA_DIR = Path(os.getenv("CHROMA_DIR", ROOT / "data" / "chroma"))
 
-# Project 2 fraud-detection API (FastAPI + XGBoost served from MLflow).
-FRAUD_API_URL = os.getenv("FRAUD_API_URL", "http://localhost:8001").rstrip("/")
-FRAUD_API_KEY = os.getenv("FRAUD_API_KEY", "")  # injected from Secret Manager in prod
-FRAUD_API_TIMEOUT_S = float(os.getenv("FRAUD_API_TIMEOUT_S", "8"))
+# DataSF "Building Permits" (Socrata API, public, no key required)
+DATASF_URL = os.getenv("DATASF_URL", "https://data.sf.gov/resource/i98e-djp9.json")
+DATASF_TIMEOUT_S = float(os.getenv("DATASF_TIMEOUT_S", "10"))
+DATASF_CACHE = os.getenv("DATASF_CACHE", "on").lower() != "off"
+DATASF_CACHE_TTL_S = int(os.getenv("DATASF_CACHE_TTL_S", str(24 * 3600)))
+DATASF_CACHE_PATH = Path(
+    os.getenv("DATASF_CACHE_PATH", ROOT / "data" / "cache" / "datasf.sqlite")
+)
+# Optional Socrata app token (higher rate limits); from Secret Manager in prod.
+SOCRATA_APP_TOKEN = os.getenv("SOCRATA_APP_TOKEN", "")
 
 MODEL = os.getenv("AGENT_MODEL", "gemini-3.8-flash")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "gemini-embedding-001")

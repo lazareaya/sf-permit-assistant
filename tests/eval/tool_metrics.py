@@ -1,18 +1,16 @@
-"""Code metrics on the trace (no LLM): number of tool errors.
-
-A tool error is a tool result that signals a *misuse* by the model: invalid
-arguments, guardrail refusals, unknown skill/procedure. Expected business
-errors (unknown card, API down) are not counted: reporting them is correct.
-"""
+"""Code metric: number of tool errors caused by a *misuse* of the tools by the
+model (invalid arguments, guardrail refusals, unknown skill). Expected business
+errors (unknown address, DataSF down, unknown project, NOT_APPROVED when the
+user asks to send) are not counted: reporting them is the correct behaviour."""
 
 import json
 
 MISUSE = (
     "INVALID_INPUT",
-    "GUARDRAIL_",
+    "GUARDRAIL_SKILL",
+    "GUARDRAIL_TOOL_BUDGET",
+    "GUARDRAIL_NO_SOURCE",
     "UNKNOWN_SKILL",
-    "UNKNOWN_PROCEDURE",
-    "ALREADY_BLOCKED",
 )
 
 

@@ -19,9 +19,10 @@ async def _with_session(fn, db_path):
         env={
             **os.environ,
             "PYTHONPATH": str(config.ROOT),
-            "BANK_DB_PATH": str(db_path),
-            "FRAUD_API_URL": "http://127.0.0.1:9",
-        },  # nothing listens there
+            "PROJECTS_DB_PATH": str(db_path),
+            "DATASF_URL": "http://127.0.0.1:9/resource.json",
+            "DATASF_CACHE": "off",
+        },  # DataSF "down"
     )
     async with stdio_client(params) as (r, w), ClientSession(r, w) as session:
         await session.initialize()
@@ -33,48 +34,40 @@ def _payload(result):
 
 
 @pytest.mark.asyncio
-async def test_mcp_exposes_the_four_tools(temp_db):
+async def test_mcp_exposes_the_five_tools(temp_db):
     tools = await _with_session(lambda s: s.list_tools(), temp_db)
     assert {t.name for t in tools.tools} == {
-        "score_transaction",
-        "get_transaction_history",
-        "get_card_status",
-        "block_card",
+        "search_permits",
+        "list_projects",
+        "get_project",
+        "create_submission_draft",
+        "send_submission",
     }
 
 
 @pytest.mark.asyncio
-async def test_mcp_history_and_status(temp_db):
+async def test_mcp_read_tools(temp_db):
     async def run(s):
-        return (
-            await s.call_tool(
-                "get_transaction_history", {"card_id": "CARD-00185", "limit": 3}
-            ),
-            await s.call_tool("get_card_status", {"card_id": "CARD-99999"}),
+        return await s.call_tool("list_projects", {}), await s.call_tool(
+            "get_project", {"project_id": 999}
         )
 
-    hist, status = await _with_session(run, temp_db)
-    assert len(_payload(hist)["transactions"]) == 3
-    assert _payload(status)["error"] == "CARD_NOT_FOUND"
+    projects, missing = await _with_session(run, temp_db)
+    assert len(_payload(projects)["projects"]) == 20
+    assert _payload(missing)["error"] == "PROJECT_NOT_FOUND"
 
 
 @pytest.mark.asyncio
-async def test_mcp_score_reports_api_outage(temp_db):
+async def test_mcp_search_permits_reports_outage(temp_db):
     res = await _with_session(
-        lambda s: s.call_tool("score_transaction", {"tx_id": 100541}), temp_db
+        lambda s: s.call_tool("search_permits", {"address": "781 20th Ave"}), temp_db
     )
-    assert _payload(res)["error"] == "FRAUD_API_UNAVAILABLE"
+    assert _payload(res)["error"] == "DATASF_UNAVAILABLE"
 
 
 @pytest.mark.asyncio
-async def test_mcp_block_card_is_pending_only(temp_db):
-    args = {
-        "card_id": "CARD-00185",
-        "justification": "score 0.99 et 3 pays étrangers",
-        "procedure_id": "PROC-01",
-    }
-    res = await _with_session(lambda s: s.call_tool("block_card", args), temp_db)
-    assert _payload(res)["status"] == "pending_approval"
-    from app import db
-
-    assert db.get_card_status("CARD-00185")["status"] == "active"
+async def test_mcp_send_refused_without_approval(temp_db):
+    res = await _with_session(
+        lambda s: s.call_tool("send_submission", {"submission_id": 1}), temp_db
+    )
+    assert _payload(res)["error"] == "NOT_APPROVED"

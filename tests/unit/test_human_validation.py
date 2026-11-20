@@ -1,4 +1,4 @@
-"""block_card must never execute directly: only a human approval does."""
+"""send_submission must never succeed before a human approval."""
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -6,8 +6,9 @@ from fastapi.testclient import TestClient
 from app import db, tools
 from app.approvals import router
 
-CARD = "CARD-00185"
-JUSTIF = "Score 0.99 sur la transaction, 3 pays étrangers en 2 heures."
+DRAFT = (
+    "# Dossier\n" + "Pièces à fournir selon https://example.test/kitchen-remodel. " * 10
+)
 
 
 def _client():
@@ -16,51 +17,62 @@ def _client():
     return TestClient(api)
 
 
-def test_block_card_only_creates_pending_request():
-    out = tools.block_card(CARD, JUSTIF, "PROC-01", tx_id=100541)
+def test_draft_is_pending_and_not_sent():
+    out = tools.create_submission_draft(1, DRAFT)
     assert out["status"] == "pending_approval"
-    assert db.get_card_status(CARD)["status"] == "active"  # NOT blocked
-    assert db.list_actions("pending_approval")[0]["card_id"] == CARD
+    assert db.get_submission(out["submission_id"])["sent_at"] is None
 
 
-def test_block_card_is_idempotent_while_pending():
-    first = tools.block_card(CARD, JUSTIF, "PROC-01")
-    second = tools.block_card(CARD, JUSTIF, "PROC-01")
-    assert second["duplicate"] is True and second["action_id"] == first["action_id"]
+def test_one_pending_draft_per_project():
+    a = tools.create_submission_draft(1, DRAFT)
+    b = tools.create_submission_draft(1, DRAFT + " v2")
+    assert b["updated_existing"] and a["submission_id"] == b["submission_id"]
 
 
-def test_block_card_requires_known_procedure():
-    assert tools.block_card(CARD, JUSTIF, "PROC-99")["error"] == "UNKNOWN_PROCEDURE"
+def test_draft_too_short_rejected():
+    assert tools.create_submission_draft(1, "trop court")["error"] == "INVALID_INPUT"
 
 
-def test_block_card_refuses_unknown_card():
+def test_send_refused_when_pending():
+    sid = tools.create_submission_draft(1, DRAFT)["submission_id"]
+    out = tools.send_submission(sid)
+    assert out["error"] == "NOT_APPROVED"
+    assert db.get_submission(sid)["status"] == "pending_approval"
+
+
+def test_send_refused_when_rejected_or_already_sent():
     assert (
-        tools.block_card("CARD-99999", JUSTIF, "PROC-01")["error"] == "CARD_NOT_FOUND"
+        tools.send_submission(3)["error"] == "NOT_APPROVED"
+    )  # seed #3 is already sent
+    sid = tools.create_submission_draft(2, DRAFT)["submission_id"]
+    db.decide_submission(sid, approve=False, reviewer="x")
+    assert tools.send_submission(sid)["error"] == "NOT_APPROVED"
+
+
+def test_approve_in_ui_then_send():
+    sid = tools.create_submission_draft(1, DRAFT)["submission_id"]
+    c = _client()
+    assert sid in [
+        s["submission_id"] if "submission_id" in s else s["id"]
+        for s in c.get("/submissions?status=pending_approval").json()
+    ]
+    assert c.post(f"/submissions/{sid}/send").status_code == 409  # not approved yet
+    assert (
+        c.post(f"/submissions/{sid}/approve", json={"reviewer": "alice"}).json()[
+            "status"
+        ]
+        == "approved"
     )
+    assert c.post(f"/submissions/{sid}/approve").status_code == 409  # single decision
+    assert tools.send_submission(sid)["status"] == "sent"
+    assert db.get_submission(sid)["sent_at"]
 
 
-def test_block_card_refuses_already_blocked_card():
-    assert (
-        tools.block_card("CARD-00300", JUSTIF, "PROC-01")["error"] == "ALREADY_BLOCKED"
-    )
+def test_reject_in_ui():
+    sid = tools.create_submission_draft(1, DRAFT)["submission_id"]
+    assert _client().post(f"/submissions/{sid}/reject").json()["status"] == "rejected"
 
 
-def test_human_approval_executes_the_block():
-    action_id = tools.block_card(CARD, JUSTIF, "PROC-01")["action_id"]
-    client = _client()
-    assert [
-        a["action_id"] for a in client.get("/actions?status=pending_approval").json()
-    ] == [action_id]
-    r = client.post(f"/actions/{action_id}/approve", json={"reviewer": "alice"})
-    assert r.status_code == 200 and r.json()["status"] == "executed"
-    assert db.get_card_status(CARD)["status"] == "blocked"
-    assert (
-        client.post(f"/actions/{action_id}/approve").status_code == 409
-    )  # no double decision
-
-
-def test_human_rejection_leaves_card_active():
-    action_id = tools.block_card(CARD, JUSTIF, "PROC-01")["action_id"]
-    r = _client().post(f"/actions/{action_id}/reject", json={"reviewer": "bob"})
-    assert r.json()["status"] == "rejected"
-    assert db.get_card_status(CARD)["status"] == "active"
+def test_unknown_submission():
+    assert tools.send_submission(999)["error"] == "SUBMISSION_NOT_FOUND"
+    assert _client().post("/submissions/999/approve").status_code == 404

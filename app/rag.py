@@ -1,18 +1,22 @@
-"""RAG over the bank's internal procedures (fictitious documents).
+"""RAG over official City of San Francisco pages (sf.gov: DBI, Planning).
 
-Pipeline: markdown files -> chunks (one per ``##`` section) -> embeddings
-(Gemini ``gemini-embedding-001``) -> Chroma (local persistent vector store)
--> top-3 passages **with their source** (procedure id + section).
+Pipeline: data/city_docs/*.md (one official page each, with a front-matter
+header: doc_id, title, url) -> chunks by heading (max ~1,500 characters) ->
+Gemini embeddings (``gemini-embedding-001``) -> Chroma (local persistent vector
+store) -> top-3 passages above a relevance threshold, **each with its source
+URL and title**.
 
-If no Gemini backend is configured (CI, offline unit tests), a deterministic
-local hashing embedder is used instead so the pipeline stays testable. The
-provider is part of the collection name, so the two never mix.
+If nothing relevant is found, the tool says so (``NO_RELEVANT_DOCUMENT``)
+instead of returning weak passages. If no Gemini backend is configured (CI,
+offline unit tests), a deterministic local hashing embedder is used so the
+pipeline stays testable; the provider is part of the collection name.
 """
 
 from __future__ import annotations
 
 import hashlib
 import math
+import os
 import re
 from dataclasses import dataclass
 from functools import lru_cache
@@ -21,66 +25,77 @@ from typing import Any
 
 from app import config
 
-PROC_ID_RE = re.compile(r"^(PROC-\d{2})")
 TOP_K = 3
+MAX_CHUNK_CHARS = 1500
+# Cosine-similarity floor below which a passage is considered irrelevant.
+MIN_SCORE = {"gemini": float(os.getenv("RAG_MIN_SCORE", "0.55")), "local": 0.12}
 
 
 @dataclass(frozen=True)
 class Chunk:
     chunk_id: str
-    procedure_id: str
+    doc_id: str
     title: str
+    url: str
     section: str
-    source: str
     text: str
 
 
-# ----------------------------------------------------------------- chunking
-def load_chunks(proc_dir: Path | None = None) -> list[Chunk]:
-    proc_dir = Path(proc_dir or config.PROCEDURES_DIR)
+# ----------------------------------------------------------------- loading
+def parse_front_matter(raw: str) -> tuple[dict[str, str], str]:
+    if not raw.startswith("---\n"):
+        return {}, raw
+    head, _, body = raw[4:].partition("\n---\n")
+    meta = {}
+    for line in head.splitlines():
+        key, _, value = line.partition(":")
+        meta[key.strip()] = value.strip()
+    return meta, body
+
+
+def _split_long(text: str) -> list[str]:
+    if len(text) <= MAX_CHUNK_CHARS:
+        return [text]
+    parts, cur = [], ""
+    for para in text.split("\n\n"):
+        if cur and len(cur) + len(para) > MAX_CHUNK_CHARS:
+            parts.append(cur.strip())
+            cur = ""
+        cur += para + "\n\n"
+    if cur.strip():
+        parts.append(cur.strip())
+    return parts
+
+
+def load_chunks(docs_dir: Path | None = None) -> list[Chunk]:
+    docs_dir = Path(docs_dir or config.CITY_DOCS_DIR)
     chunks: list[Chunk] = []
-    for path in sorted(proc_dir.glob("PROC-*.md")):
-        m = PROC_ID_RE.match(path.name)
-        if not m:
-            continue
-        proc_id = m.group(1)
-        raw = path.read_text(encoding="utf-8")
-        lines = raw.splitlines()
-        title = lines[0].lstrip("# ").strip() if lines else proc_id
-        body = "\n".join(lines[1:])
-        # Drop the "document fictif" disclaimer lines from the indexed text.
-        body = "\n".join(line for line in body.splitlines() if not line.startswith(">"))
-        sections = re.split(r"^## ", body, flags=re.MULTILINE)
-        for i, sec in enumerate(sections):
-            sec = sec.strip()
-            if not sec:
+    for path in sorted(docs_dir.glob("*.md")):
+        meta, body = parse_front_matter(path.read_text(encoding="utf-8"))
+        if not meta.get("url") or not meta.get("title"):
+            continue  # a page without its source is never indexed
+        doc_id = meta.get("doc_id", path.stem)
+        sections = re.split(r"^(#{1,3} .+)$", body, flags=re.MULTILINE)
+        current, n = "Introduction", 0
+        for piece in sections:
+            if re.match(r"^#{1,3} ", piece):
+                current = piece.lstrip("# ").strip()
                 continue
-            if i == 0:
-                name, text = "Introduction", sec
-            else:
-                name, _, text = sec.partition("\n")
-                text = text.strip()
-            chunks.append(
-                Chunk(
-                    chunk_id=f"{proc_id}#{i}",
-                    procedure_id=proc_id,
-                    title=title,
-                    section=name.strip(),
-                    source=path.name,
-                    # Title is prepended so each chunk is self-describing.
-                    text=f"{title} — {name.strip()}\n{text}",
+            for part in _split_long(piece.strip()):
+                if len(part) < 40:
+                    continue
+                chunks.append(
+                    Chunk(
+                        chunk_id=f"{doc_id}#{n}",
+                        doc_id=doc_id,
+                        title=meta["title"],
+                        url=meta["url"],
+                        section=current,
+                        text=f"{meta['title']} — {current}\n{part}",
+                    )
                 )
-            )
+                n += 1
     return chunks
-
-
-@lru_cache(maxsize=1)
-def known_procedure_ids() -> frozenset[str]:
-    return frozenset(c.procedure_id for c in load_chunks())
-
-
-def procedure_exists(procedure_id: str) -> bool:
-    return procedure_id in known_procedure_ids()
 
 
 # --------------------------------------------------------------- embeddings
@@ -92,14 +107,10 @@ class LocalHashEmbedder:
 
     def _vec(self, text: str) -> list[float]:
         v = [0.0] * self.dim
-        tokens = re.findall(r"\w+", text.lower())
-        for tok in tokens:
+        for tok in re.findall(r"\w+", text.lower()):
             if len(tok) < 3:
                 continue
-            tok = tok[
-                :6
-            ]  # crude stemming: bloquer/blocage/bloquée -> "bloque"/"blocag"
-            h = int(hashlib.md5(tok.encode()).hexdigest(), 16)
+            h = int(hashlib.md5(tok[:7].encode()).hexdigest(), 16)
             v[h % self.dim] += 1.0
         norm = math.sqrt(sum(x * x for x in v)) or 1.0
         return [x / norm for x in v]
@@ -143,8 +154,6 @@ class GeminiEmbedder:
 
 
 def get_embedder():
-    import os
-
     provider = os.getenv("RAG_EMBEDDINGS", "auto")
     if provider == "local" or (provider == "auto" and not config.gemini_configured()):
         return LocalHashEmbedder()
@@ -152,91 +161,120 @@ def get_embedder():
 
 
 # ------------------------------------------------------------------- index
-class ProcedureIndex:
-    def __init__(self, persist_dir: Path | None = None, embedder=None):
+class CityDocsIndex:
+    def __init__(
+        self,
+        persist_dir: Path | None = None,
+        embedder=None,
+        docs_dir: Path | None = None,
+    ):
         import chromadb
 
         self.embedder = embedder or get_embedder()
+        self.docs_dir = docs_dir
         self.client = chromadb.PersistentClient(
             path=str(persist_dir or config.CHROMA_DIR)
         )
         self.collection = self.client.get_or_create_collection(
-            name=f"procedures_{self.embedder.name}", metadata={"hnsw:space": "cosine"}
+            name=f"city_docs_{self.embedder.name}", metadata={"hnsw:space": "cosine"}
         )
 
     def build(self, force: bool = False) -> int:
-        chunks = load_chunks()
+        chunks = load_chunks(self.docs_dir)
         if self.collection.count() == len(chunks) and not force:
             return len(chunks)
         existing = self.collection.get()["ids"]
         if existing:
             self.collection.delete(ids=existing)
-        self.collection.add(
-            ids=[c.chunk_id for c in chunks],
-            documents=[c.text for c in chunks],
-            embeddings=self.embedder.embed_documents([c.text for c in chunks]),
-            metadatas=[
-                {
-                    "procedure_id": c.procedure_id,
-                    "title": c.title,
-                    "section": c.section,
-                    "source": c.source,
-                }
-                for c in chunks
-            ],
-        )
+        if chunks:
+            self.collection.add(
+                ids=[c.chunk_id for c in chunks],
+                documents=[c.text for c in chunks],
+                embeddings=self.embedder.embed_documents([c.text for c in chunks]),
+                metadatas=[
+                    {
+                        "doc_id": c.doc_id,
+                        "title": c.title,
+                        "url": c.url,
+                        "section": c.section,
+                    }
+                    for c in chunks
+                ],
+            )
         return len(chunks)
 
     def search(self, question: str, k: int = TOP_K) -> list[dict[str, Any]]:
         if self.collection.count() == 0:
-            self.build()
+            return []
         res = self.collection.query(
-            query_embeddings=[self.embedder.embed_query(question)], n_results=k
+            query_embeddings=[self.embedder.embed_query(question)],
+            n_results=min(k, self.collection.count()),
         )
+        floor = MIN_SCORE.get(self.embedder.name, 0.0)
         hits = []
         for doc, meta, dist in zip(
             res["documents"][0], res["metadatas"][0], res["distances"][0], strict=True
         ):
-            hits.append(
-                {
-                    "procedure_id": meta["procedure_id"],
-                    "title": meta["title"],
-                    "section": meta["section"],
-                    "source": meta["source"],
-                    "score": round(1 - float(dist), 3),
-                    "text": doc,
-                }
-            )
+            score = round(1 - float(dist), 3)
+            if score >= floor:
+                hits.append(
+                    {
+                        "doc_id": meta["doc_id"],
+                        "title": meta["title"],
+                        "url": meta["url"],
+                        "section": meta["section"],
+                        "score": score,
+                        "text": doc,
+                    }
+                )
         return hits
 
 
 @lru_cache(maxsize=1)
-def get_index() -> ProcedureIndex:
-    idx = ProcedureIndex()
+def get_index() -> CityDocsIndex:
+    idx = CityDocsIndex()
     idx.build()
     return idx
 
 
-def search_procedures(question: str) -> dict[str, Any]:
-    """Search the bank's internal fraud procedures (RAG).
+def search_city_docs(question: str) -> dict[str, Any]:
+    """Search the official City of San Francisco pages (DBI, Planning) about permit
+    requirements for residential work (kitchen, bathroom, ADU, reroofing, solar, windows).
 
-    Returns the 3 most relevant passages, each with its source
-    (procedure_id, title, section). The answer MUST cite the procedure_id used.
+    Returns up to 3 relevant passages, each with its source title and URL, which MUST
+    be cited in the answer. If no relevant passage exists, says so: do not answer
+    from memory in that case.
 
     Args:
-        question: What you need to know, e.g. "quand bloquer une carte ?".
+        question: the requirement you look for, ideally in English, e.g.
+            "documents required for an ADU building permit".
     """
     from pydantic import ValidationError
 
-    from app.schemas import SearchArgs
+    from app.schemas import QuestionArgs
 
     try:
-        args = SearchArgs(question=question)
+        args = QuestionArgs(question=question)
     except ValidationError as exc:
         return {"error": "INVALID_INPUT", "message": str(exc)}
-    return {"question": args.question, "passages": get_index().search(args.question)}
+    index = get_index()
+    if index.collection.count() == 0:
+        return {
+            "error": "CORPUS_EMPTY",
+            "message": "Aucun document officiel n'est indexé.",
+        }
+    hits = index.search(args.question)
+    if not hits:
+        return {
+            "question": args.question,
+            "passages": [],
+            "status": "NO_RELEVANT_DOCUMENT",
+            "message": "Aucun passage pertinent dans les documents officiels indexés. "
+            "Ne pas répondre de mémoire : le dire à l'utilisateur.",
+        }
+    return {"question": args.question, "passages": hits}
 
 
 if __name__ == "__main__":
-    n = ProcedureIndex().build(force=True)
+    n = CityDocsIndex().build(force=True)
     print(f"Indexed {n} chunks into {config.CHROMA_DIR}")

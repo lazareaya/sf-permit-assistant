@@ -1,0 +1,46 @@
+{
+  "eval_cases": [
+    {
+      "eval_case_id": "datasf_down_lyon",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Quels permis existent au 2460 Lyon St ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_TOOLS: search_permits] L'API DataSF est indisponible (DATASF_UNAVAILABLE ou DATASF_TIMEOUT) : l'agent le dit clairement, n'invente aucun permis et propose de réessayer plus tard. Termine par l'avertissement « pas un avis juridique »."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "eval_case_id": "datasf_down_kirkham",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Où en sont les permis du 1924 Kirkham Street ?"
+          }
+        ]
+      },
+      "reference": {
+        "response": {
+          "role": "model",
+          "parts": [
+            {
+              "text": "[EXPECT_TOOLS: search_permits] L'API DataSF est indisponible : l'agent le dit, n'invente aucun permis, propose de réessayer. Termine par l'avertissement « pas un avis juridique »."
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

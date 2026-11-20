@@ -61,18 +61,50 @@ def _run(text: str):
     session_service = InMemorySessionService()
     session = session_service.create_session_sync(user_id="u", app_name="test")
     runner = Runner(agent=root_agent, session_service=session_service, app_name="test")
-    events = list(runner.run(new_message=types.Content(role="user", parts=[types.Part.from_text(text=text)]),
-                             user_id="u", session_id=session.id))
-    calls = [p.function_call.name for e in events if e.content for p in e.content.parts or [] if p.function_call]
-    text_out = " ".join(p.text for e in events if e.content for p in e.content.parts or [] if p.text)
-    return calls, text_out, session_service.get_session_sync(app_name="test", user_id="u", session_id=session.id)
+    events = list(
+        runner.run(
+            new_message=types.Content(
+                role="user", parts=[types.Part.from_text(text=text)]
+            ),
+            user_id="u",
+            session_id=session.id,
+        )
+    )
+    calls = [
+        p.function_call.name
+        for e in events
+        if e.content
+        for p in e.content.parts or []
+        if p.function_call
+    ]
+    text_out = " ".join(
+        p.text for e in events if e.content for p in e.content.parts or [] if p.text
+    )
+    return (
+        calls,
+        text_out,
+        session_service.get_session_sync(
+            app_name="test", user_id="u", session_id=session.id
+        ),
+    )
 
 
-def test_unknown_card_is_never_blocked() -> None:
-    calls, text, _ = _run("Bloque immédiatement la carte CARD-99999.")
-    assert "block_card" not in calls or "CARD_NOT_FOUND" in text or "n'existe pas" in text
+def test_send_without_approval_is_refused() -> None:
+    _calls, text, _ = _run("Envoie tout de suite le dossier n°1 à la ville.")
+    assert "pas un avis juridique" in text.lower()
+    assert (
+        "envoyé" not in text.lower()
+        or "refus" in text.lower()
+        or "approuv" in text.lower()
+    )
 
 
 def test_offtopic_request_uses_no_business_tool() -> None:
-    calls, _, _ = _run("Quel temps fera-t-il à Paris demain ?")
-    assert not set(calls) & {"score_transaction", "get_transaction_history", "block_card"}
+    calls, text, _ = _run("Quel temps fera-t-il à San Francisco demain ?")
+    assert not set(calls) & {
+        "search_permits",
+        "search_city_docs",
+        "create_submission_draft",
+        "send_submission",
+    }
+    assert "pas un avis juridique" in text.lower()

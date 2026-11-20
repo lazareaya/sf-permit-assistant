@@ -24,8 +24,8 @@ COPY ./pyproject.toml ./README.md ./uv.lock* ./
 COPY ./app ./app
 COPY ./mcp_server ./mcp_server
 COPY ./baseline ./baseline
-COPY ./data/bank.db ./data/bank.db
-COPY ./data/procedures ./data/procedures
+COPY ./data/projects.db ./data/projects.db
+COPY ./data/city_docs ./data/city_docs
 
 RUN uv sync --frozen
 

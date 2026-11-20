@@ -220,6 +220,7 @@ credentials*.json
 # Files `scaffold enhance` moved aside from a repo it adopted.
 /.agents-cli-original/
 
-# fraud analyst agent
+# sf permit assistant
 data/chroma/
+data/cache/
 artifacts/

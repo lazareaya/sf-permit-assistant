@@ -4,28 +4,34 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
-CARD_ID_PATTERN = r"^CARD-\d{5}$"
+
+class AddressArgs(BaseModel):
+    address: str = Field(
+        ...,
+        min_length=5,
+        max_length=120,
+        pattern=r"^[0-9A-Za-z .,'#\-]+$",
+        description="ex: 781 20th Ave",
+    )
 
 
-class CardArgs(BaseModel):
-    card_id: str = Field(..., pattern=CARD_ID_PATTERN, description="ex: CARD-00042")
+class ProjectArgs(BaseModel):
+    project_id: int = Field(..., ge=1, le=100000)
 
 
-class HistoryArgs(CardArgs):
-    limit: int = Field(20, ge=1, le=100)
+class NoArgs(BaseModel):
+    pass
 
 
-class ScoreArgs(BaseModel):
-    tx_id: int = Field(..., ge=100001, le=999999)
+class DraftArgs(ProjectArgs):
+    content: str = Field(..., min_length=200, max_length=20000)
 
 
-class BlockCardArgs(CardArgs):
-    tx_id: int | None = Field(None, ge=100001, le=999999)
-    justification: str = Field(..., min_length=20, max_length=2000)
-    procedure_id: str = Field(..., pattern=r"^PROC-\d{2}$")
+class SubmissionArgs(BaseModel):
+    submission_id: int = Field(..., ge=1, le=100000)
 
 
-class SearchArgs(BaseModel):
+class QuestionArgs(BaseModel):
     question: str = Field(..., min_length=3, max_length=500)
 
 
@@ -34,10 +40,11 @@ class SkillArgs(BaseModel):
 
 
 TOOL_ARG_MODELS: dict[str, type[BaseModel]] = {
-    "get_card_status": CardArgs,
-    "get_transaction_history": HistoryArgs,
-    "score_transaction": ScoreArgs,
-    "block_card": BlockCardArgs,
-    "search_procedures": SearchArgs,
+    "search_permits": AddressArgs,
+    "list_projects": NoArgs,
+    "get_project": ProjectArgs,
+    "create_submission_draft": DraftArgs,
+    "send_submission": SubmissionArgs,
+    "search_city_docs": QuestionArgs,
     "activate_skill": SkillArgs,
 }

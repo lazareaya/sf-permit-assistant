@@ -1,9 +1,9 @@
-"""Streamlit UI for the fraud analyst agent.
+"""Streamlit UI for the San Francisco building-permit assistant.
 
 Three areas:
 1. chat with the agent (calls the agent's FastAPI server, ADK ``/run``);
 2. the visible trace: every tool called at each step, with args and result;
-3. human-in-the-loop: Approve / Reject buttons for pending actions.
+3. human-in-the-loop: pending drafts with Approve / Reject, approved drafts with Send.
 
 Run:  AGENT_API_URL=http://localhost:8000 uv run streamlit run frontend/streamlit_app.py
 """
@@ -19,10 +19,13 @@ import streamlit as st
 
 API = os.getenv("AGENT_API_URL", "http://localhost:8000").rstrip("/")
 APP_NAME = os.getenv("AGENT_APP_NAME", "app")
-USER_ID = "analyste-demo"
+USER_ID = "architecte-demo"
 TIMEOUT = 180
+DISCLAIMER = "Information générale, pas un avis juridique. Vérifier auprès du Department of Building Inspection."
 
-st.set_page_config(page_title="Assistant analyste fraude", page_icon="🛡️", layout="wide")
+st.set_page_config(
+    page_title="Assistant permis — San Francisco", page_icon="🏗️", layout="wide"
+)
 
 
 def _headers() -> dict[str, str]:
@@ -93,6 +96,18 @@ def unwrap(data):
     return data
 
 
+def submissions(status: str | None = None) -> list[dict]:
+    params = {"status": status} if status else {}
+    return httpx.get(
+        f"{API}/submissions", params=params, headers=_headers(), timeout=15
+    ).json()
+
+
+def post(path: str, reviewer: str | None = None) -> httpx.Response:
+    body = {"reviewer": reviewer} if reviewer else None
+    return httpx.post(f"{API}{path}", json=body, headers=_headers(), timeout=15)
+
+
 # ------------------------------------------------------------------ state
 if "session_id" not in st.session_state:
     try:
@@ -103,8 +118,12 @@ if "session_id" not in st.session_state:
     st.session_state.messages = []
     st.session_state.traces = []
 
-st.title("🛡️ Assistant analyste fraude")
-st.caption(f"Agent Google ADK + Gemini · outils MCP · RAG procédures · API : {API}")
+st.title("🏗️ Assistant permis de construire — San Francisco")
+st.caption(
+    "Cabinet d'architectes fictif · Agent Google ADK + Gemini · outils MCP (API DataSF, base projets) · "
+    f"RAG sur les pages officielles de la ville · API : {API}"
+)
+st.warning(f"⚠️ {DISCLAIMER}")
 
 col_chat, col_side = st.columns([3, 2], gap="large")
 
@@ -115,17 +134,23 @@ with col_chat:
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
     examples = [
-        "Alerte fraude sur la transaction 110613. Peux-tu instruire le dossier ?",
-        "Est-ce que la transaction 111410 est frauduleuse ?",
-        "Bloque la carte CARD-99999.",
+        "Quels permis existent au 781 20th Ave et où en sont-ils ?",
+        "Quels documents faut-il pour une rénovation de cuisine ?",
+        "Prépare le dossier du projet 9 du cabinet.",
     ]
     prompt = st.chat_input("Ex. : " + examples[0])
-    with st.expander("Exemples"):
+    with st.expander("Ce que l'assistant sait faire"):
+        st.markdown(
+            "1. **Permis existants** à une adresse et leur statut (API DataSF)\n"
+            "2. **Documents requis** pour : cuisine, salle de bain, ADU, toiture, solaire, fenêtres "
+            "(pages officielles, sources citées)\n"
+            "3. **Préparation du dossier** d'un projet du cabinet (envoi après validation humaine)"
+        )
         for ex in examples:
             st.code(ex, language=None)
     if prompt:
         st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.spinner("L'agent enquête..."):
+        with st.spinner("L'assistant travaille..."):
             try:
                 answer, steps = parse_events(
                     run_agent(st.session_state.session_id, prompt)
@@ -153,66 +178,59 @@ with col_side:
                 data = unwrap(step["data"])
                 if step["type"] == "call":
                     st.markdown(f"**{n}. ➡️ `{step['name']}`**")
-                    st.json(data, expanded=False)
                 else:
                     flag = "⛔" if isinstance(data, dict) and "error" in data else "✅"
                     st.markdown(f"{flag} résultat `{step['name']}`")
-                    st.json(data, expanded=False)
+                st.json(data, expanded=False)
 
     # ----------------------------------------------------- 3. human validation
-    st.subheader("Actions en attente de validation")
+    st.subheader("Dossiers en attente de validation")
+    reviewer = st.text_input("Validé par", value="architecte référent")
     try:
-        pending = httpx.get(
-            f"{API}/actions",
-            params={"status": "pending_approval"},
-            headers=_headers(),
-            timeout=15,
-        ).json()
+        pending, approved = submissions("pending_approval"), submissions("approved")
     except httpx.HTTPError as exc:
-        pending = []
-        st.warning(f"Impossible de lire les actions : {exc}")
+        pending, approved = [], []
+        st.warning(f"Impossible de lire les dossiers : {exc}")
     if not pending:
-        st.success("Aucune action en attente.")
-    reviewer = st.text_input("Validé par", value="analyste N1")
-    for a in pending:
+        st.success("Aucun dossier en attente.")
+    for s in pending:
         with st.container(border=True):
             st.markdown(
-                f"**#{a['action_id']} · {a['action_type']} · {a['card_id']}**"
-                f" (transaction {a.get('tx_id') or '—'})"
+                f"**Dossier #{s['id']} · projet {s['project_id']} · {s['address']}** ({s['work_type']})"
             )
-            st.write(a["justification"])
-            st.caption(
-                f"Procédure citée : {a['procedure_id']} · demandé par {a['requested_by']} "
-                f"le {a['created_at']}"
-            )
+            with st.expander("Lire le brouillon"):
+                st.markdown(s["draft"])
+            st.caption(f"Créé le {s['created_at']}")
             b1, b2 = st.columns(2)
-            if b1.button("✅ Approuver", key=f"ok{a['action_id']}", type="primary"):
-                httpx.post(
-                    f"{API}/actions/{a['action_id']}/approve",
-                    json={"reviewer": reviewer},
-                    headers=_headers(),
-                    timeout=15,
-                )
+            if b1.button("✅ Approuver", key=f"ok{s['id']}", type="primary"):
+                post(f"/submissions/{s['id']}/approve", reviewer)
                 st.rerun()
-            if b2.button("❌ Refuser", key=f"ko{a['action_id']}"):
-                httpx.post(
-                    f"{API}/actions/{a['action_id']}/reject",
-                    json={"reviewer": reviewer},
-                    headers=_headers(),
-                    timeout=15,
-                )
+            if b2.button("❌ Refuser", key=f"ko{s['id']}"):
+                post(f"/submissions/{s['id']}/reject", reviewer)
                 st.rerun()
-    with st.expander("Historique des décisions"):
-        try:
-            done = [
-                a
-                for a in httpx.get(
-                    f"{API}/actions", headers=_headers(), timeout=15
-                ).json()
-                if a["status"] != "pending_approval"
-            ]
-            st.dataframe(done, hide_index=True) if done else st.write(
-                "Aucune décision."
+
+    st.subheader("Dossiers approuvés")
+    if not approved:
+        st.write("Aucun dossier approuvé en attente d'envoi.")
+    for s in approved:
+        with st.container(border=True):
+            st.markdown(
+                f"**Dossier #{s['id']} · {s['address']}** — approuvé par {s['decided_by']}"
             )
+            if st.button("📤 Envoyer (simulé)", key=f"send{s['id']}"):
+                r = post(f"/submissions/{s['id']}/send")
+                (st.success if r.status_code == 200 else st.error)(r.text)
+                st.rerun()
+    with st.expander("Historique (refusés / envoyés)"):
+        try:
+            done = [s for s in submissions() if s["status"] in ("rejected", "sent")]
+            rows = [
+                {k: s[k] for k in ("id", "address", "status", "decided_by", "sent_at")}
+                for s in done
+            ]
+            if rows:
+                st.dataframe(rows, hide_index=True)
+            else:
+                st.write("Aucun.")
         except httpx.HTTPError:
             st.write("Indisponible.")

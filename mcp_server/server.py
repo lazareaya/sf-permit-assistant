@@ -1,18 +1,21 @@
-"""MCP server exposing the bank's fraud tools (FastMCP, stdio or HTTP).
+"""MCP server exposing the SF permit assistant's tools (FastMCP, stdio or HTTP).
 
 Built with the official Python MCP SDK. Its high-level server was called
 ``FastMCP`` up to SDK v1 and is named ``MCPServer`` since SDK v2 (same API).
 
 The ADK agent does not import these tools: it *discovers* them at runtime
-through the Model Context Protocol (``McpToolset`` in ``app/agent.py``).
-Any other MCP client (Claude Desktop, Gemini CLI, Cursor...) can use them too.
+through the Model Context Protocol (``McpToolset`` in ``app/agent.py``). Any
+other MCP client (Claude Desktop, Gemini CLI, Cursor...) can use them too.
 
 Tools:
-* ``score_transaction``       -> HTTP call to the Project 2 fraud-detection API
-* ``get_transaction_history`` -> read-only SQL query
-* ``get_card_status``         -> read-only SQL query
-* ``block_card``              -> RISKY: only creates a *pending* request in the
-                                 ``actions`` table; a human must approve it.
+* ``search_permits``          -> public DataSF Building Permits API (cached)
+* ``list_projects``           -> read-only SQL
+* ``get_project``             -> read-only SQL
+* ``create_submission_draft`` -> writes a draft with status pending_approval
+* ``send_submission``         -> RISKY: refused unless status is approved
+
+The RAG tool ``search_city_docs`` stays a direct ADK tool: the Chroma index and
+the embedding client live in the agent process, so no extra hop is needed.
 
 Run:
     uv run python -m mcp_server.server                 # stdio (used by the agent)
@@ -32,60 +35,63 @@ except ImportError:  # MCP SDK v1
 from app import tools
 
 mcp = FastMCP(
-    "bank-fraud-tools",
-    instructions="Outils d'investigation fraude carte : historique SQL, scoring ML, demande de blocage.",
+    "sf-permit-tools",
+    instructions="Permis de construire à San Francisco (DataSF) et projets du cabinet d'architectes.",
 )
 
 
 @mcp.tool()
-def score_transaction(tx_id: int) -> dict[str, Any]:
-    """Score une transaction avec le modèle de détection de fraude (API du projet 2, XGBoost).
+def search_permits(address: str) -> dict[str, Any]:
+    """Permis de construire enregistrés par la ville de San Francisco à une adresse
+    (API publique DataSF « Building Permits »), du plus récent au plus ancien.
 
     Args:
-        tx_id: identifiant de la transaction (nombre à 6 chiffres, ex: 100123).
+        address: numéro + rue à San Francisco, ex. « 781 20th Ave » ou « 2542 Bryant St ».
 
-    Returns: fraud_probability (0-1), is_fraud, threshold_used, model_version,
-    ou {"error": "FRAUD_API_UNAVAILABLE"} si l'API est en panne.
+    Returns: permit_count, permits (permit_number, permit_type_definition, status,
+    status_date, filed_date, issued_date, description, estimated_cost...), source,
+    data_as_of ; ou une erreur ADDRESS_NOT_FOUND, DATASF_TIMEOUT, DATASF_UNAVAILABLE.
     """
-    return tools.score_transaction(tx_id)
+    return tools.search_permits(address)
 
 
 @mcp.tool()
-def get_transaction_history(card_id: str, limit: int = 20) -> dict[str, Any]:
-    """Historique des dernières transactions d'une carte (requête SQL en lecture seule)
-    et statistiques : nombre, montant moyen, montant max, nombre de transactions à l'étranger.
-
-    Args:
-        card_id: identifiant de carte au format CARD-00000.
-        limit: nombre de transactions à renvoyer (1-100, défaut 20).
-    """
-    return tools.get_transaction_history(card_id, limit)
+def list_projects() -> dict[str, Any]:
+    """Liste des projets du cabinet (id, client, adresse, type de travaux, statut). Lecture seule."""
+    return tools.list_projects()
 
 
 @mcp.tool()
-def get_card_status(card_id: str) -> dict[str, Any]:
-    """Statut d'une carte (active / blocked), titulaire, plafond et dernières actions.
+def get_project(project_id: int) -> dict[str, Any]:
+    """Détail d'un projet du cabinet et de ses dossiers déjà créés. Lecture seule.
 
     Args:
-        card_id: identifiant de carte au format CARD-00000.
+        project_id: identifiant numérique du projet (ex. 3).
     """
-    return tools.get_card_status(card_id)
+    return tools.get_project(project_id)
 
 
 @mcp.tool()
-def block_card(
-    card_id: str, justification: str, procedure_id: str, tx_id: int | None = None
-) -> dict[str, Any]:
-    """ACTION RISQUÉE. Demande le blocage d'une carte. La carte N'EST PAS bloquée :
-    une demande « en attente de validation » est créée et un humain doit l'approuver.
+def create_submission_draft(project_id: int, content: str) -> dict[str, Any]:
+    """Enregistre le brouillon de dossier d'un projet, au statut « pending_approval ».
+    Le dossier N'EST PAS envoyé : un humain doit l'approuver dans l'interface.
 
     Args:
-        card_id: carte à bloquer (CARD-00000).
-        justification: score, signaux observés et raisonnement (20 caractères minimum).
-        procedure_id: procédure interne appliquée, obligatoire (ex: PROC-01).
-        tx_id: transaction à l'origine de la demande.
+        project_id: identifiant du projet.
+        content: brouillon complet en markdown, avec les sources officielles citées (URL).
     """
-    return tools.block_card(card_id, justification, procedure_id, tx_id)
+    return tools.create_submission_draft(project_id, content)
+
+
+@mcp.tool()
+def send_submission(submission_id: int) -> dict[str, Any]:
+    """ACTION RISQUÉE. Envoie un dossier (envoi simulé). Refusé si le dossier n'a pas été
+    approuvé par un humain (statut « approved »).
+
+    Args:
+        submission_id: identifiant du dossier.
+    """
+    return tools.send_submission(submission_id)
 
 
 if __name__ == "__main__":

@@ -1,191 +1,246 @@
-# Agent IA d'analyse de fraude — Google ADK, Gemini, MCP, RAG, Cloud Run
+# Assistant permis de construire pour San Francisco — Google ADK, Gemini, MCP, RAG, Cloud Run
 
-[![CI](https://github.com/lazareaya/fraud-analyst-agent/actions/workflows/ci.yaml/badge.svg)](https://github.com/lazareaya/fraud-analyst-agent/actions/workflows/ci.yaml)
+[![CI](https://github.com/lazareaya/sf-permit-assistant/actions/workflows/ci.yaml/badge.svg)](https://github.com/lazareaya/sf-permit-assistant/actions/workflows/ci.yaml)
 ![Python 3.11](https://img.shields.io/badge/python-3.11-3776AB?logo=python&logoColor=white)
 ![Google ADK](https://img.shields.io/badge/Google%20ADK-2.14-4285F4)
 ![MCP](https://img.shields.io/badge/MCP-server-black)
 
-Un **assistant pour analyste fraude**. On lui donne une transaction suspecte. Il :
+> ⚠️ **Information générale, pas un avis juridique. Vérifier auprès du Department of Building Inspection.**
 
-1. va chercher l'historique de la carte dans une **base SQL** ;
-2. appelle **mon API de détection de fraude** ([projet 2 : fraud-detection-mlops](https://github.com/lazareaya/fraud-detection-mlops), XGBoost servi par FastAPI) pour obtenir un score ;
-3. consulte les **procédures internes** de la banque (**RAG** : embeddings Gemini + Chroma) ;
-4. propose une action, par exemple bloquer la carte, **en citant la procédure appliquée** ;
-5. **attend la validation d'un humain** avant que l'action ne soit exécutée.
+Projet GenAI, sujet 1 : *Domain Specific Agent Harness*.
 
-Le modèle de ML du projet 2 devient ainsi un **outil** de l'agent, exposé via un **serveur MCP**.
+## Le problème
 
-> Le squelette du projet (agent ADK, API FastAPI, Dockerfile, tests, évaluation LLM-as-a-judge,
-> Terraform, CI/CD) a été **généré avec [google/agents-cli](https://github.com/google/agents-cli)**
-> v1.15.0 (`agents-cli create fraud-analyst-agent -d cloud_run --cicd-runner github_actions`).
-> Tout le code métier (outils, MCP, RAG, skills, garde-fous, validation humaine, UI, évaluation)
-> a été écrit ensuite.
+Dans un cabinet d'architectes, une bonne partie du temps passe en recherches administratives
+répétitives :
+- retrouver l'historique des permis d'une adresse ;
+- vérifier quelles pièces la ville exige pour un type de travaux ;
+- monter le dossier d'un projet.
+
+Ces informations sont publiques mais dispersées entre l'open data de la ville et les pages
+du Department of Building Inspection (DBI) et du Planning Department.
+
+L'assistant sert un **cabinet d'architectes fictif**. Il ne traite que **3 types de demandes** :
+
+| Demande | Exemple | Source |
+|---|---|---|
+| a) Permis existants à une adresse et leur statut | « Quels permis existent au 781 20th Ave ? » | API **DataSF** (temps réel, cache local) |
+| b) Documents requis pour un type de travaux | « Quels documents pour une rénovation de cuisine ? » | **RAG** sur les pages officielles de la ville, **sources citées** |
+| c) Préparation du dossier d'un projet du cabinet | « Prépare le dossier du projet 9 » | **Base SQL** des projets + brouillon **envoyé seulement après validation humaine** |
+
+Types de travaux couverts en b) :
+- rénovation de cuisine ;
+- rénovation de salle de bain ;
+- logement accessoire (ADU) ;
+- réfection de toiture ;
+- panneaux solaires ;
+- remplacement de fenêtres.
+
+Toute autre demande est refusée poliment, et l'assistant rappelle ce qu'il sait faire.
+
+> Le squelette du projet a été **généré avec [google/agents-cli](https://github.com/google/agents-cli)**
+> v1.15.0 (`agents-cli create … -d cloud_run --cicd-runner github_actions`). Il comprend l'agent
+> ADK, l'API FastAPI, le Dockerfile, les tests, l'évaluation par LLM juge, Terraform et la CI/CD.
+> Tout le code métier a été écrit ensuite : outils, MCP, RAG, skills, garde-fous, validation
+> humaine, interface et évaluation.
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-    U(["Analyste fraude"]) --> ST["Streamlit<br/>chat · trace des outils · Approuver/Refuser"]
+    U(["Architecte"]) --> ST["Streamlit<br/>chat · trace des outils<br/>dossiers : Approuver / Refuser / Envoyer"]
     ST -->|"HTTP /run"| API
 
-    subgraph CR1["Cloud Run : fraud-analyst-agent"]
-        API["FastAPI (ADK)<br/>/run · /actions"] --> AG["Agent Google ADK<br/>Gemini"]
+    subgraph CR["Cloud Run : sf-permit-assistant"]
+        API["FastAPI (ADK)<br/>/run · /submissions"] --> AG["Agent Google ADK<br/>Gemini"]
         AG --> CB["Constructeur de contexte<br/>+ registre de 3 skills"]
-        AG --> GR["Garde-fous<br/>budget d'outils · Pydantic · allowlist<br/>carte inconnue · procédure obligatoire"]
-        AG -->|"McpToolset (stdio)"| MCP["Serveur MCP (FastMCP)<br/>score_transaction · get_transaction_history<br/>get_card_status · block_card"]
-        AG --> RAG["search_procedures<br/>Chroma + Gemini embeddings"]
-        MCP --> DB[("SQLite<br/>cards · transactions · actions")]
-        API -->|"approve / reject"| DB
+        AG --> GR["Garde-fous<br/>budget d'outils · Pydantic · allowlist par skill<br/>sources obligatoires · envoi si approuvé<br/>avertissement juridique en sortie"]
+        AG -->|"McpToolset (stdio)"| MCP["Serveur MCP (FastMCP)<br/>search_permits · list_projects · get_project<br/>create_submission_draft · send_submission"]
+        AG --> RAG["search_city_docs<br/>Chroma + embeddings Gemini"]
+        MCP --> DB[("SQLite<br/>projects · submissions")]
+        MCP --> CACHE[("cache DataSF")]
+        API -->|"approve / reject / send"| DB
+        RAG --> DOCS[["Pages officielles sf.gov<br/>(DBI, Planning)"]]
     end
 
-    MCP -->|"HTTPS + clé API"| FA
-
-    subgraph CR2["Cloud Run : fraud-api (projet 2)"]
-        FA["FastAPI /predict<br/>XGBoost (MLflow)"]
-    end
-
-    SM[("Secret Manager")] -.->|FRAUD_API_KEY| MCP
-    SM -.->|API_KEY| FA
+    MCP -->|"HTTPS, SoQL"| DSF["API DataSF<br/>Building Permits"]
+    SM[("Secret Manager")] -.->|"SOCRATA_APP_TOKEN (optionnel)"| MCP
     AG -.->|"OpenTelemetry"| OBS["Cloud Trace · Cloud Logging"]
 ```
 
-**Déroulé d'une enquête** (visible dans la trace Streamlit) :
-`activate_skill(investigation)` → `score_transaction` → `get_card_status` → `get_transaction_history`
-→ `activate_skill(procedure_lookup)` → `search_procedures` → `activate_skill(decision_prep)`
-→ `block_card` (crée une demande **en attente de validation**) → l'humain clique **Approuver**.
+**Déroulé d'une préparation de dossier** (visible dans la trace Streamlit) :
+1. `activate_skill(submission_prep)` puis `get_project(9)` ;
+2. `search_city_docs("documents required for an ADU permit")` ;
+3. `create_submission_draft`, qui crée le dossier au statut **en attente de validation** ;
+4. l'architecte clique **Approuver**, puis **Envoyer**. L'envoi est simulé.
 
 ## Ce que fait chaque brique
 
 | Brique | Fichier | Détail |
 |---|---|---|
-| Agent | [app/agent.py](app/agent.py) | Google ADK `Agent`, Gemini, `temperature=0`, callbacks de garde-fous |
-| Base SQL | [scripts/build_db.py](scripts/build_db.py), [app/db.py](app/db.py) | 20 000 transactions du projet 2 (dont les 492 fraudes), 300 cartes, tables `cards`, `transactions`, `actions`. Lectures sur une connexion **read-only** |
-| Serveur MCP | [mcp_server/server.py](mcp_server/server.py) | SDK MCP officiel (FastMCP, renommé `MCPServer` en v2), stdio ou HTTP. L'agent **découvre** ses outils via `McpToolset` |
-| Scoring ML | [app/tools.py](app/tools.py) | `score_transaction` appelle l'API du projet 2 (`/predict`, contrat `Time, Amount, V1..V28`) avec clé API ; panne → erreur `FRAUD_API_UNAVAILABLE` |
-| RAG | [app/rag.py](app/rag.py), [data/procedures/](data/procedures/) | 12 procédures **fictives**, découpées par section (19 morceaux), embeddings `gemini-embedding-001`, **Chroma**, top 3 **avec leur source** |
-| Skills | [app/skills.py](app/skills.py) | Registre de 3 skills : `investigation`, `procedure_lookup`, `decision_prep`, chacune avec ses instructions et ses outils autorisés |
-| Constructeur de contexte | [app/skills.py](app/skills.py) `build_instruction` | `InstructionProvider` ADK : n'injecte que les règles, le catalogue, les instructions de la skill active et les faits du dossier utiles à cette skill |
-| Garde-fous | [app/guardrails.py](app/guardrails.py), [app/schemas.py](app/schemas.py) | Max 10 appels d'outils par demande · validation Pydantic · outil hors skill refusé · carte inconnue refusée · **pas de `block_card` sans procédure retrouvée par le RAG** |
-| Validation humaine | [app/approvals.py](app/approvals.py) | `block_card` n'écrit qu'une demande `pending_approval` ; seul `POST /actions/{id}/approve` (humain) bloque la carte |
-| Interface | [frontend/streamlit_app.py](frontend/streamlit_app.py) | Chat, trace des outils appelés, boutons Approuver / Refuser |
-| Baseline | [baseline/agent.py](baseline/agent.py) | Assistant « simple prompt » : même modèle, même consigne, **sans outils, skills, RAG ni garde-fous** |
-| Évaluation | [tests/eval/](tests/eval/), [scripts/run_eval.sh](scripts/run_eval.sh) | 25 scénarios, LLM juge, métriques d'actions inutiles et d'erreurs d'outils, `agents-cli eval compare` |
+| Agent | [app/agent.py](app/agent.py) | Google ADK `Agent`, Gemini, `temperature=0`, callbacks de garde-fous en entrée et en sortie |
+| API DataSF | [app/datasf.py](app/datasf.py) | Analyse de l'adresse (`230 4th Ave` → `04th`), requête SoQL (`$where`, `$order`, `$limit`), dédoublonnage par `permit_number`, **cache SQLite (24 h)**, cache périmé servi et signalé si l'API tombe. Erreurs : `ADDRESS_NOT_FOUND`, `DATASF_TIMEOUT`, `DATASF_UNAVAILABLE` |
+| Base SQL | [scripts/build_projects_db.py](scripts/build_projects_db.py), [app/db.py](app/db.py) | `projects` (20 projets fictifs à de **vraies adresses** de SF) et `submissions` (`pending_approval`, `approved`, `rejected`, `sent`). Lectures sur une connexion **read-only** |
+| Serveur MCP | [mcp_server/server.py](mcp_server/server.py) | SDK MCP officiel (FastMCP, renommé `MCPServer` en v2). 5 outils, que l'agent **découvre** via `McpToolset` |
+| RAG | [app/rag.py](app/rag.py), [data/city_docs/](data/city_docs/) | Une fiche officielle par fichier, avec son URL et son titre. Découpage par section, embeddings `gemini-embedding-001`, **Chroma**, top 3 au-dessus d'un seuil de pertinence, sinon `NO_RELEVANT_DOCUMENT` |
+| Skills | [app/skills.py](app/skills.py) | Registre de 3 skills : `permit_search`, `document_requirements`, `submission_prep`, chacune avec ses instructions et ses outils autorisés |
+| Constructeur de contexte | [app/skills.py](app/skills.py) `build_instruction` | `InstructionProvider` ADK. Il n'injecte que les règles, le catalogue, les instructions de la skill active et les faits du dossier utiles à cette skill |
+| Garde-fous | [app/guardrails.py](app/guardrails.py), [app/schemas.py](app/schemas.py) | Voir la section suivante |
+| Validation humaine | [app/approvals.py](app/approvals.py) | `POST /submissions/{id}/approve`, `/reject` et `/send`. L'envoi est refusé tant que le dossier n'est pas approuvé |
+| Interface | [frontend/streamlit_app.py](frontend/streamlit_app.py) | Avertissement visible, chat, trace des outils, dossiers en attente (Approuver / Refuser) et approuvés (Envoyer) |
+| Baseline | [baseline/agent.py](baseline/agent.py) | Assistant « simple prompt » : même modèle, même périmètre, même avertissement, **sans outils, skills, RAG ni base** |
+| Évaluation | [tests/eval/](tests/eval/), [scripts/run_eval.sh](scripts/run_eval.sh) | 25 scénarios, LLM juge, métriques calculées par code, `agents-cli eval compare` |
 | Notebook | [notebooks/demo.ipynb](notebooks/demo.ipynb) | Démonstration exécutée de chaque brique |
-| Déploiement | [deployment/deploy_gcp.sh](deployment/deploy_gcp.sh) | Cloud Run (agent + API du projet 2), Secret Manager, Cloud Trace |
-| CI/CD | [.github/workflows/](.github/workflows/) | `ci.yaml` : lint + tests unitaires à chaque push. Workflows agents-cli : tests sur PR, déploiement staging → prod sur merge (actifs après `agents-cli infra cicd`) |
+| Déploiement | [deployment/deploy_gcp.sh](deployment/deploy_gcp.sh) | Cloud Run, Secret Manager, Cloud Trace |
+| CI/CD | [.github/workflows/](.github/workflows/) | `ci.yaml` lance le lint et les tests unitaires à chaque push. Les workflows agents-cli lancent les tests sur PR puis déploient en staging et en prod au merge, une fois `agents-cli infra cicd` configuré |
 
-## Évaluation : agent vs assistant à simple prompt
+`search_city_docs` reste un outil ADK direct plutôt qu'un outil MCP. C'est le plus simple :
+l'index Chroma et le client d'embeddings vivent déjà dans le processus de l'agent.
 
-25 scénarios ([tests/eval/datasets/](tests/eval/datasets/)), chacun avec le comportement attendu :
+## Garde-fous et validation humaine
+
+**Avant chaque appel d'outil** (`before_tool_callback`) :
+1. 10 appels d'outils métier au maximum par demande ;
+2. un outil n'est accepté que si la skill active l'autorise ;
+3. tous les arguments sont validés par **Pydantic** (format d'adresse, identifiants, longueur du brouillon) ;
+4. un projet inconnu est refusé ;
+5. `create_submission_draft` est refusé si le brouillon ne cite aucune URL officielle retrouvée
+   par le RAG ;
+6. `send_submission` est refusé si le dossier n'est pas `approved`.
+
+Le serveur MCP revérifie aussi cette dernière règle (défense en profondeur).
+
+**Sur chaque réponse finale** (`after_model_callback`) :
+- l'avertissement juridique est ajouté s'il manque ;
+- si des documents officiels ont été consultés et qu'aucune URL n'est citée, les sources sont
+  ajoutées.
+
+**Validation humaine :**
+- l'agent ne fait que **préparer** les dossiers ;
+- l'approbation se fait dans l'interface ;
+- l'envoi n'est possible qu'à partir du statut `approved`. Il est **simulé** : aucun dépôt réel
+  auprès de la ville.
+
+## Évaluation : assistant vs assistant à simple prompt
+
+Les 25 scénarios sont dans [tests/eval/datasets/](tests/eval/datasets/) et sont générés par
+[scripts/make_eval_datasets.py](scripts/make_eval_datasets.py). Chaque scénario donne les outils
+attendus, les éléments de réponse et la source attendue.
 
 | Type | Nb | Comportement attendu |
 |---|---|---|
-| Fraudes évidentes (score ≥ 0,90) | 7 | Demande de blocage citant PROC-01, en attente de validation |
-| Transactions normales | 6 | Faux positif, aucune action (PROC-08) |
-| Score intermédiaire | 2 | Contacter le client, pas de blocage (PROC-04) |
-| Carte / transaction inconnue ou mal formée | 3 | Aucune hypothèse, aucune action (PROC-06) |
-| Carte déjà bloquée | 1 | Pas de doublon (PROC-09) |
-| Hors sujet / données personnelles | 3 | Refus poli (PROC-11, PROC-12) |
-| **API de fraude en panne** | 3 | Ne pas inventer de score, mode dégradé (PROC-07) |
+| Permis à une adresse réelle | 5 | `search_permits`, faits conformes à DataSF (instantané à la génération) |
+| Adresse inexistante | 1 | Aucun permis trouvé, rien d'inventé |
+| Documents requis (6 types de travaux) | 6 | `search_city_docs`, réponse sourcée, page officielle attendue citée |
+| Réponse absente des documents | 2 | L'assistant dit qu'il ne trouve pas, sans répondre de mémoire |
+| Préparation de dossier | 3 | `get_project` → `search_city_docs` → `create_submission_draft`, en attente de validation |
+| Liste des projets | 1 | `list_projects`, sans action |
+| Envoi d'un dossier non validé | 1 | `send_submission` refusé, aucune prétention d'envoi |
+| Projet inconnu | 1 | Refus, aucun brouillon |
+| Hors périmètre (météo, autre ville, conseil juridique) | 3 | Refus poli, sans outil |
+| **API DataSF en panne** | 2 | Indisponibilité signalée, aucun permis inventé |
 
-Métriques ([tests/eval/eval_config.yaml](tests/eval/eval_config.yaml)) : **LLM juge** 1-5 contre la
-vérité terrain (réussite = note ≥ 4), **actions inutiles** (blocage demandé ou recommandé à tort),
-**erreurs d'outils** (arguments invalides, refus des garde-fous), nombre d'appels d'outils.
+Métriques ([tests/eval/eval_config.yaml](tests/eval/eval_config.yaml)) :
+- **LLM juge** de 1 à 5 contre le comportement attendu. Un scénario est réussi si la note est
+  d'au moins 4.
+- **Outils attendus appelés.**
+- **Conformité** : avertissement présent et source attendue citée.
+- **Actions inutiles** : brouillon ou envoi non demandé, ou réponse qui prétend avoir envoyé un
+  dossier.
+- **Erreurs d'outils** : arguments invalides ou refus des garde-fous.
+- **Nombre d'appels d'outils.**
 
 <!-- EVAL_TABLE_START -->
 Résultats : lancer `bash scripts/run_eval.sh`, qui écrit le tableau ici et dans
 [docs/eval_results.md](docs/eval_results.md).
 <!-- EVAL_TABLE_END -->
 
+## Sources de données et licences
+
+| Donnée | Source | Licence / droits |
+|---|---|---|
+| Permis de construire | [DataSF — Building Permits](https://data.sf.gov/d/i98e-djp9) (API Socrata `https://data.sf.gov/resource/i98e-djp9.json`), sans clé | **ODC Public Domain Dedication and License (PDDL) 1.0** |
+| Exigences documentaires | 12 pages officielles de [sf.gov](https://www.sf.gov) (Department of Building Inspection, Planning Department), listées dans [scripts/fetch_city_docs.py](scripts/fetch_city_docs.py) | © City and County of San Francisco. Extraits reproduits à titre d'information, chacun avec le lien vers sa page source |
+| Projets du cabinet | [scripts/build_projects_db.py](scripts/build_projects_db.py) | **Fictifs**. Seules les adresses sont réelles (issues de DataSF) |
+
+**Récupérer les pages officielles.** sf.gov répond aux clients automatisés par une page de
+vérification anti-robots. Le script ne la contourne pas. Si `scripts/fetch_city_docs.py`
+échoue :
+1. ouvre chaque URL de la liste dans un navigateur ;
+2. fais *Enregistrer sous… → Page web, HTML uniquement* dans un même dossier ;
+3. lance `uv run python scripts/import_city_docs.py <dossier>`.
+
+Le script d'import retrouve chaque page par son URL canonique, convertit le contenu tel quel et
+conserve son URL et son titre. Il liste aussi les pages manquantes. Aucune page n'est remplacée
+par un autre contenu.
+
 ## Démarrage rapide (local)
 
-Prérequis : Python 3.11, [uv](https://docs.astral.sh/uv/), une clé Gemini gratuite
+Prérequis : Python 3.11, [uv](https://docs.astral.sh/uv/), et une clé Gemini gratuite
 ([Google AI Studio](https://aistudio.google.com)) **ou** un projet Google Cloud.
 
 ```bash
-# 1. Dépendances
 uv sync --extra eval
+cp .env.example .env    # GEMINI_API_KEY=... (et commenter les 3 lignes GOOGLE_*)
+                        # ou GOOGLE_CLOUD_PROJECT=... + gcloud auth application-default login
 
-# 2. Configuration : dans .env, soit GEMINI_API_KEY=... (et commenter les 3 lignes
-#    GOOGLE_*), soit GOOGLE_CLOUD_PROJECT=mon-projet + `gcloud auth application-default login`
-cp .env.example .env
+# Pages officielles -> data/city_docs/, puis index Chroma
+uv run python scripts/fetch_city_docs.py || uv run python scripts/import_city_docs.py ~/Downloads/sf_pages
+uv run python -m app.rag
 
-# 3. L'API de fraude du projet 2 (dans son dépôt), sur le port 8001
-cd "../../PROJET 2 - ML /fraud-detection-mlops"
-MLOPS_DATASET=creditcard MODEL_URI="$PWD/mlruns/1/$(python3 -c "import json;print(json.load(open('models/creditcard/run_info.json'))['run_id'])")/artifacts/model" \
-  .venv/bin/uvicorn api.main:app --port 8001 &
-cd -
-
-# 4. L'agent (API FastAPI + playground ADK sur http://localhost:8000/dev-ui)
-uv run uvicorn app.fast_api_app:app --port 8000
-#    ou : uvx google-agents-cli playground
-
-# 5. L'interface Streamlit
-uv run streamlit run frontend/streamlit_app.py
+uv run uvicorn app.fast_api_app:app --port 8000      # API + playground ADK (/dev-ui)
+uv run streamlit run frontend/streamlit_app.py       # interface
 ```
-
-Exemples : *« Alerte fraude sur la transaction 110613. Peux-tu instruire le dossier ? »*,
-*« Est-ce que la transaction 111410 est frauduleuse ? »*, *« Bloque la carte CARD-99999. »*
-
-Reconstruire les données : `uv run python scripts/build_db.py --csv <creditcard.csv du projet 2>`
-puis `uv run python -m app.rag` (index Chroma).
 
 ## Tests
 
 ```bash
-uv run pytest tests/unit          # 44 tests, sans clé : SQL, MCP (vrai serveur stdio), RAG,
-                                  # scoring (API simulée + panne), skills, garde-fous, validation humaine
+uv run pytest tests/unit          # 59 tests, sans clé : DataSF (simulé : timeout, panne, cache),
+                                  # SQL, MCP (vrai serveur stdio), RAG, skills, garde-fous,
+                                  # validation humaine, métriques d'évaluation
 uv run pytest tests/integration   # appelle Gemini (ignoré si aucune clé n'est configurée)
-bash scripts/run_eval.sh          # évaluation complète agent vs baseline (LLM juge)
+bash scripts/run_eval.sh          # évaluation complète assistant vs baseline (LLM juge)
 ```
 
 ## Mise en production sur Google Cloud
 
 ```bash
 gcloud auth login && gcloud auth application-default login
-bash deployment/deploy_gcp.sh MON_PROJET europe-west1
+SOCRATA_APP_TOKEN=... bash deployment/deploy_gcp.sh MON_PROJET us-west1   # jeton DataSF optionnel
 uvx google-agents-cli infra cicd     # pipeline CI/CD : tests sur PR, déploiement sur merge
 ```
 
-Le script active les API, crée la clé de l'API de fraude dans **Secret Manager**, construit et
-déploie l'**API du projet 2 sur Cloud Run** (clé lue dans Secret Manager), puis déploie l'agent
-avec `agents-cli deploy` sur **Cloud Run** (`FRAUD_API_KEY` injectée depuis Secret Manager, jamais
-dans le code). Les traces OpenTelemetry (latence, tokens, appels d'outils) arrivent dans
+Le script de déploiement :
+- active les API nécessaires ;
+- range le jeton DataSF dans **Secret Manager** ;
+- déploie l'agent sur **Cloud Run** avec `agents-cli deploy`.
+
+Gemini est appelé via Vertex AI avec l'identité du service : aucune clé n'est nécessaire en
+production. Les traces OpenTelemetry (latence, tokens, appels d'outils) arrivent dans
 **Cloud Trace** et **Cloud Logging**.
 
 <!-- Capture Cloud Trace : docs/images/cloud_trace.png -->
 
-## Démo vidéo
+## Limites
 
-<!-- Lien de la vidéo de démo (Streamlit : enquête → demande de blocage → approbation) -->
-_À ajouter._
-
-## Données et limites
-
-- Les transactions viennent du jeu de données public *Credit Card Fraud Detection* (ULB, via
-  OpenML/Kaggle) utilisé dans le projet 2. Les cartes, clients, dates, catégories de commerçant et
-  pays sont **synthétiques** (générés par `scripts/build_db.py`).
-- Les 12 procédures de [data/procedures/](data/procedures/) sont des **documents fictifs** rédigés
-  pour ce projet. Ils ne reflètent les règles d'aucune banque réelle.
-- La colonne `label_is_fraud` (vérité terrain) n'est jamais exposée à l'agent.
-- SQLite est embarqué dans l'image : sur Cloud Run, chaque instance a sa propre copie. En vrai
-  production, on utiliserait Cloud SQL ou PostgreSQL (Supabase).
+- L'envoi d'un dossier est simulé : il passe au statut `sent`, sans dépôt réel auprès de la ville.
+- SQLite est embarqué dans l'image : chaque instance Cloud Run a sa copie. En vraie production,
+  on passerait à Cloud SQL ou PostgreSQL.
+- Les pages de la ville évoluent. Le corpus est daté (`fetched_at`) et doit être rafraîchi.
 - Sans clé Gemini (CI, tests), le RAG bascule sur un embedder local déterministe
-  (`RAG_EMBEDDINGS=local`). En production, ce sont les embeddings Gemini.
+  (`RAG_EMBEDDINGS=local`) et un petit corpus de test synthétique.
 
 ## Ma contribution
 
 Projet de groupe (cours GenAI, sujet 1). Ma part :
 
-- **Serveur MCP** branché sur mon API de détection de fraude du projet 2 (`score_transaction`,
-  `get_transaction_history`, `get_card_status`, `block_card`) et intégration dans l'agent ADK
-  via `McpToolset`.
-- **Évaluation contre la baseline** : jeu de 25 scénarios, LLM juge adapté au domaine, métriques
-  d'actions inutiles et d'erreurs d'outils, script de bout en bout et comparaison
-  `agents-cli eval compare`.
-- **Mise en production** : Cloud Run (agent + API du projet 2), Secret Manager, Cloud Trace,
-  CI/CD GitHub Actions.
+- **Serveur MCP** : client DataSF (cache, gestion des erreurs), outils sur la base des projets,
+  intégration dans l'agent ADK via `McpToolset`.
+- **Évaluation contre la baseline** : 25 scénarios, LLM juge adapté au domaine, métriques
+  calculées par code, script de bout en bout, `agents-cli eval compare`.
+- **Mise en production** : Cloud Run, Secret Manager, Cloud Trace, CI/CD GitHub Actions.
 
 ## Licence
 
-Apache 2.0 (code généré par agents-cli © Google LLC, Apache 2.0).
+Code sous Apache 2.0. Le code généré par agents-cli est © Google LLC, sous Apache 2.0. Pour les
+données, voir les licences ci-dessus.

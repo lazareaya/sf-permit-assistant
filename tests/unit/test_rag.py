@@ -1,32 +1,28 @@
 from app import rag
 
 
-def test_chunks_cover_all_procedures():
-    ids = {c.procedure_id for c in rag.load_chunks()}
-    assert ids == {f"PROC-{i:02d}" for i in range(1, 13)}
+def test_pages_without_source_are_never_indexed():
+    chunks = rag.load_chunks()
+    assert {c.doc_id for c in chunks} == {"TEST-01", "TEST-02"}
+    assert all(c.url.startswith("https://") and c.title for c in chunks)
 
 
-def test_search_returns_top3_with_sources():
-    out = rag.search_procedures("API de scoring indisponible, que faire ?")
-    assert len(out["passages"]) == 3
-    for p in out["passages"]:
-        assert p["procedure_id"].startswith("PROC-")
-        assert p["source"].endswith(".md") and p["section"]
-    assert out["passages"][0]["procedure_id"] == "PROC-07"
+def test_search_returns_passages_with_source():
+    out = rag.search_city_docs("kitchen remodel plans walls floor plan")
+    assert out["passages"]
+    top = out["passages"][0]
+    assert top["url"] == "https://example.test/kitchen-remodel" and top["title"]
 
 
-def test_search_finds_blocking_procedure():
-    ids = [
-        p["procedure_id"]
-        for p in rag.search_procedures("quand bloquer une carte")["passages"]
-    ]
-    assert "PROC-01" in ids
+def test_irrelevant_question_returns_no_document():
+    out = rag.search_city_docs("zzqx wombat")
+    assert out["passages"] == [] and out["status"] == "NO_RELEVANT_DOCUMENT"
 
 
-def test_procedure_exists():
-    assert rag.procedure_exists("PROC-01")
-    assert not rag.procedure_exists("PROC-99")
+def test_front_matter_parser():
+    meta, body = rag.parse_front_matter("---\nurl: https://x\ntitle: T\n---\nhello")
+    assert meta == {"url": "https://x", "title": "T"} and body == "hello"
 
 
-def test_search_input_validated():
-    assert rag.search_procedures("")["error"] == "INVALID_INPUT"
+def test_input_validated():
+    assert rag.search_city_docs("")["error"] == "INVALID_INPUT"

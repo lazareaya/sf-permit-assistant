@@ -1,4 +1,4 @@
-name: "fraud-analyst-agent"
+name: "sf-permit-assistant"
 acli_version: "1.15.0"
 agent_directory: "app"
 region: 'us-east1'
@@ -10,7 +10,7 @@ create_params:
   # The ADK name of the root agent, as rendered into the agent source. Rename
   # the agent and you must change it in both places: telemetry reports this as
   # gen_ai.agent.name, and it is what agents-cli reports for the project.
-  root_agent_name: "fraud_analyst_agent"
+  root_agent_name: "sf_permit_assistant"
   # The {app_name} the server serves the agent under (/apps/{app_name}/...),
   # as rendered into the server source. Change it in both places. ADK Python
   # serves /apps/ under the agent directory name, so keep the two equal there.

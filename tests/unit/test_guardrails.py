@@ -1,59 +1,73 @@
 from app import config
-from app.guardrails import check_tool_call, unwrap_tool_response, update_case
+from app.config import DISCLAIMER
+from app.guardrails import (
+    check_tool_call,
+    enforce_output,
+    unwrap_tool_response,
+    update_case,
+)
 
 INV = "inv-1"
+DRAFT = {
+    "project_id": 1,
+    "content": "Pièces requises (source : https://example.test/kitchen-remodel). " * 5,
+}
 
 
 def test_tool_refused_without_active_skill(state):
-    out = check_tool_call("get_card_status", {"card_id": "CARD-00001"}, state, INV)
-    assert out["error"] == "GUARDRAIL_SKILL"
+    assert (
+        check_tool_call("search_permits", {"address": "781 20th Ave"}, state, INV)[
+            "error"
+        ]
+        == "GUARDRAIL_SKILL"
+    )
 
 
 def test_tool_refused_outside_active_skill(state):
-    state["active_skill"] = "procedure_lookup"
-    out = check_tool_call("score_transaction", {"tx_id": 100001}, state, INV)
-    assert out["error"] == "GUARDRAIL_SKILL" and "investigation" in out["message"]
+    state["active_skill"] = "permit_search"
+    out = check_tool_call("search_city_docs", {"question": "adu"}, state, INV)
+    assert (
+        out["error"] == "GUARDRAIL_SKILL" and "document_requirements" in out["message"]
+    )
 
 
 def test_allowed_tool_passes(state):
-    state["active_skill"] = "investigation"
+    state["active_skill"] = "permit_search"
     assert (
-        check_tool_call("get_card_status", {"card_id": "CARD-00001"}, state, INV)
+        check_tool_call("search_permits", {"address": "781 20th Ave"}, state, INV)
         is None
     )
 
 
 def test_pydantic_validation(state):
-    state["active_skill"] = "investigation"
+    state["active_skill"] = "submission_prep"
     assert (
-        check_tool_call("score_transaction", {"tx_id": "abc"}, state, INV)["error"]
+        check_tool_call("get_project", {"project_id": "abc"}, state, INV)["error"]
         == "INVALID_INPUT"
     )
 
 
-def test_unknown_card_refused(state):
-    state["active_skill"] = "investigation"
+def test_unknown_project_refused(state):
+    state["active_skill"] = "submission_prep"
     assert (
-        check_tool_call("get_card_status", {"card_id": "CARD-99999"}, state, INV)[
-            "error"
-        ]
-        == "CARD_NOT_FOUND"
+        check_tool_call("get_project", {"project_id": 999}, state, INV)["error"]
+        == "PROJECT_NOT_FOUND"
     )
 
 
 def test_tool_budget_per_request(state, monkeypatch):
-    monkeypatch.setattr(config, "MAX_TOOL_CALLS_PER_REQUEST", 3)
-    state["active_skill"] = "investigation"
-    args = {"card_id": "CARD-00001"}
-    assert all(
-        check_tool_call("get_card_status", args, state, INV) is None for _ in range(3)
-    )
+    monkeypatch.setattr(config, "MAX_TOOL_CALLS_PER_REQUEST", 2)
+    state["active_skill"] = "permit_search"
+    args = {"address": "781 20th Ave"}
+    assert check_tool_call("search_permits", args, state, INV) is None
+    assert check_tool_call("search_permits", args, state, INV) is None
     assert (
-        check_tool_call("get_card_status", args, state, INV)["error"]
+        check_tool_call("search_permits", args, state, INV)["error"]
         == "GUARDRAIL_TOOL_BUDGET"
     )
-    # a new user request (new invocation) gets a fresh budget
-    assert check_tool_call("get_card_status", args, state, "inv-2") is None
+    assert (
+        check_tool_call("search_permits", args, state, "inv-2") is None
+    )  # new request
 
 
 def test_activate_skill_not_counted(state, monkeypatch):
@@ -61,49 +75,86 @@ def test_activate_skill_not_counted(state, monkeypatch):
     for _ in range(5):
         assert (
             check_tool_call(
-                "activate_skill", {"skill_name": "investigation"}, state, INV
+                "activate_skill", {"skill_name": "permit_search"}, state, INV
             )
             is None
         )
 
 
-BLOCK = {
-    "card_id": "CARD-00185",
-    "procedure_id": "PROC-01",
-    "justification": "score 0.99 + 3 pays étrangers",
-}
-
-
-def test_block_card_refused_without_cited_procedure(state):
-    state["active_skill"] = "decision_prep"
+def test_draft_refused_without_retrieved_source(state):
+    state["active_skill"] = "submission_prep"
     assert (
-        check_tool_call("block_card", BLOCK, state, INV)["error"]
-        == "GUARDRAIL_NO_PROCEDURE"
+        check_tool_call("create_submission_draft", DRAFT, state, INV)["error"]
+        == "GUARDRAIL_NO_SOURCE"
     )
 
 
-def test_block_card_allowed_after_procedure_retrieved(state):
+def test_draft_allowed_when_it_cites_a_retrieved_source(state):
     update_case(
-        "search_procedures", {}, {"passages": [{"procedure_id": "PROC-01"}]}, state
-    )
-    state["active_skill"] = "decision_prep"
-    assert check_tool_call("block_card", BLOCK, state, INV) is None
-
-
-def test_update_case_tracks_score_and_errors(state):
-    update_case(
-        "score_transaction",
+        "search_city_docs",
         {},
-        {"tx_id": 1, "card_id": "CARD-00001", "fraud_probability": 0.9},
+        {"passages": [{"url": "https://example.test/kitchen-remodel", "title": "T"}]},
+        state,
+        INV,
+    )
+    state["active_skill"] = "submission_prep"
+    assert check_tool_call("create_submission_draft", DRAFT, state, INV) is None
+
+
+def test_send_refused_unless_approved(state):
+    state["active_skill"] = "submission_prep"
+    assert (
+        check_tool_call("send_submission", {"submission_id": 1}, state, INV)["error"]
+        == "GUARDRAIL_NOT_APPROVED"
+    )
+    assert (
+        check_tool_call("send_submission", {"submission_id": 3}, state, INV)["error"]
+        == "GUARDRAIL_NOT_APPROVED"
+    )
+    assert (
+        check_tool_call("send_submission", {"submission_id": 2}, state, INV) is None
+    )  # seed #2 approved
+    assert (
+        check_tool_call("send_submission", {"submission_id": 999}, state, INV)["error"]
+        == "SUBMISSION_NOT_FOUND"
+    )
+
+
+def test_output_guardrail_adds_disclaimer_and_sources():
+    out = enforce_output(
+        "Il faut des plans.", [("https://example.test/kitchen-remodel", "Kitchen")]
+    )
+    assert (
+        "[Kitchen](https://example.test/kitchen-remodel)" in out and DISCLAIMER in out
+    )
+    ok = f"Voir https://x.test.\n\n⚠️ {DISCLAIMER}"
+    assert (
+        enforce_output(ok, [("https://y", "Y")]) == ok
+    )  # already compliant: unchanged
+    assert DISCLAIMER in enforce_output("Je ne traite pas cette demande.", None)
+
+
+def test_update_case_tracks_facts(state):
+    update_case(
+        "search_permits", {}, {"address": "781 20th Av", "permit_count": 8}, state
+    )
+    update_case(
+        "get_project",
+        {},
+        {"id": 1, "address": "781 20th Ave", "work_type": "kitchen_remodel"},
         state,
     )
-    update_case("score_transaction", {}, {"error": "FRAUD_API_UNAVAILABLE"}, state)
-    assert state["case"]["fraud_probability"] == 0.9
-    assert state["case"]["errors"] == ["score_transaction: FRAUD_API_UNAVAILABLE"]
+    update_case("search_permits", {}, {"error": "DATASF_TIMEOUT"}, state)
+    assert (
+        state["case"]["permit_count"] == 8
+        and state["case"]["work_type"] == "kitchen_remodel"
+    )
+    assert state["case"]["errors"] == ["search_permits: DATASF_TIMEOUT"]
 
 
 def test_unwrap_mcp_response():
-    mcp = {"content": [{"type": "text", "text": '{"a": 1}'}], "isError": False}
-    assert unwrap_tool_response(mcp) == {"a": 1}
+    assert unwrap_tool_response(
+        {"content": [{"type": "text", "text": '{"a": 1}'}]}
+    ) == {"a": 1}
     assert unwrap_tool_response({"structuredContent": {"result": {"a": 2}}}) == {"a": 2}
     assert unwrap_tool_response({"a": 3}) == {"a": 3}

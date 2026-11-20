@@ -37,16 +37,22 @@ def summarize(cases: list[dict[str, float]]) -> dict[str, float]:
     def vals(m):
         return [c[m] for c in cases if c.get(m) is not None]
 
+    def avg(m):
+        v = vals(m)
+        return mean(v) if v else float("nan")
+
     q = vals("custom_response_quality")
     return {
         "n": len(cases),
         "pass_rate": 100 * sum(s >= PASS_SCORE for s in q) / len(q)
         if q
         else float("nan"),
-        "quality": mean(q) if q else float("nan"),
+        "quality": avg("custom_response_quality"),
+        "expected_tools": 100 * avg("expected_tools"),
+        "compliance": 100 * avg("source_and_disclaimer"),
         "unnecessary": sum(vals("unnecessary_action")),
         "tool_errors": sum(vals("tool_errors")),
-        "tool_calls": mean(vals("tool_call_count")) if vals("tool_call_count") else 0,
+        "tool_calls": avg("tool_call_count") if vals("tool_call_count") else 0,
     }
 
 
@@ -65,12 +71,18 @@ def main() -> None:
         ("Scénarios évalués", "n", "{:.0f}"),
         ("Taux de réussite (juge ≥ 4/5)", "pass_rate", "{:.0f} %"),
         ("Note moyenne du juge (1-5)", "quality", "{:.2f}"),
-        ("Actions inutiles (blocage à tort)", "unnecessary", "{:.0f}"),
+        ("Outils attendus appelés", "expected_tools", "{:.0f} %"),
+        ("Conformité (avertissement + source citée)", "compliance", "{:.0f} %"),
+        (
+            "Actions inutiles (brouillon/envoi non demandé, envoi prétendu)",
+            "unnecessary",
+            "{:.0f}",
+        ),
         ("Erreurs d'outils", "tool_errors", "{:.0f}"),
         ("Appels d'outils moyens / scénario", "tool_calls", "{:.1f}"),
     ]
     lines = [
-        "| Métrique | Baseline simple prompt | Agent (outils + skills + RAG) |",
+        "| Métrique | Baseline simple prompt | Assistant (outils + skills + RAG) |",
         "|---|---|---|",
     ]
     for label, key, fmt in rows:
