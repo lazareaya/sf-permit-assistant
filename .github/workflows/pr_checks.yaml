@@ -62,8 +62,8 @@ jobs:
 
       - name: Run integration tests
         # Integration tests run the agent in-process; pytest doesn't load .env.
+        # Gemini via the AI Studio API key (free tier), stored as a GitHub secret.
         env:
-          GOOGLE_GENAI_USE_ENTERPRISE: 'true'
-          GOOGLE_CLOUD_PROJECT: ${{ vars.CICD_PROJECT_ID }}
-          GOOGLE_CLOUD_LOCATION: global
+          GOOGLE_GENAI_USE_ENTERPRISE: 'false'
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: uv run pytest tests/integration

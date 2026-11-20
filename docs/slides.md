@@ -106,7 +106,7 @@ Le prompt est **reconstruit avant chaque appel** : règles + catalogue + instruc
 ## Mise en production
 
 - `agents-cli deploy` → **Cloud Run**
-- Jeton DataSF dans **Secret Manager** · Gemini via Vertex AI, sans clé
+- Clé Gemini (AI Studio, gratuite) dans **Secret Manager** · Cloud Run à 0 instance au repos
 - **Cloud Trace / Cloud Logging** : latence, tokens, appels d'outils
 - **CI/CD** : lint et tests unitaires à chaque push, staging puis prod au merge
 

@@ -46,7 +46,17 @@ resource "google_cloud_run_v2_service" "app" {
 
       env {
         name  = "GOOGLE_GENAI_USE_ENTERPRISE"
-        value = "True"
+        value = "False"  # Gemini via the AI Studio API key (free tier), not Vertex AI
+      }
+
+      env {
+        name = "GEMINI_API_KEY"
+        value_source {
+          secret_key_ref {
+            secret  = var.gemini_api_key_secret
+            version = "latest"
+          }
+        }
       }
 
       resources {

@@ -38,8 +38,6 @@ MAX_TOOL_CALLS_PER_REQUEST = int(os.getenv("MAX_TOOL_CALLS_PER_REQUEST", "10"))
 
 
 def gemini_configured() -> bool:
-    """True when a Gemini backend (AI Studio key or Google Cloud project) is set."""
-    if os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY"):
-        return True
-    project = os.getenv("GOOGLE_CLOUD_PROJECT", "")
-    return bool(project) and project != "your-gcp-project-id"
+    """True when a Gemini API key from Google AI Studio is set (not the placeholder)."""
+    key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY") or ""
+    return bool(key) and key != "your-api-key-here"

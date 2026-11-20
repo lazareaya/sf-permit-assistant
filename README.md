@@ -64,7 +64,8 @@ flowchart LR
     end
 
     MCP -->|"HTTPS, SoQL"| DSF["API DataSF<br/>Building Permits"]
-    SM[("Secret Manager")] -.->|"SOCRATA_APP_TOKEN (optionnel)"| MCP
+    SM[("Secret Manager")] -.->|"GEMINI_API_KEY"| AG
+    SM -.->|"SOCRATA_APP_TOKEN (optionnel)"| MCP
     AG -.->|"OpenTelemetry"| OBS["Cloud Trace · Cloud Logging"]
 ```
 
@@ -182,12 +183,11 @@ canonique.
 ## Démarrage rapide (local)
 
 Prérequis : Python 3.11, [uv](https://docs.astral.sh/uv/), et une clé Gemini gratuite
-([Google AI Studio](https://aistudio.google.com)) **ou** un projet Google Cloud.
+([Google AI Studio](https://aistudio.google.com/apikey)).
 
 ```bash
 uv sync --extra eval
-cp .env.example .env    # GEMINI_API_KEY=... (et commenter les 3 lignes GOOGLE_*)
-                        # ou GOOGLE_CLOUD_PROJECT=... + gcloud auth application-default login
+cp .env.example .env    # puis GEMINI_API_KEY=ta_clé
 
 # Index Chroma des 10 fiches officielles (data/city_docs/)
 uv run python -m app.rag
@@ -210,17 +210,19 @@ bash scripts/run_eval.sh          # évaluation complète assistant vs baseline 
 
 ```bash
 gcloud auth login && gcloud auth application-default login
-SOCRATA_APP_TOKEN=... bash deployment/deploy_gcp.sh MON_PROJET us-west1   # jeton DataSF optionnel
+bash deployment/deploy_gcp.sh MON_PROJET us-west1   # lit GEMINI_API_KEY dans .env
 uvx google-agents-cli infra cicd     # pipeline CI/CD : tests sur PR, déploiement sur merge
 ```
 
 Le script de déploiement :
 - active les API nécessaires ;
-- range le jeton DataSF dans **Secret Manager** ;
+- range la clé Gemini (lue dans `.env`) et, si tu en as un, le jeton DataSF dans **Secret Manager** ;
 - déploie l'agent sur **Cloud Run** avec `agents-cli deploy`.
 
-Gemini est appelé via Vertex AI avec l'identité du service : aucune clé n'est nécessaire en
-production. Les traces OpenTelemetry (latence, tokens, appels d'outils) arrivent dans
+Tout reste dans les offres gratuites. Gemini est appelé avec une **clé Google AI Studio**
+(offre gratuite) et non via Vertex AI. En production, cette clé est lue depuis **Secret Manager** :
+elle n'est jamais dans l'image ni en variable d'environnement en clair. Cloud Run tourne avec
+0 instance au repos, donc rien n'est consommé sans requête. Les traces OpenTelemetry (latence, tokens, appels d'outils) arrivent dans
 **Cloud Trace** et **Cloud Logging**.
 
 <!-- Capture Cloud Trace : docs/images/cloud_trace.png -->

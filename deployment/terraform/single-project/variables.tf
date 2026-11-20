@@ -61,3 +61,9 @@ variable "agent_identity_roles" {
     "roles/cloudtrace.agent",
   ]
 }
+
+variable "gemini_api_key_secret" {
+  type        = string
+  description = "Secret Manager secret holding the Gemini API key from Google AI Studio (create it before applying)."
+  default     = "gemini-api-key"
+}

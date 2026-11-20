@@ -147,8 +147,8 @@ servis par le même serveur. `agents-cli eval generate` produit les traces, puis
 ## 7. Déploiement
 
 - **Cloud Run**, via `agents-cli deploy`.
-- **Secret Manager** pour le jeton DataSF, qui est optionnel.
-- Gemini est appelé via Vertex AI avec l'identité du service, sans clé.
+- **Secret Manager** pour la clé Gemini et le jeton DataSF optionnel.
+- Gemini est appelé avec une clé Google AI Studio (offre gratuite), lue depuis Secret Manager. Tout reste dans les offres gratuites.
 - **CI/CD** :
   - `ci.yaml` lance le lint et les tests unitaires sans identifiants cloud ;
   - les workflows générés par `agents-cli infra cicd` lancent les tests sur PR, puis déploient en

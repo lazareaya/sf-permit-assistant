@@ -30,7 +30,8 @@ locals {
   ]
 
   deploy_project_services = [
-    "aiplatform.googleapis.com",
+    "secretmanager.googleapis.com", # Gemini API key (AI Studio)
+    "aiplatform.googleapis.com",    # enabled by the template, unused (Gemini via API key)
     "cloudbuild.googleapis.com",
     "run.googleapis.com",
     "iam.googleapis.com",

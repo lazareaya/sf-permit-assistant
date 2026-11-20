@@ -117,3 +117,9 @@ variable "agent_identity_roles" {
     "roles/cloudtrace.agent",
   ]
 }
+
+variable "gemini_api_key_secret" {
+  type        = string
+  description = "Secret Manager secret (in each deploy project) holding the Gemini API key from Google AI Studio. Create it before applying: printf %s \"$GEMINI_API_KEY\" | gcloud secrets create gemini-api-key --data-file=- --project=<project>"
+  default     = "gemini-api-key"
+}

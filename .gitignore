@@ -224,3 +224,4 @@ credentials*.json
 data/chroma/
 data/cache/
 artifacts/
+.env.local-backup
