@@ -9,7 +9,7 @@
 # 2. stores the Gemini API key (read from .env) in Secret Manager — never in the
 #    image, never as a plain environment variable
 # 3. (optional) stores the Socrata/DataSF app token in Secret Manager
-# 4. deploys the agent with agents-cli on Cloud Run (min 0 instances: no idle cost)
+# 4. deploys the agent with agents-cli on Cloud Run (min 0 / max 2 instances, 2 GiB)
 # Traces and logs then appear in Cloud Trace / Cloud Logging (free quotas).
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -79,10 +79,10 @@ uvx google-agents-cli deploy --project "$PROJECT" --region "$REGION" \
   --env-vars "GOOGLE_GENAI_USE_ENTERPRISE=false,RAG_EMBEDDINGS=gemini,OTEL_TO_CLOUD=true,AGENT_MODEL=${AGENT_MODEL:-gemini-3.5-flash-lite}" \
   --secrets "$SECRETS"
 
-# agents-cli deploys with --no-cpu-throttling (CPU billed for the whole instance
-# lifetime). Switch to request-based billing: CPU is only billed while a request
-# is being handled, which keeps a demo inside the free tier.
-gcloud run services update sf-permit-assistant --region "$REGION" --cpu-throttling --quiet
+# CPU stays allocated for the instance lifetime (agents-cli default): with
+# request-based CPU, OpenTelemetry's background exporters never get CPU after
+# the response and no trace reaches Cloud Trace. With min 0 instances an
+# instance only lives a few minutes after each use: a demo stays in the free tier.
 
 echo
 echo "Done. Next:"

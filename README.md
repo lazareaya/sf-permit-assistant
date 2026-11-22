@@ -237,14 +237,18 @@ Le script de déploiement :
 - Gemini est appelé avec une **clé Google AI Studio** (offre gratuite), pas via Vertex AI. En
   production, la clé est lue depuis **Secret Manager** : elle n'est jamais dans l'image ni en clair
   dans les variables d'environnement.
-- Cloud Run tourne avec 0 instance au repos (2 au maximum) et 2 Gio de mémoire. Le processeur n'est
-  facturé que pendant le traitement d'une requête.
+- Cloud Run tourne avec 0 instance au repos (2 au maximum) et 2 Gio de mémoire. Une instance ne
+  vit que quelques minutes après chaque utilisation : une démo reste dans le quota gratuit de
+  Cloud Run. Le processeur reste alloué pendant la vie de l'instance, sinon OpenTelemetry ne peut
+  pas envoyer les traces après la réponse.
 - Cloud Build, Artifact Registry, Secret Manager, Cloud Trace et Cloud Logging restent dans leurs
   quotas gratuits ou dans les crédits d'essai.
 - Une alerte de budget à 5 € prévient en cas de dérive.
 
-Les traces OpenTelemetry (latence, tokens, appels d'outils) arrivent dans **Cloud Trace** et
-**Cloud Logging**.
+Les traces OpenTelemetry arrivent dans **Cloud Trace** et **Cloud Logging**. Pour une demande
+« Quels permis existent au 230 4th Ave ? », on y voit la chaîne `invoke_agent` →
+`generate_content gemini-3.5-flash-lite` (latence et tokens d'entrée et de sortie de chaque appel)
+→ `execute_tool search_permits` → `MCP send tools/call search_permits` (728 ms).
 
 **Choix du modèle.** `gemini-3.8-flash` était saturé sur l'offre gratuite le jour des tests (erreurs
 503). L'agent et la baseline utilisent donc `gemini-3.5-flash-lite` (variable `AGENT_MODEL`), et le

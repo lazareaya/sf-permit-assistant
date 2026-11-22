@@ -77,7 +77,7 @@ resource "google_cloud_run_v2_service" "app" {
           cpu    = "1"
           memory = "4Gi"
         }
-        cpu_idle = true  # CPU billed only while handling requests (free tier)
+        cpu_idle = false  # CPU kept for the instance lifetime so OpenTelemetry can export traces
       }
 
       env {
