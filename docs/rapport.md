@@ -130,19 +130,40 @@ servis par le même serveur. `agents-cli eval generate` produit les traces, puis
 
 **Résultats** : voir [eval_results.md](eval_results.md), généré par `bash scripts/run_eval.sh`.
 
-| Métrique | Baseline | Assistant |
-|---|---|---|
-| Taux de réussite | _xx %_ | _xx %_ |
-| Conformité (avertissement + source) | _xx %_ | _xx %_ |
-| Actions inutiles | _x_ | _x_ |
-| Erreurs d'outils | — | _x_ |
+Run du 2026-11-22. Assistant et baseline sur `gemini-3.5-flash-lite`, juge `gemini-3.1-flash-lite`.
 
-**Analyse attendue :**
-- La baseline n'a ni données ni sources. Elle ne peut pas connaître les permis d'une adresse et
-  risque d'inventer des exigences ou des URL. Elle ne sait pas non plus qu'un projet n'existe pas.
-- L'assistant répond à partir de la trace et cite ses sources.
-- Ses risques sont un nombre d'appels d'outils plus élevé (latence, coût) et des erreurs de
-  séquencement des skills. Les garde-fous les captent et la métrique d'erreurs d'outils les mesure.
+| Métrique | Baseline simple prompt | Assistant |
+|---|---|---|
+| Taux de réussite (juge ≥ 4/5) | 20 % | **96 %** |
+| Note moyenne du juge (1-5) | 2,88 | **4,80** |
+| Outils attendus appelés | 8 % | **96 %** |
+| Conformité (avertissement + source citée) | 78 % | **100 %** |
+| Actions inutiles | 0 | **0** |
+| Erreurs d'outils | — | **0** |
+| Appels d'outils moyens par scénario | 0 | 2,4 |
+
+**Analyse :**
+- **La baseline** échoue sur 20 scénarios sur 25. Elle n'a ni données ni sources : elle ne peut
+  pas connaître les permis d'une adresse, ne voit pas qu'un projet ou une adresse n'existe pas, et
+  cite rarement une page officielle. Elle ne réussit que les refus hors périmètre et quelques
+  questions génériques.
+- **L'assistant** réussit 24 scénarios sur 25. Il répond à partir de la trace d'outils, cite
+  toujours ses sources et l'avertissement, et ne fait aucune action non demandée. Il signale
+  correctement l'adresse inexistante, la page manquante, la réponse absente des fiches et la panne
+  de DataSF.
+- **Seul échec** : la liste des formulaires pour un ADU (note 3/5). La réponse est juste mais
+  incomplète, il manque une partie des formulaires de la fiche DOC-05. C'est la piste
+  d'amélioration principale : une deuxième recherche dans le RAG ciblée sur les formulaires.
+- **Coût** : 2,4 appels d'outils par scénario en moyenne, contre 0 pour la baseline. C'est le prix
+  de la fiabilité, en latence et en tokens.
+
+**Corrections faites pendant l'évaluation :**
+- Un premier passage a mis en évidence deux défauts. Le juge des actions inutiles comptait à tort
+  l'historique des permis d'une adresse comme un « dossier envoyé » : sa consigne a été précisée.
+  L'agent refusait la question « qui contacter » comme hors périmètre : la règle de périmètre a été
+  corrigée.
+- L'assistant a ensuite été réévalué sur les 25 scénarios. Les traces de la baseline, inchangée,
+  ont été réutilisées.
 
 ## 7. Déploiement
 
@@ -151,8 +172,13 @@ servis par le même serveur. `agents-cli eval generate` produit les traces, puis
 - Gemini est appelé avec une clé Google AI Studio (offre gratuite), lue depuis Secret Manager. Tout reste dans les offres gratuites.
 - **CI/CD** :
   - `ci.yaml` lance le lint et les tests unitaires sans identifiants cloud ;
-  - les workflows générés par `agents-cli infra cicd` lancent les tests sur PR, puis déploient en
-    staging et en production au merge.
+  - `cd.yaml` relance les tests puis redéploie Cloud Run à chaque merge sur `main`. GitHub
+    s'authentifie par Workload Identity Federation (aucune clé stockée sur GitHub). Ce pipeline sur
+    un seul projet remplace la CI/CD staging + production d'`agents-cli infra cicd`, qui demandait
+    plusieurs projets.
+- **Observabilité vérifiée** : Cloud Trace montre `invoke_agent` → `generate_content` (latence,
+  tokens d'entrée et de sortie) → `execute_tool` → `MCP tools/call`. Le processeur reste alloué
+  pendant la vie de l'instance : en facturation à la requête, les traces n'étaient jamais envoyées.
 
 ## 8. Limites et pistes
 

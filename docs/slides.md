@@ -95,9 +95,10 @@ Le prompt est **reconstruit avant chaque appel** : règles + catalogue + instruc
 
 | Métrique | Baseline simple prompt | Assistant |
 |---|---|---|
-| Taux de réussite (juge ≥ 4/5) | xx % | **xx %** |
-| Conformité (avertissement + source) | xx % | **xx %** |
-| Actions inutiles | x | **x** |
+| Taux de réussite (juge ≥ 4/5) | 20 % | **96 %** |
+| Note moyenne du juge (1-5) | 2,88 | **4,80** |
+| Conformité (avertissement + source) | 78 % | **100 %** |
+| Actions inutiles · erreurs d'outils | 0 · — | **0 · 0** |
 
 `agents-cli eval run` / `eval compare`
 
@@ -108,7 +109,7 @@ Le prompt est **reconstruit avant chaque appel** : règles + catalogue + instruc
 - `agents-cli deploy` → **Cloud Run**
 - Clé Gemini (AI Studio, gratuite) dans **Secret Manager** · Cloud Run à 0 instance au repos
 - **Cloud Trace / Cloud Logging** : latence, tokens, appels d'outils
-- **CI/CD** : lint et tests unitaires à chaque push, staging puis prod au merge
+- **CI/CD** : lint et tests à chaque PR, redéploiement automatique au merge (Workload Identity Federation)
 
 ---
 

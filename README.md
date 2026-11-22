@@ -155,9 +155,26 @@ Métriques ([tests/eval/eval_config.yaml](tests/eval/eval_config.yaml)) :
 - **Nombre d'appels d'outils.**
 
 <!-- EVAL_TABLE_START -->
-Résultats : lancer `bash scripts/run_eval.sh`, qui écrit le tableau ici et dans
-[docs/eval_results.md](docs/eval_results.md).
+| Métrique | Baseline simple prompt | Assistant (outils + skills + RAG) |
+|---|---|---|
+| Scénarios évalués | 25 | **25** |
+| Taux de réussite (juge ≥ 4/5) | 20 % | **96 %** |
+| Note moyenne du juge (1-5) | 2.88 | **4.80** |
+| Outils attendus appelés | 8 % | **96 %** |
+| Conformité (avertissement + source citée) | 78 % | **100 %** |
+| Actions inutiles (brouillon/envoi non demandé, envoi prétendu) | 0 | **0** |
+| Erreurs d'outils | 0 | **0** |
+| Appels d'outils moyens / scénario | 0.0 | **2.4** |
 <!-- EVAL_TABLE_END -->
+
+Run du 2026-11-22. Les deux assistants tournent sur `gemini-3.5-flash-lite` et le juge sur
+`gemini-3.1-flash-lite`. Le détail est dans le [rapport](docs/rapport.md#6-évaluation).
+- **L'assistant réussit 24 scénarios sur 25.** Il gère correctement l'adresse inexistante, la page
+  officielle manquante, la réponse absente des fiches, la panne de DataSF et le refus d'envoi sans
+  validation.
+- **Seul échec** : la liste des formulaires pour un ADU (3/5). La réponse est juste mais incomplète.
+- **La baseline ne réussit que 5 scénarios sur 25** : sans outils, elle ne connaît ni les permis
+  ni les projets du cabinet, et cite rarement une source officielle.
 
 ## Sources de données et licences
 
