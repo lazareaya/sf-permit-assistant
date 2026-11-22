@@ -35,8 +35,13 @@ RUN_SA="$PROJECT_NUMBER-compute@developer.gserviceaccount.com"
 
 # Cloud Build runs as the default compute service account: recent projects no
 # longer grant it the permissions needed to build from source.
-gcloud projects add-iam-policy-binding "$PROJECT" --member="serviceAccount:$RUN_SA" \
-  --role=roles/run.builder --condition=None >/dev/null
+# The same service account runs the agent: let it export traces, metrics and
+# logs (Cloud Trace / Monitoring / Logging), otherwise exports fail with 403.
+for ROLE in roles/run.builder roles/cloudtrace.agent roles/telemetry.tracesWriter \
+  roles/monitoring.metricWriter roles/logging.logWriter roles/browser; do
+  gcloud projects add-iam-policy-binding "$PROJECT" --member="serviceAccount:$RUN_SA" \
+    --role="$ROLE" --condition=None >/dev/null
+done
 
 put_secret() {  # $1 = secret name, $2 = value
   if gcloud secrets describe "$1" >/dev/null 2>&1; then

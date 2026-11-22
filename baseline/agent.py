@@ -18,7 +18,7 @@ root_agent = Agent(
     name="baseline_single_prompt",
     model=Gemini(
         model=os.getenv("AGENT_MODEL", "gemini-3.5-flash-lite"),
-        retry_options=types.HttpRetryOptions(attempts=5, initial_delay=2, max_delay=30),
+        retry_options=types.HttpRetryOptions(attempts=7, initial_delay=4, max_delay=60),
     ),
     instruction=(
         "Tu es l'assistant permis de construire d'un cabinet d'architectes à San Francisco. "

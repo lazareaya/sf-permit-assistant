@@ -79,6 +79,32 @@ app.description = "API for interacting with the Agent sf-permit-assistant"
 app.include_router(approvals_router)
 
 
+if otel_to_cloud:
+    from fastapi import Request
+    from starlette.concurrency import run_in_threadpool
+
+    @app.middleware("http")
+    async def flush_telemetry(request: Request, call_next):
+        """Export traces/metrics before the response ends.
+
+        Cloud Run is configured with request-based CPU billing (free tier): once a
+        response is sent the instance gets no CPU, so OpenTelemetry's background
+        batch exporters would never run. Flushing inside the request fixes it.
+        """
+        response = await call_next(request)
+        if request.url.path.startswith(("/run", "/apps/", "/a2a/")):
+            from opentelemetry import metrics, trace
+
+            def _flush() -> None:
+                for provider in (trace.get_tracer_provider(), metrics.get_meter_provider()):
+                    flush = getattr(provider, "force_flush", None)
+                    if flush:
+                        flush(timeout_millis=5000)
+
+            await run_in_threadpool(_flush)
+        return response
+
+
 # Main execution
 if __name__ == "__main__":
     import uvicorn

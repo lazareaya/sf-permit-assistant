@@ -46,6 +46,24 @@ def _client() -> genai.Client:
     return client
 
 
+def _generate(**kwargs):
+    """generate_content with patience for the free tier: on 429 (15 requests/min),
+    wait for the delay suggested by the API (or 30 s) and retry."""
+    import re
+    import time
+
+    from google.genai import errors
+
+    for attempt in range(8):
+        try:
+            return _client().models.generate_content(**kwargs)
+        except errors.APIError as exc:
+            if exc.code not in (429, 503) or attempt == 7:
+                raise
+            m = re.search(r"retry in (\d+(?:\.\d+)?)s", str(exc))
+            time.sleep(float(m.group(1)) + 1 if m else 30)
+
+
 def evaluate(instance):
     prompt = (
         f"{RUBRIC}\n\nDemande : {instance.get('prompt', '')}\n"
@@ -53,7 +71,7 @@ def evaluate(instance):
         f"Comportement attendu : {instance.get('reference', '')}\n"
         f"Trace complète (appels d'outils et résultats) : {instance.get('agent_data', '')}\n"
     )
-    response = _client().models.generate_content(
+    response = _generate(
         model=JUDGE_MODEL,
         contents=prompt,
         config=types.GenerateContentConfig(
