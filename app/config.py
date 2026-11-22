@@ -30,7 +30,8 @@ DATASF_CACHE_PATH = Path(
 # Optional Socrata app token (higher rate limits); from Secret Manager in prod.
 SOCRATA_APP_TOKEN = os.getenv("SOCRATA_APP_TOKEN", "")
 
-MODEL = os.getenv("AGENT_MODEL", "gemini-3.8-flash")
+# Free-tier model chosen for availability (2026-11-22: gemini-3.8-flash was saturated, 503).
+MODEL = os.getenv("AGENT_MODEL", "gemini-3.5-flash-lite")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "gemini-embedding-001")
 
 # Guardrails

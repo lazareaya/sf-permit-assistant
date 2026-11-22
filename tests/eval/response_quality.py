@@ -4,6 +4,7 @@ Scaffolded by agents-cli, rubric rewritten for this use case. A case is
 *passed* when the score is >= 4 (see scripts/summarize_eval.py).
 """
 
+import os
 import threading
 
 from google import genai
@@ -11,7 +12,9 @@ from google.genai import types
 from pydantic import BaseModel
 
 _local = threading.local()
-JUDGE_MODEL = "gemini-3.8-flash"
+
+# Judge = a different model than the agents (limits self-preference bias).
+JUDGE_MODEL = os.getenv("JUDGE_MODEL", "gemini-3.1-flash-lite")
 
 RUBRIC = """Tu évalues un assistant « permis de construire à San Francisco » pour un cabinet \
 d'architectes. Note sa réponse finale de 1 à 5 en la comparant au comportement attendu.

@@ -12,6 +12,11 @@
 # 4. writes docs/eval_results.md and the README table
 set -euo pipefail
 cd "$(dirname "$0")/.."
+# GEMINI_API_KEY for the judges and the agents (AI Studio free tier).
+set -a; source .env; set +a
+# Free-tier friendly: few parallel cases, slow grading (raise if you have a paid quota).
+CONCURRENCY="${CONCURRENCY:-2}"
+QPS="${QPS:-0.5}"
 
 ACLI="uvx google-agents-cli"
 PORT=8010
@@ -25,7 +30,7 @@ wait_http() { for _ in $(seq 1 60); do curl -sf "$1" >/dev/null && return 0; sle
 
 serve() {  # $1 = DataSF url, $2 = cache on/off
   PROJECTS_DB_PATH="$WORK/projects.db" DATASF_URL="$1" DATASF_CACHE="$2" \
-    DATASF_CACHE_PATH="$WORK/datasf.sqlite" CHROMA_DIR="$WORK/chroma" \
+    DATASF_CACHE_PATH="$WORK/datasf.sqlite" CHROMA_DIR="data/chroma" \
     uv run uvicorn app.fast_api_app:app --port $PORT >"$WORK/agent_$2.log" 2>&1 &
   SERVER=$!
   wait_http "http://localhost:$PORT/list-apps"
@@ -37,7 +42,7 @@ for phase in main down; do
   for agent in app baseline; do
     echo ">> generate $agent / $phase"
     $ACLI eval generate --url "http://localhost:$PORT" --app-name "$agent" \
-      --dataset "$DS" --output "$OUT/traces/$agent/$phase.json" --concurrency 4
+      --dataset "$DS" --output "$OUT/traces/$agent/$phase.json" --concurrency "$CONCURRENCY"
   done
   kill "$SERVER"; wait "$SERVER" 2>/dev/null || true
 done
@@ -45,7 +50,7 @@ done
 for agent in app baseline; do
   echo ">> grade $agent"
   $ACLI eval grade --traces "$OUT/traces/$agent" --config tests/eval/eval_config.yaml \
-    --output "$OUT/grades/$agent" --qps 2 || true   # baseline may fail the threshold
+    --output "$OUT/grades/$agent" --qps "$QPS" || true   # baseline may fail the threshold
 done
 
 BASE=$(ls "$OUT"/grades/baseline/results_*.json | head -1)

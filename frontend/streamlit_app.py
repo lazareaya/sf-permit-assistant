@@ -59,9 +59,15 @@ def run_agent(session_id: str, text: str) -> list[dict]:
 
 
 def parse_events(events: list[dict]) -> tuple[str, list[dict]]:
-    """Return (final text, trace steps) from ADK events."""
-    steps, texts = [], []
+    """Return (final text, trace steps) from ADK events.
+
+    A model answer can arrive split into several text parts of the same event:
+    the final answer is the concatenation of the text parts of the last event
+    that has text.
+    """
+    steps, final = [], ""
     for ev in events:
+        texts = []
         for part in (ev.get("content") or {}).get("parts", []) or []:
             call = part.get("functionCall") or part.get("function_call")
             resp = part.get("functionResponse") or part.get("function_response")
@@ -79,7 +85,9 @@ def parse_events(events: list[dict]) -> tuple[str, list[dict]]:
                 )
             elif part.get("text") and not part.get("thought"):
                 texts.append(part["text"])
-    return (texts[-1] if texts else "(pas de réponse)"), steps
+        if texts:
+            final = "".join(texts)
+    return (final or "(pas de réponse)"), steps
 
 
 def unwrap(data):

@@ -221,7 +221,6 @@ credentials*.json
 /.agents-cli-original/
 
 # sf permit assistant
-data/chroma/
 data/cache/
 artifacts/
 .env.local-backup

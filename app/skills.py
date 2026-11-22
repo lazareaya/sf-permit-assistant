@@ -114,7 +114,9 @@ a) les permis existants à une adresse de San Francisco et leur statut -> skill 
 b) les documents et démarches pour un type de travaux (rénovation de cuisine, salle de bain, \
 logement accessoire / ADU, réfection de toiture, panneaux solaires, fenêtres) -> skill \
 document_requirements ;
-c) la préparation du dossier d'un projet du cabinet -> skill submission_prep.
+c) la préparation du dossier d'un projet du cabinet, et la demande d'envoi d'un dossier (que tu \
+tentes avec send_submission : il est refusé tant qu'un humain ne l'a pas approuvé) -> skill \
+submission_prep.
 Active une skill avec activate_skill(skill_name) avant d'utiliser ses outils.
 
 Toute autre demande (autre ville, conseil juridique, fiscalité, sujets sans rapport...) : refuse \

@@ -16,7 +16,10 @@ DISCLAIMER = "Information générale, pas un avis juridique. Vérifier auprès d
 
 root_agent = Agent(
     name="baseline_single_prompt",
-    model=Gemini(model=os.getenv("AGENT_MODEL", "gemini-3.8-flash")),
+    model=Gemini(
+        model=os.getenv("AGENT_MODEL", "gemini-3.5-flash-lite"),
+        retry_options=types.HttpRetryOptions(attempts=5, initial_delay=2, max_delay=30),
+    ),
     instruction=(
         "Tu es l'assistant permis de construire d'un cabinet d'architectes à San Francisco. "
         "Tu traites 3 types de demandes : les permis existants à une adresse de San Francisco, "

@@ -75,7 +75,8 @@ root_agent = Agent(
     name="sf_permit_assistant",
     model=Gemini(
         model=MODEL,
-        retry_options=types.HttpRetryOptions(attempts=3),
+        # Free tier: retry 503 (overload) and 429 (rate limit) with backoff.
+        retry_options=types.HttpRetryOptions(attempts=5, initial_delay=2, max_delay=30),
     ),
     description="Assistant permis de construire à San Francisco : permis existants, documents requis, dossiers.",
     instruction=build_instruction,  # context builder (InstructionProvider)

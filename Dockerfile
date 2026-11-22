@@ -24,14 +24,14 @@ COPY ./pyproject.toml ./README.md ./uv.lock* ./
 COPY ./app ./app
 COPY ./mcp_server ./mcp_server
 COPY ./baseline ./baseline
-COPY ./data/projects.db ./data/projects.db
-COPY ./data/city_docs ./data/city_docs
+# projects.db, the official pages and (when built locally) the Gemini Chroma index
+COPY ./data ./data
 
-RUN uv sync --frozen
+RUN uv sync --frozen --no-dev
 
 ARG AGENT_VERSION=0.0.0
 ENV AGENT_VERSION=${AGENT_VERSION}
 
 EXPOSE 8080
 
-CMD ["uv", "run", "uvicorn", "app.fast_api_app:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["uv", "run", "--no-sync", "uvicorn", "app.fast_api_app:app", "--host", "0.0.0.0", "--port", "8080"]

@@ -33,6 +33,11 @@ gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregi
 PROJECT_NUMBER=$(gcloud projects describe "$PROJECT" --format='value(projectNumber)')
 RUN_SA="$PROJECT_NUMBER-compute@developer.gserviceaccount.com"
 
+# Cloud Build runs as the default compute service account: recent projects no
+# longer grant it the permissions needed to build from source.
+gcloud projects add-iam-policy-binding "$PROJECT" --member="serviceAccount:$RUN_SA" \
+  --role=roles/run.builder --condition=None >/dev/null
+
 put_secret() {  # $1 = secret name, $2 = value
   if gcloud secrets describe "$1" >/dev/null 2>&1; then
     printf %s "$2" | gcloud secrets versions add "$1" --data-file=- >/dev/null
@@ -65,9 +70,14 @@ ENV
 
 uvx google-agents-cli deploy --project "$PROJECT" --region "$REGION" \
   --no-agent-identity --service-account "$RUN_SA" \
-  --min-instances 0 --max-instances 2 \
-  --env-vars "GOOGLE_GENAI_USE_ENTERPRISE=false,RAG_EMBEDDINGS=gemini,OTEL_TO_CLOUD=true" \
+  --min-instances 0 --max-instances 2 --memory 2Gi \
+  --env-vars "GOOGLE_GENAI_USE_ENTERPRISE=false,RAG_EMBEDDINGS=gemini,OTEL_TO_CLOUD=true,AGENT_MODEL=${AGENT_MODEL:-gemini-3.5-flash-lite}" \
   --secrets "$SECRETS"
+
+# agents-cli deploys with --no-cpu-throttling (CPU billed for the whole instance
+# lifetime). Switch to request-based billing: CPU is only billed while a request
+# is being handled, which keeps a demo inside the free tier.
+gcloud run services update sf-permit-assistant --region "$REGION" --cpu-throttling --quiet
 
 echo
 echo "Done. Next:"

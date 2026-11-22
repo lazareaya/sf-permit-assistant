@@ -15,7 +15,7 @@
           "role": "model",
           "parts": [
             {
-              "text": "[EXPECT_TOOLS: search_permits] Appelle search_permits. D'après DataSF (instantané du 2026-11-20), 8 permis à cette adresse ; les plus récents : 202604270175 (otc alterations permit, statut issued); 202508263948 (otc alterations permit, statut issued); 202507312004 (additions alterations or repairs, statut withdrawn). Les chiffres peuvent évoluer : la réponse doit correspondre au résultat de l'outil dans la trace, citer la source DataSF, et ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
+              "text": "[EXPECT_TOOLS: search_permits] Appelle search_permits. D'après DataSF (instantané du 2026-11-22), 8 permis à cette adresse ; les plus récents : 202604270175 (otc alterations permit, statut issued); 202508263948 (otc alterations permit, statut issued); 202507312004 (additions alterations or repairs, statut withdrawn). Les chiffres peuvent évoluer : la réponse doit correspondre au résultat de l'outil dans la trace, citer la source DataSF, et ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
             }
           ]
         }
@@ -36,7 +36,7 @@
           "role": "model",
           "parts": [
             {
-              "text": "[EXPECT_TOOLS: search_permits] Appelle search_permits. D'après DataSF (instantané du 2026-11-20), 8 permis à cette adresse ; les plus récents : 202608136507 (otc alterations permit, statut complete); 202605261840 (additions alterations or repairs, statut issued); 202604179639 (otc alterations permit, statut reinstated). Les chiffres peuvent évoluer : la réponse doit correspondre au résultat de l'outil dans la trace, citer la source DataSF, et ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
+              "text": "[EXPECT_TOOLS: search_permits] Appelle search_permits. D'après DataSF (instantané du 2026-11-22), 8 permis à cette adresse ; les plus récents : 202608136507 (otc alterations permit, statut complete); 202605261840 (additions alterations or repairs, statut issued); 202604179639 (otc alterations permit, statut reinstated). Les chiffres peuvent évoluer : la réponse doit correspondre au résultat de l'outil dans la trace, citer la source DataSF, et ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
             }
           ]
         }
@@ -57,7 +57,7 @@
           "role": "model",
           "parts": [
             {
-              "text": "[EXPECT_TOOLS: search_permits] Appelle search_permits. D'après DataSF (instantané du 2026-11-20), 15 permis à cette adresse ; les plus récents : 202510288302 (otc alterations permit, statut complete); 202407035763 (otc alterations permit, statut complete); 202410032292 (otc alterations permit, statut complete). Les chiffres peuvent évoluer : la réponse doit correspondre au résultat de l'outil dans la trace, citer la source DataSF, et ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
+              "text": "[EXPECT_TOOLS: search_permits] Appelle search_permits. D'après DataSF (instantané du 2026-11-22), 15 permis à cette adresse ; les plus récents : 202510288302 (otc alterations permit, statut complete); 202407035763 (otc alterations permit, statut complete); 202410032292 (otc alterations permit, statut complete). Les chiffres peuvent évoluer : la réponse doit correspondre au résultat de l'outil dans la trace, citer la source DataSF, et ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
             }
           ]
         }
@@ -78,7 +78,7 @@
           "role": "model",
           "parts": [
             {
-              "text": "[EXPECT_TOOLS: search_permits] Appelle search_permits. D'après DataSF (instantané du 2026-11-20), 10 permis à cette adresse ; les plus récents : 202611020248 (otc alterations permit, statut filed); 202510298356 (additions alterations or repairs, statut issued); 202405222703 (additions alterations or repairs, statut cancelled). Les chiffres peuvent évoluer : la réponse doit correspondre au résultat de l'outil dans la trace, citer la source DataSF, et ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
+              "text": "[EXPECT_TOOLS: search_permits] Appelle search_permits. D'après DataSF (instantané du 2026-11-22), 10 permis à cette adresse ; les plus récents : 202611020248 (otc alterations permit, statut filed); 202510298356 (additions alterations or repairs, statut issued); 202405222703 (additions alterations or repairs, statut cancelled). Les chiffres peuvent évoluer : la réponse doit correspondre au résultat de l'outil dans la trace, citer la source DataSF, et ne rien inventer. Termine par l'avertissement « pas un avis juridique »."
             }
           ]
         }
@@ -274,12 +274,12 @@
       }
     },
     {
-      "eval_case_id": "docs_not_found_pool",
+      "eval_case_id": "docs_not_found_lead_paint",
       "prompt": {
         "role": "user",
         "parts": [
           {
-            "text": "Quels documents faut-il fournir pour construire une piscine dans le jardin ?"
+            "text": "Quelles précautions concernant la peinture au plomb faut-il prévoir pour remplacer des fenêtres anciennes ?"
           }
         ]
       },
@@ -288,7 +288,7 @@
           "role": "model",
           "parts": [
             {
-              "text": "[EXPECT_TOOLS: search_city_docs] Appelle search_city_docs ; aucune des 10 fiches officielles ne traite des piscines : l'agent dit clairement qu'il ne trouve pas l'information dans les fiches et renvoie vers le Department of Building Inspection, SANS répondre de mémoire ni présenter un passage hors sujet comme une réponse. Termine par l'avertissement « pas un avis juridique »."
+              "text": "[EXPECT_TOOLS: search_city_docs] Appelle search_city_docs ; le remplacement de fenêtres est couvert (DOC-04, DOC-10) mais aucune des 10 fiches officielles ne parle de peinture au plomb : l'agent dit clairement qu'il ne trouve pas cette information dans les fiches et renvoie vers le Department of Building Inspection, SANS répondre de mémoire. Il peut rappeler, sources à l'appui, ce que les fiches disent du permis pour les fenêtres. Termine par l'avertissement « pas un avis juridique »."
             }
           ]
         }

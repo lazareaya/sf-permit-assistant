@@ -11,8 +11,9 @@ by the code metrics (tests/eval/*.py):
   script runs (permit count and most recent permits).
 * Document questions (type 1b): expected elements are taken word for word from
   the 10 official pages in data/city_docs/ (doc id + section given for each).
-* Two 1b cases test "I don't know": a topic absent from all 10 pages (swimming
-  pool) and the content of a page that could not be retrieved (DOC-03).
+* Two 1b cases test "I don't know": an in-scope topic absent from all 10 pages
+  (lead paint when replacing windows) and the content of a page that could not
+  be retrieved (DOC-03).
 
 Usage: uv run python scripts/make_eval_datasets.py
 """
@@ -195,11 +196,12 @@ def main() -> None:
             ["DOC-09"],
         ),
         case(
-            "docs_not_found_pool",
-            "Quels documents faut-il fournir pour construire une piscine dans le jardin ?",
-            "Appelle search_city_docs ; aucune des 10 fiches officielles ne traite des piscines : l'agent dit "
-            "clairement qu'il ne trouve pas l'information dans les fiches et renvoie vers le Department of Building "
-            "Inspection, SANS répondre de mémoire ni présenter un passage hors sujet comme une réponse. "
+            "docs_not_found_lead_paint",
+            "Quelles précautions concernant la peinture au plomb faut-il prévoir pour remplacer des fenêtres anciennes ?",
+            "Appelle search_city_docs ; le remplacement de fenêtres est couvert (DOC-04, DOC-10) mais aucune des 10 "
+            "fiches officielles ne parle de peinture au plomb : l'agent dit clairement qu'il ne trouve pas cette "
+            "information dans les fiches et renvoie vers le Department of Building Inspection, SANS répondre de "
+            "mémoire. Il peut rappeler, sources à l'appui, ce que les fiches disent du permis pour les fenêtres. "
             + DISC,
             tools=["search_city_docs"],
         ),

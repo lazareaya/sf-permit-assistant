@@ -91,7 +91,7 @@ Le prompt est **reconstruit avant chaque appel** : règles + catalogue + instruc
 
 ## Évaluation : 25 scénarios, LLM juge
 
-5 permis (dont 1 adresse inexistante) · 10 documents (dont 1 sujet absent et 1 page manquante) · 6 dossiers (dont 1 envoi non validé et 1 projet inconnu) · 2 hors périmètre · **2 avec DataSF en panne**
+5 permis (dont 1 adresse inexistante) · 10 documents (dont 1 réponse absente et 1 page manquante) · 6 dossiers (dont 1 envoi non validé et 1 projet inconnu) · 2 hors périmètre · **2 avec DataSF en panne**
 
 | Métrique | Baseline simple prompt | Assistant |
 |---|---|---|

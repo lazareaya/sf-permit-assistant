@@ -1,6 +1,6 @@
 # Rapport — Assistant permis de construire pour San Francisco
 
-*Cours GenAI, sujet 1 : Domain Specific Agent Harness. Projet de groupe (4 personnes).*
+*Cours GenAI, sujet 1 : Domain Specific Agent Harness. Projet réalisé seul.*
 
 > ⚠️ Information générale, pas un avis juridique. Vérifier auprès du Department of Building Inspection.
 
@@ -110,8 +110,8 @@ source attendue :
 - 4 permis à une adresse réelle (vérité terrain : instantané DataSF) et 1 adresse inexistante ;
 - 7 questions sur les documents requis et 1 question « qui contacter », dont les éléments attendus
   sont repris mot pour mot des fiches ;
-- 1 question sur un sujet absent des fiches (piscine) et 1 question sur le contenu d'une page
-  manquante (DOC-03) ;
+- 1 question dont la réponse est absente des fiches (peinture au plomb lors d'un remplacement de
+  fenêtres) et 1 question sur le contenu d'une page manquante (DOC-03) ;
 - 3 préparations de dossier, 1 liste de projets, 1 envoi sans validation, 1 projet inconnu ;
 - 2 demandes hors périmètre ;
 - 2 cas avec l'API DataSF en panne.
@@ -165,12 +165,3 @@ servis par le même serveur. `agents-cli eval generate` produit les traces, puis
   - suivi automatique des changements de statut d'un permis ;
   - checklists par type de travaux ;
   - authentification de l'interface (IAP).
-
-## 9. Répartition du travail
-
-| Membre | Partie |
-|---|---|
-| _moi_ | Serveur MCP (DataSF, base projets), évaluation contre la baseline, déploiement Cloud Run et CI/CD |
-| _membre 2_ | RAG (corpus officiel, embeddings, Chroma) |
-| _membre 3_ | Interface Streamlit et validation humaine |
-| _membre 4_ | Scénarios d'évaluation, rapport, slides |

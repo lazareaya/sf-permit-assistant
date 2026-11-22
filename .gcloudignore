@@ -4,6 +4,11 @@
 # list of things that are merely not worth uploading.
 #!include:.gitignore
 
+# Ship the pre-built Chroma index (git-ignored) so Cloud Run does not re-embed
+# the corpus at startup; never ship the local DataSF cache.
+!data/chroma/
+!data/chroma/**
+
 .git
 .gitignore
 .gcloudignore

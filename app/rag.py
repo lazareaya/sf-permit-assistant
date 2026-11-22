@@ -30,7 +30,9 @@ from app import config
 TOP_K = 3
 MAX_CHUNK_CHARS = 1500
 # Cosine-similarity floor below which a passage is considered irrelevant.
-MIN_SCORE = {"gemini": float(os.getenv("RAG_MIN_SCORE", "0.55")), "local": 0.12}
+# Calibrated on gemini-embedding-001 (2026-11-22): relevant questions score 0.70-0.79,
+# off-topic ones (swimming pool, weather) 0.60-0.66.
+MIN_SCORE = {"gemini": float(os.getenv("RAG_MIN_SCORE", "0.67")), "local": 0.12}
 
 
 @dataclass(frozen=True)
@@ -190,16 +192,30 @@ class GeminiEmbedder:
         self.client = genai.Client()
 
     def _embed(self, texts: list[str], task: str) -> list[list[float]]:
-        from google.genai import types
+        import time
 
+        from google.genai import errors, types
+
+        # Free tier: 100 embedded texts per minute. Send batches of 30 and pace
+        # them; on a 429, wait and retry instead of failing.
+        batch, pause = 30, 20.0
         out: list[list[float]] = []
-        for i in range(0, len(texts), 50):
-            resp = self.client.models.embed_content(
-                model=self.model,
-                contents=texts[i : i + 50],
-                config=types.EmbedContentConfig(task_type=task),
-            )
+        for i in range(0, len(texts), batch):
+            for attempt in range(6):
+                try:
+                    resp = self.client.models.embed_content(
+                        model=self.model,
+                        contents=texts[i : i + batch],
+                        config=types.EmbedContentConfig(task_type=task),
+                    )
+                    break
+                except errors.ClientError as exc:
+                    if exc.code != 429 or attempt == 5:
+                        raise
+                    time.sleep(30)
             out.extend(e.values for e in resp.embeddings)
+            if i + batch < len(texts):
+                time.sleep(pause)
         return out
 
     def embed_documents(self, texts: list[str]) -> list[list[float]]:

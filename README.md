@@ -41,6 +41,7 @@ Toute autre demande est refusée poliment, et l'assistant rappelle ce qu'il sait
 > Le squelette du projet a été **généré avec [google/agents-cli](https://github.com/google/agents-cli)**
 > v1.15.0 (`agents-cli create … -d cloud_run --cicd-runner github_actions`). Il comprend l'agent
 > ADK, l'API FastAPI, le Dockerfile, les tests, l'évaluation par LLM juge, Terraform et la CI/CD.
+> La CI/CD a ensuite été simplifiée en un pipeline GitHub Actions gratuit, sur un seul projet.
 > Tout le code métier a été écrit ensuite : outils, MCP, RAG, skills, garde-fous, validation
 > humaine, interface et évaluation.
 
@@ -93,7 +94,7 @@ flowchart LR
 | Évaluation | [tests/eval/](tests/eval/), [scripts/run_eval.sh](scripts/run_eval.sh) | 25 scénarios, LLM juge, métriques calculées par code, `agents-cli eval compare` |
 | Notebook | [notebooks/demo.ipynb](notebooks/demo.ipynb) | Démonstration exécutée de chaque brique |
 | Déploiement | [deployment/deploy_gcp.sh](deployment/deploy_gcp.sh) | Cloud Run, Secret Manager, Cloud Trace |
-| CI/CD | [.github/workflows/](.github/workflows/) | `ci.yaml` lance le lint et les tests unitaires à chaque push. Les workflows agents-cli lancent les tests sur PR puis déploient en staging et en prod au merge, une fois `agents-cli infra cicd` configuré |
+| CI/CD | [.github/workflows/](.github/workflows/) | `ci.yaml` : lint et tests unitaires sur chaque PR et chaque push. `cd.yaml` : à chaque merge sur `main`, tests puis redéploiement sur Cloud Run, authentifié par **Workload Identity Federation** (aucune clé stockée sur GitHub) |
 
 `search_city_docs` reste un outil ADK direct plutôt qu'un outil MCP. C'est le plus simple :
 l'index Chroma et le client d'embeddings vivent déjà dans le processus de l'agent.
@@ -134,7 +135,7 @@ attendus, les éléments de réponse et la source attendue.
 | Adresse inexistante | 1 | Aucun permis trouvé, rien d'inventé |
 | Documents requis (cuisine, salle de bain, 2 × ADU, toiture, solaire, fenêtres) | 7 | `search_city_docs`, éléments attendus repris mot pour mot des fiches, page attendue citée |
 | Qui contacter (toiture) | 1 | Passage « Contact us » de la fiche toiture |
-| Sujet absent des 10 fiches (piscine) | 1 | L'assistant dit qu'il ne trouve pas, sans répondre de mémoire |
+| Sujet couvert mais réponse absente des 10 fiches (peinture au plomb, fenêtres) | 1 | L'assistant dit qu'il ne trouve pas, sans répondre de mémoire |
 | Contenu d'une page manquante (DOC-03, projets éligibles OTC) | 1 | L'assistant dit qu'il n'a pas cette page, sans l'inventer |
 | Préparation de dossier | 3 | `get_project` → `search_city_docs` → `create_submission_draft`, en attente de validation |
 | Liste des projets | 1 | `list_projects`, sans action |
@@ -208,24 +209,47 @@ bash scripts/run_eval.sh          # évaluation complète assistant vs baseline 
 
 ## Mise en production sur Google Cloud
 
+L'assistant est déployé sur **Cloud Run** : `https://sf-permit-assistant-62689813869.us-west1.run.app`.
+Le service est privé : il faut un jeton d'identité, ce qui évite que n'importe qui consomme les
+quotas. Pour l'utiliser depuis l'interface :
+
 ```bash
-gcloud auth login && gcloud auth application-default login
+AGENT_API_URL=https://sf-permit-assistant-62689813869.us-west1.run.app \
+AGENT_ID_TOKEN=$(gcloud auth print-identity-token) uv run streamlit run frontend/streamlit_app.py
+```
+
+**Premier déploiement** (à faire une seule fois) :
+
+```bash
+gcloud auth login --update-adc
 bash deployment/deploy_gcp.sh MON_PROJET us-west1   # lit GEMINI_API_KEY dans .env
-uvx google-agents-cli infra cicd     # pipeline CI/CD : tests sur PR, déploiement sur merge
 ```
 
 Le script de déploiement :
 - active les API nécessaires ;
 - range la clé Gemini (lue dans `.env`) et, si tu en as un, le jeton DataSF dans **Secret Manager** ;
-- déploie l'agent sur **Cloud Run** avec `agents-cli deploy`.
+- déploie l'agent sur **Cloud Run** avec `agents-cli deploy`, puis passe la facturation du
+  processeur au mode « à la requête ».
 
-Tout reste dans les offres gratuites. Gemini est appelé avec une **clé Google AI Studio**
-(offre gratuite) et non via Vertex AI. En production, cette clé est lue depuis **Secret Manager** :
-elle n'est jamais dans l'image ni en variable d'environnement en clair. Cloud Run tourne avec
-0 instance au repos, donc rien n'est consommé sans requête. Les traces OpenTelemetry (latence, tokens, appels d'outils) arrivent dans
-**Cloud Trace** et **Cloud Logging**.
+**Déploiements suivants** : automatiques à chaque merge sur `main`, via `cd.yaml`.
 
-<!-- Capture Cloud Trace : docs/images/cloud_trace.png -->
+**Tout reste gratuit :**
+- Gemini est appelé avec une **clé Google AI Studio** (offre gratuite), pas via Vertex AI. En
+  production, la clé est lue depuis **Secret Manager** : elle n'est jamais dans l'image ni en clair
+  dans les variables d'environnement.
+- Cloud Run tourne avec 0 instance au repos (2 au maximum) et 2 Gio de mémoire. Le processeur n'est
+  facturé que pendant le traitement d'une requête.
+- Cloud Build, Artifact Registry, Secret Manager, Cloud Trace et Cloud Logging restent dans leurs
+  quotas gratuits ou dans les crédits d'essai.
+- Une alerte de budget à 5 € prévient en cas de dérive.
+
+Les traces OpenTelemetry (latence, tokens, appels d'outils) arrivent dans **Cloud Trace** et
+**Cloud Logging**.
+
+**Choix du modèle.** `gemini-3.8-flash` était saturé sur l'offre gratuite le jour des tests (erreurs
+503). L'agent et la baseline utilisent donc `gemini-3.5-flash-lite` (variable `AGENT_MODEL`), et le
+juge `gemini-3.1-flash-lite` (variable `JUDGE_MODEL`). Le juge est un modèle différent des
+assistants qu'il note, ce qui limite le biais d'auto-évaluation.
 
 ## Limites
 
@@ -235,16 +259,6 @@ elle n'est jamais dans l'image ni en variable d'environnement en clair. Cloud Ru
 - Les pages de la ville évoluent. Le corpus est daté (`fetched_at`) et doit être rafraîchi.
 - Sans clé Gemini (CI, tests), le RAG bascule sur un embedder local déterministe
   (`RAG_EMBEDDINGS=local`) et un petit corpus de test synthétique.
-
-## Ma contribution
-
-Projet de groupe (cours GenAI, sujet 1). Ma part :
-
-- **Serveur MCP** : client DataSF (cache, gestion des erreurs), outils sur la base des projets,
-  intégration dans l'agent ADK via `McpToolset`.
-- **Évaluation contre la baseline** : 25 scénarios, LLM juge adapté au domaine, métriques
-  calculées par code, script de bout en bout, `agents-cli eval compare`.
-- **Mise en production** : Cloud Run, Secret Manager, Cloud Trace, CI/CD GitHub Actions.
 
 ## Licence
 
