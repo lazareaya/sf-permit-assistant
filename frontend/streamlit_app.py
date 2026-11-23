@@ -5,6 +5,11 @@ Three areas:
 2. the visible trace: every tool called at each step, with args and result;
 3. human-in-the-loop: pending drafts with Approve / Reject, approved drafts with Send.
 
+Free-tier resilience: every successful answer is recorded in
+``frontend/demo_replays.json``. If Gemini is saturated (timeout or 5xx), the
+recorded answer to the same question is shown, clearly labelled; the
+"mode démo hors ligne" toggle replays recorded answers only.
+
 Run:  AGENT_API_URL=http://localhost:8000 uv run streamlit run frontend/streamlit_app.py
 """
 
@@ -12,7 +17,11 @@ from __future__ import annotations
 
 import json
 import os
+import re
+import unicodedata
 import uuid
+from datetime import datetime
+from pathlib import Path
 
 import httpx
 import streamlit as st
@@ -20,7 +29,14 @@ import streamlit as st
 API = os.getenv("AGENT_API_URL", "http://localhost:8000").rstrip("/")
 APP_NAME = os.getenv("AGENT_APP_NAME", "app")
 USER_ID = "architecte-demo"
-TIMEOUT = 180
+TIMEOUT = float(os.getenv("AGENT_TIMEOUT_S", "120"))
+REPLAYS_PATH = Path(
+    os.getenv("DEMO_REPLAYS", Path(__file__).with_name("demo_replays.json"))
+)
+SATURATED = (
+    "⏳ Gemini (offre gratuite) est saturé en ce moment : l'agent n'a pas pu répondre. "
+    "Réessayez dans un instant."
+)
 DISCLAIMER = "Information générale, pas un avis juridique. Vérifier auprès du Department of Building Inspection."
 
 st.set_page_config(
@@ -56,6 +72,74 @@ def run_agent(session_id: str, text: str) -> list[dict]:
     r = httpx.post(f"{API}/run", json=body, headers=_headers(), timeout=TIMEOUT)
     r.raise_for_status()
     return r.json()
+
+
+# ----------------------------------------------------------- recorded answers
+def _norm(text: str) -> str:
+    text = unicodedata.normalize("NFKD", text.lower())
+    text = "".join(c for c in text if not unicodedata.combining(c))
+    return re.sub(r"[^a-z0-9]+", " ", text).strip()
+
+
+def load_replays() -> dict:
+    try:
+        return json.loads(REPLAYS_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def save_replay(prompt: str, events: list[dict]) -> None:
+    replays = load_replays()
+    replays[_norm(prompt)] = {
+        "prompt": prompt,
+        "recorded_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "events": events,
+    }
+    try:
+        REPLAYS_PATH.write_text(
+            json.dumps(replays, ensure_ascii=False, indent=1), encoding="utf-8"
+        )
+    except OSError:
+        pass  # read-only file system: recording is best effort
+
+
+def replay_for(prompt: str) -> dict | None:
+    return load_replays().get(_norm(prompt))
+
+
+def answer(prompt: str, offline: bool) -> tuple[str, list[dict]]:
+    """Live answer from the agent; recorded answer if Gemini is saturated."""
+    if not offline:
+        try:
+            events = run_agent(st.session_state.session_id, prompt)
+            text, steps = parse_events(events)
+            if text != "(pas de réponse)":
+                save_replay(prompt, events)
+            return text, steps
+        except httpx.TimeoutException:
+            problem = SATURATED
+        except httpx.HTTPStatusError as exc:
+            problem = (
+                SATURATED
+                if exc.response.status_code >= 500
+                else f"Erreur d'appel à l'agent : {exc}"
+            )
+        except httpx.HTTPError as exc:
+            problem = f"Agent injoignable : {exc}"
+    else:
+        problem = (
+            "Mode démo hors ligne : aucune réponse enregistrée pour cette question."
+        )
+    rec = replay_for(prompt)
+    if rec is None:
+        return problem, []
+    text, steps = parse_events(rec["events"])
+    note = (
+        f"*📼 Réponse réelle de l'agent enregistrée le {rec['recorded_at']}"
+        + ("" if offline else " (Gemini saturé à l'instant)")
+        + ".*\n\n"
+    )
+    return note + text, steps
 
 
 def parse_events(events: list[dict]) -> tuple[str, list[dict]]:
@@ -132,6 +216,15 @@ st.caption(
     f"RAG sur les pages officielles de la ville · API : {API}"
 )
 st.warning(f"⚠️ {DISCLAIMER}")
+with st.sidebar:
+    offline = st.toggle(
+        "Mode démo hors ligne",
+        help="Rejoue les réponses réelles enregistrées, sans appeler Gemini.",
+    )
+    recorded = [r["prompt"] for r in load_replays().values()]
+    st.caption(f"{len(recorded)} réponse(s) enregistrée(s)")
+    for q in recorded:
+        st.code(q, language=None)
 
 col_chat, col_side = st.columns([3, 2], gap="large")
 
@@ -159,13 +252,8 @@ with col_chat:
     if prompt:
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.spinner("L'assistant travaille..."):
-            try:
-                answer, steps = parse_events(
-                    run_agent(st.session_state.session_id, prompt)
-                )
-            except httpx.HTTPError as exc:
-                answer, steps = f"Erreur d'appel à l'agent : {exc}", []
-        st.session_state.messages.append({"role": "assistant", "content": answer})
+            reply, steps = answer(prompt, offline)
+        st.session_state.messages.append({"role": "assistant", "content": reply})
         st.session_state.traces.append({"prompt": prompt, "steps": steps})
         st.rerun()
     if st.button("Nouvelle conversation"):

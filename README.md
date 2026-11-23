@@ -272,6 +272,16 @@ Les traces OpenTelemetry arrivent dans **Cloud Trace** et **Cloud Logging**. Pou
 juge `gemini-3.1-flash-lite` (variable `JUDGE_MODEL`). Le juge est un modèle différent des
 assistants qu'il note, ce qui limite le biais d'auto-évaluation.
 
+**Résistance à la saturation de l'offre gratuite** ([app/resilient_llm.py](app/resilient_llm.py)).
+Sur l'offre gratuite, un modèle peut être saturé (503), limité (429) ou ne jamais répondre. Au lieu
+de réessayer le même modèle pendant des minutes, chaque appel a 25 s, puis l'agent passe au modèle
+gratuit suivant (`gemini-3-flash-preview`, `gemini-3.5-flash`… ; variable `AGENT_FALLBACK_MODELS`).
+Le modèle qui a répondu est réutilisé en priorité pendant 5 minutes. Au-delà de 75 s, l'interface
+affiche « Gemini est saturé » au lieu de tourner sans fin. Mesuré un jour de saturation : 2 à
+5 minutes par question avant, 2 à 36 s après. L'interface enregistre aussi chaque réponse réelle
+(`frontend/demo_replays.json`) et la rejoue si Gemini est saturé, avec une mention explicite, ou en
+« mode démo hors ligne ».
+
 ## Limites
 
 - L'envoi d'un dossier est simulé : il passe au statut `sent`, sans dépôt réel auprès de la ville.

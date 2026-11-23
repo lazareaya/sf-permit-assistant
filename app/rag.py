@@ -191,17 +191,19 @@ class GeminiEmbedder:
         self.model = model or config.EMBEDDING_MODEL
         self.client = genai.Client()
 
-    def _embed(self, texts: list[str], task: str) -> list[list[float]]:
+    def _embed(
+        self, texts: list[str], task: str, attempts: int = 6, wait: float = 30.0
+    ) -> list[list[float]]:
         import time
 
         from google.genai import errors, types
 
         # Free tier: 100 embedded texts per minute. Send batches of 30 and pace
-        # them; on a 429, wait and retry instead of failing.
+        # them; on a 429/503, wait and retry instead of failing.
         batch, pause = 30, 20.0
         out: list[list[float]] = []
         for i in range(0, len(texts), batch):
-            for attempt in range(6):
+            for attempt in range(attempts):
                 try:
                     resp = self.client.models.embed_content(
                         model=self.model,
@@ -209,10 +211,10 @@ class GeminiEmbedder:
                         config=types.EmbedContentConfig(task_type=task),
                     )
                     break
-                except errors.ClientError as exc:
-                    if exc.code != 429 or attempt == 5:
+                except errors.APIError as exc:
+                    if exc.code not in (429, 500, 503) or attempt == attempts - 1:
                         raise
-                    time.sleep(30)
+                    time.sleep(wait)
             out.extend(e.values for e in resp.embeddings)
             if i + batch < len(texts):
                 time.sleep(pause)
@@ -221,8 +223,13 @@ class GeminiEmbedder:
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
         return self._embed(texts, "RETRIEVAL_DOCUMENT")
 
+    @lru_cache(maxsize=512)  # noqa: B019 - one embedder per process
+    def _embed_query_cached(self, text: str) -> tuple[float, ...]:
+        # A user is waiting: 3 quick attempts, not minutes of retries.
+        return tuple(self._embed([text], "RETRIEVAL_QUERY", attempts=3, wait=2.0)[0])
+
     def embed_query(self, text: str) -> list[float]:
-        return self._embed([text], "RETRIEVAL_QUERY")[0]
+        return list(self._embed_query_cached(text))
 
 
 def get_embedder():
@@ -339,7 +346,19 @@ def search_city_docs(question: str) -> dict[str, Any]:
             "error": "CORPUS_EMPTY",
             "message": "Aucun document officiel n'est indexé.",
         }
-    hits = index.search(args.question)
+    try:
+        hits = index.search(args.question)
+    except Exception as exc:
+        from google.genai import errors
+
+        if not isinstance(exc, errors.APIError):
+            raise
+        return {
+            "error": "SEARCH_UNAVAILABLE",
+            "message": "Le service de recherche (embeddings Gemini) est momentanément "
+            "saturé. Le dire à l'utilisateur et l'inviter à réessayer ; ne pas "
+            "répondre de mémoire.",
+        }
     if not hits:
         return {
             "question": args.question,

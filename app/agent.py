@@ -34,7 +34,6 @@ import sys
 
 from google.adk.agents import Agent
 from google.adk.apps import App
-from google.adk.models import Gemini
 from google.adk.tools import FunctionTool
 from google.adk.tools.mcp_tool.mcp_session_manager import StdioConnectionParams
 from google.adk.tools.mcp_tool.mcp_toolset import McpToolset
@@ -44,6 +43,7 @@ from mcp import StdioServerParameters
 from app import config
 from app.guardrails import after_model, after_tool, before_tool
 from app.rag import search_city_docs
+from app.resilient_llm import make_model
 from app.skills import activate_skill, build_instruction
 
 MODEL = config.MODEL
@@ -73,12 +73,9 @@ root_agent = Agent(
     # manifest's value. Renaming the agent only here makes the two disagree, and
     # anything selecting traces by name stops finding this agent's.
     name="sf_permit_assistant",
-    model=Gemini(
-        model=MODEL,
-        # Free tier: retry 503 (overload) and 429 (15 requests/min) with backoff
-        # long enough to cover a full one-minute quota window.
-        retry_options=types.HttpRetryOptions(attempts=7, initial_delay=4, max_delay=60),
-    ),
+    # Free tier: short time budget per model, then automatic fallback to the
+    # next free Gemini model (app.resilient_llm) instead of minutes of retries.
+    model=make_model(MODEL),
     description="Assistant permis de construire à San Francisco : permis existants, documents requis, dossiers.",
     instruction=build_instruction,  # context builder (InstructionProvider)
     tools=[FunctionTool(activate_skill), FunctionTool(search_city_docs), mcp_tools],
