@@ -1,6 +1,7 @@
-"""Free-tier resilience: model fallback chain and per-call timeout."""
+"""Free-tier resilience: hedged calls across a chain of free models."""
 
 import asyncio
+import time
 
 import pytest
 from google.adk.models import Gemini
@@ -13,7 +14,10 @@ from app.resilient_llm import AllModelsUnavailableError, fallback_chain, make_mo
 
 
 def _fake_parent(behaviour: dict, calls: list):
-    """Replace Gemini.generate_content_async: behaviour[model] = 'ok' | code | 'hang'."""
+    """Replace Gemini.generate_content_async.
+
+    behaviour[model] = 'ok' | HTTP code | 'hang' | float (seconds before answering).
+    """
 
     async def fake(self, llm_request, stream=False):
         model = llm_request.model
@@ -21,6 +25,8 @@ def _fake_parent(behaviour: dict, calls: list):
         b = behaviour.get(model, "ok")
         if b == "hang":
             await asyncio.sleep(10)
+        if isinstance(b, float):
+            await asyncio.sleep(b)
         if isinstance(b, int):
             raise (
                 errors.ServerError(b, {"error": {"message": "high demand"}})
@@ -61,16 +67,31 @@ def test_falls_back_on_503_and_429(monkeypatch):
     assert out[0].content.parts[0].text == "answer from m3"
 
 
-def test_times_out_a_hanging_model(monkeypatch):
+def test_hanging_model_is_hedged_quickly(monkeypatch):
     monkeypatch.setattr(resilient_llm, "_preferred", {})
     monkeypatch.setenv("AGENT_FALLBACK_MODELS", "m2")
-    monkeypatch.setattr(resilient_llm, "PER_CALL_TIMEOUT_S", 0.2)
+    monkeypatch.setattr(resilient_llm, "HEDGE_DELAY_S", 0.2)
     calls: list = []
     monkeypatch.setattr(
         Gemini, "generate_content_async", _fake_parent({"m1": "hang"}, calls)
     )
+    start = time.monotonic()
     out = _run(make_model("m1"), LlmRequest(model="m1"))
     assert out[0].content.parts[0].text == "answer from m2"
+    assert time.monotonic() - start < 2  # not the 10 s of the hanging model
+
+
+def test_slow_but_healthy_answer_is_not_cut(monkeypatch):
+    monkeypatch.setattr(resilient_llm, "_preferred", {})
+    monkeypatch.setenv("AGENT_FALLBACK_MODELS", "m2")
+    monkeypatch.setattr(resilient_llm, "HEDGE_DELAY_S", 0.2)
+    calls: list = []
+    monkeypatch.setattr(
+        Gemini, "generate_content_async", _fake_parent({"m1": 0.6, "m2": "hang"}, calls)
+    )
+    out = _run(make_model("m1"), LlmRequest(model="m1"))
+    assert calls == ["m1", "m2"]  # m2 started in parallel...
+    assert out[0].content.parts[0].text == "answer from m1"  # ...but m1 kept running
 
 
 def test_non_retryable_error_is_raised(monkeypatch):
@@ -88,7 +109,7 @@ def test_non_retryable_error_is_raised(monkeypatch):
 def test_all_models_saturated_gives_clear_error(monkeypatch):
     monkeypatch.setattr(resilient_llm, "_preferred", {})
     monkeypatch.setenv("AGENT_FALLBACK_MODELS", "m2")
-    monkeypatch.setattr(resilient_llm, "TOTAL_BUDGET_S", 4)
+    monkeypatch.setattr(resilient_llm, "TOTAL_BUDGET_S", 7)
     calls: list = []
     monkeypatch.setattr(
         Gemini, "generate_content_async", _fake_parent({"m1": 503, "m2": 503}, calls)
