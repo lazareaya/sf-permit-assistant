@@ -1,0 +1,2022 @@
+{
+ "quels permis ont ete deposes au 1 dr carlton b goodlett pl": {
+  "prompt": "Quels permis ont été déposés au 1 Dr Carlton B Goodlett Pl ?",
+  "recorded_at": "2026-11-23 16:15",
+  "events": [
+   {
+    "modelVersion": "gemini-3.5-flash-lite",
+    "content": {
+     "parts": [
+      {
+       "functionCall": {
+        "id": "call_1344740193002974577",
+        "args": {
+         "skill_name": "permit_search"
+        },
+        "name": "activate_skill"
+       },
+       "thoughtSignature": "Eo4BCosBAWkUfRNreRVGYxtFpIAw2scdNGGgkkymIxvHZ5aI5yH4Jrb5CqaIn9KpvsBki8q0xUPOXWVJtlTu3Ac9M2Sxr0ey95Sy9MoHnJnDbeMabX80pfr3RHVkmmadSV3DA7Ntc5rD5jO2a0CftwPVoiHCIqJsvg9HBIPBVSqfJY_pcmc4az8XsxQhcQ2wPQ=="
+      }
+     ],
+     "role": "model"
+    },
+    "finishReason": "STOP",
+    "usageMetadata": {
+     "candidatesTokenCount": 20,
+     "promptTokenCount": 1739,
+     "promptTokensDetails": [
+      {
+       "modality": "TEXT",
+       "tokenCount": 1739
+      }
+     ],
+     "totalTokenCount": 1759
+    },
+    "invocationId": "e-dd5d3171-384d-4636-aa22-6c3c194c4df8",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {},
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "longRunningToolIds": [],
+    "id": "832f8020-243b-4773-b9e4-27e25f0a8065",
+    "timestamp": 1795446911.354986
+   },
+   {
+    "content": {
+     "parts": [
+      {
+       "functionResponse": {
+        "id": "call_1344740193002974577",
+        "name": "activate_skill",
+        "response": {
+         "active_skill": "permit_search",
+         "allowed_tools": [
+          "search_permits"
+         ]
+        }
+       }
+      }
+     ],
+     "role": "user"
+    },
+    "invocationId": "e-dd5d3171-384d-4636-aa22-6c3c194c4df8",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {
+      "active_skill": "permit_search",
+      "case": {}
+     },
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "id": "49170f03-9066-4443-a798-1e66ea0dce75",
+    "timestamp": 1795446911.3578796
+   },
+   {
+    "modelVersion": "gemini-3.5-flash-lite",
+    "content": {
+     "parts": [
+      {
+       "functionCall": {
+        "id": "call_3846745942732428233",
+        "args": {
+         "address": "1 Dr Carlton B Goodlett Pl"
+        },
+        "name": "search_permits"
+       },
+       "thoughtSignature": "Eo4BCosBAWkUfRNPRh9q8cNcVfq5TR75OZdiMEugWpEEH6QavjbbqT2bIS1OlAh8KhqfwAD3qon8Iw983TpYisht16_5zDVUNxdD_tSDDNHdAtu2-baIXF6M1UVqtcDbv2OF2xoNcMo51T8F2qGp3nYkUxTirTUntP7ylWrpzb86DjgruHudHHG4E1eIo2H3cQ=="
+      }
+     ],
+     "role": "model"
+    },
+    "finishReason": "STOP",
+    "usageMetadata": {
+     "candidatesTokenCount": 23,
+     "promptTokenCount": 1955,
+     "promptTokensDetails": [
+      {
+       "modality": "TEXT",
+       "tokenCount": 1955
+      }
+     ],
+     "totalTokenCount": 1978
+    },
+    "invocationId": "e-dd5d3171-384d-4636-aa22-6c3c194c4df8",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {},
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "longRunningToolIds": [],
+    "id": "65c6ce63-247e-4d3f-a788-d9f23381c955",
+    "timestamp": 1795446911.8051183
+   },
+   {
+    "content": {
+     "parts": [
+      {
+       "functionResponse": {
+        "id": "call_3846745942732428233",
+        "name": "search_permits",
+        "response": {
+         "content": [
+          {
+           "type": "text",
+           "text": "{\n  \"address\": \"1 Dr Carlton B Goodlett Pl\",\n  \"neighborhood\": \"Tenderloin\",\n  \"zipcode\": \"94102\",\n  \"permit_count\": 23,\n  \"permits\": [\n    {\n      \"permit_number\": \"202305037014\",\n      \"permit_type_definition\": \"otc alterations permit\",\n      \"status\": \"complete\",\n      \"status_date\": \"2026-10-26T08:39:36.000\",\n      \"filed_date\": \"2023-05-03T12:30:17.000\",\n      \"issued_date\": \"2023-05-04T11:28:28.000\",\n      \"description\": \"remove 4 (e) sprinkler heads at elevator machine room & piping per drw. ref to 202108236905\",\n      \"estimated_cost\": \"2500.0\",\n      \"neighborhoods_analysis_boundaries\": \"Tenderloin\",\n      \"zipcode\": \"94102\"\n    },\n    {\n      \"permit_number\": \"202212158453\",\n      \"permit_type_definition\": \"additions alterations or repairs\",\n      \"status\": \"complete\",\n      \"status_date\": \"2026-08-20T09:32:24.000\",\n      \"filed_date\": \"2022-12-15T14:00:26.000\",\n      \"issued_date\": \"2023-05-08T08:32:53.000\",\n      \"description\": \"replace (179)existing water source heat pumps,flexible hose,necessary ductwork & thermostats with new.\",\n      \"estimated_cost\": \"5800000.0\",\n      \"neighborhoods_analysis_boundaries\": \"Tenderloin\",\n      \"zipcode\": \"94102\"\n    },\n    {\n      \"permit_number\": \"202603177745\",\n      \"permit_type_definition\": \"additions alterations or repairs\",\n      \"status\": \"complete\",\n      \"status_date\": \"2026-08-20T09:32:11.000\",\n      \"filed_date\": \"2026-03-27T13:58:28.000\",\n      \"issued_date\": \"2026-07-14T15:23:47.000\",\n      \"description\": \"revision to pa# 202212158453 & 202508062396, scope reduction, updated units requiring duct smoke detectors.\",\n      \"estimated_cost\": \"1.0\",\n      \"neighborhoods_analysis_boundaries\": \"Tenderloin\",\n      \"zipcode\": \"94102\"\n    },\n    {\n      \"permit_number\": \"202607104847\",\n      \"permit_type_definition\": \"otc alterations permit\",\n      \"status\": \"complete\",\n      \"status_date\": \"2026-07-16T15:51:42.000\",\n      \"filed_date\": \"2026-07-10T11:08:55.000\",\n      \"issued_date\": \"2026-07-10T12:45:52.000\",\n      \"description\": \"fire alarm as builts. delta 3 includes the final inspection inspection inspectors corrections so the plans match field conditions. ref#202306089630\",\n      \"estimated_cost\": \"1.0\",\n      \"neighborhoods_analysis_boundaries\": \"Tenderloin\",\n      \"zipcode\": \"94102\"\n    },\n    {\n      \"permit_number\": \"202507301908\",\n      \"permit_type_definition\": \"otc alterations permit\",\n      \"status\": \"issued\",\n      \"status_date\": \"2026-06-22T16:28:22.000\",\n      \"filed_date\": \"2025-07-30T09:01:39.000\",\n      \"issued_date\": \"2026-06-22T16:28:22.000\",\n      \"description\": \"scope: consist of readily achievable barrier removal of wheelchair lift proposed to allow access from the east entry to the main lobby level removal of existing wheelchair lift, patch and repair of the floor after existing lift is removed. install new lift including necessary structural\",\n      \"estimated_cost\": \"373300.0\",\n      \"neighborhoods_analysis_boundaries\": \"Tenderloin\",\n      \"zipcode\": \"94102\"\n    },\n    {\n      \"permit_number\": \"202606052651\",\n      \"permit_type_definition\": \"otc alterations permit\",\n      \"status\": \"filed\",\n      \"status_date\": \"2026-06-05T11:37:29.000\",\n      \"filed_date\": \"2026-06-05T11:37:29.000\",\n      \"issued_date\": null,\n      \"description\": \"fire alarm revision for removal of 18 duct detectors and 18 relay modules for existing hvac units that are under 2000 cf and dont reach a combined 2000 cfm in shared spaces ref 202306089630\",\n      \"estimated_cost\": \"1.0\",\n      \"neighborhoods_analysis_boundaries\": \"Tenderloin\",\n      \"zipcode\": \"94102\"\n    },\n    {\n      \"permit_number\": \"202510036737\",\n      \"permit_type_definition\": \"otc alterations permit\",\n      \"status\": \"filed\",\n      \"status_date\": \"2025-10-03T15:03:43.000\",\n      \"filed_date\": \"2025-10-03T15:03:43.000\",\n      \"issued_date\": null,\n      \"description\": \"prop h:tenant improvement of(e)childcare area within city hall @ ground fl\",\n      \"estimated_cost\": \"1100000.0\",\n      \"neighborhoods_analysis_boundaries\": \"Tenderloin\",\n      \"zipcode\": \"94102\"\n    },\n    {\n      \"permit_number\": \"202508143055\",\n      \"permit_type_definition\": \"otc alterations permit\",\n      \"status\": \"filed\",\n      \"status_date\": \"2025-08-14T11:17:47.000\",\n      \"filed_date\": \"2025-08-14T11:17:47.000\",\n      \"issued_date\": null,\n      \"description\": \"revision to 202108236905: construction of a steel screen dividez in elevator machine room 4,5,6 in order to separate machine room from skylight well\",\n      \"estimated_cost\": \"5000.0\",\n      \"neighborhoods_analysis_boundaries\": \"Tenderloin\",\n      \"zipcode\": \"94102\"\n    },\n    {\n      \"permit_number\": \"202401234440\",\n      \"permit_type_definition\": \"otc alterations permit\",\n      \"status\": \"withdrawn\",\n      \"status_date\": \"2025-08-01T16:02:10.000\",\n      \"filed_date\": \"2024-01-23T10:37:06.000\",\n      \"issued_date\": null,\n      \"description\": \"the proposed project is limitted in scope and consists of readily achievable barrier removal. a wheel chair lift is proposed to allow access from the east entry to the main lobby level.\",\n      \"estimated_cost\": \"597000.0\",\n      \"neighborhoods_analysis_boundaries\": \"Tenderloin\",\n      \"zipcode\": \"94102\"\n    },\n    {\n      \"permit_number\": \"202507251615\",\n      \"permit_type_definition\": \"otc alterations permit\",\n      \"status\": \"issued\",\n      \"status_date\": \"2025-07-29T10:13:39.000\",\n      \"filed_date\": \"2025-07-25T10:37:31.000\",\n      \"issued_date\": \"2025-07-29T10:13:39.000\",\n      \"description\": \"adding 3 smokes, 3 relay modules to elevators\",\n      \"estimated_cost\": \"5000.0\",\n      \"neighborhoods_analysis_boundaries\": \"Tenderloin\",\n      \"zipcode\": \"94102\"\n    }\n  ],\n  \"source\": \"DataSF — Building Permits (i98e-djp9), https://data.sf.gov/d/i98e-djp9\",\n  \"data_as_of\": \"2026-10-28T01:05:02.000\",\n  \"from_cache\": false\n}"
+          }
+         ],
+         "structuredContent": {
+          "address": "1 Dr Carlton B Goodlett Pl",
+          "neighborhood": "Tenderloin",
+          "zipcode": "94102",
+          "permit_count": 23,
+          "permits": [
+           {
+            "permit_number": "202305037014",
+            "permit_type_definition": "otc alterations permit",
+            "status": "complete",
+            "status_date": "2026-10-26T08:39:36.000",
+            "filed_date": "2023-05-03T12:30:17.000",
+            "issued_date": "2023-05-04T11:28:28.000",
+            "description": "remove 4 (e) sprinkler heads at elevator machine room & piping per drw. ref to 202108236905",
+            "estimated_cost": "2500.0",
+            "neighborhoods_analysis_boundaries": "Tenderloin",
+            "zipcode": "94102"
+           },
+           {
+            "permit_number": "202212158453",
+            "permit_type_definition": "additions alterations or repairs",
+            "status": "complete",
+            "status_date": "2026-08-20T09:32:24.000",
+            "filed_date": "2022-12-15T14:00:26.000",
+            "issued_date": "2023-05-08T08:32:53.000",
+            "description": "replace (179)existing water source heat pumps,flexible hose,necessary ductwork & thermostats with new.",
+            "estimated_cost": "5800000.0",
+            "neighborhoods_analysis_boundaries": "Tenderloin",
+            "zipcode": "94102"
+           },
+           {
+            "permit_number": "202603177745",
+            "permit_type_definition": "additions alterations or repairs",
+            "status": "complete",
+            "status_date": "2026-08-20T09:32:11.000",
+            "filed_date": "2026-03-27T13:58:28.000",
+            "issued_date": "2026-07-14T15:23:47.000",
+            "description": "revision to pa# 202212158453 & 202508062396, scope reduction, updated units requiring duct smoke detectors.",
+            "estimated_cost": "1.0",
+            "neighborhoods_analysis_boundaries": "Tenderloin",
+            "zipcode": "94102"
+           },
+           {
+            "permit_number": "202607104847",
+            "permit_type_definition": "otc alterations permit",
+            "status": "complete",
+            "status_date": "2026-07-16T15:51:42.000",
+            "filed_date": "2026-07-10T11:08:55.000",
+            "issued_date": "2026-07-10T12:45:52.000",
+            "description": "fire alarm as builts. delta 3 includes the final inspection inspection inspectors corrections so the plans match field conditions. ref#202306089630",
+            "estimated_cost": "1.0",
+            "neighborhoods_analysis_boundaries": "Tenderloin",
+            "zipcode": "94102"
+           },
+           {
+            "permit_number": "202507301908",
+            "permit_type_definition": "otc alterations permit",
+            "status": "issued",
+            "status_date": "2026-06-22T16:28:22.000",
+            "filed_date": "2025-07-30T09:01:39.000",
+            "issued_date": "2026-06-22T16:28:22.000",
+            "description": "scope: consist of readily achievable barrier removal of wheelchair lift proposed to allow access from the east entry to the main lobby level removal of existing wheelchair lift, patch and repair of the floor after existing lift is removed. install new lift including necessary structural",
+            "estimated_cost": "373300.0",
+            "neighborhoods_analysis_boundaries": "Tenderloin",
+            "zipcode": "94102"
+           },
+           {
+            "permit_number": "202606052651",
+            "permit_type_definition": "otc alterations permit",
+            "status": "filed",
+            "status_date": "2026-06-05T11:37:29.000",
+            "filed_date": "2026-06-05T11:37:29.000",
+            "issued_date": null,
+            "description": "fire alarm revision for removal of 18 duct detectors and 18 relay modules for existing hvac units that are under 2000 cf and dont reach a combined 2000 cfm in shared spaces ref 202306089630",
+            "estimated_cost": "1.0",
+            "neighborhoods_analysis_boundaries": "Tenderloin",
+            "zipcode": "94102"
+           },
+           {
+            "permit_number": "202510036737",
+            "permit_type_definition": "otc alterations permit",
+            "status": "filed",
+            "status_date": "2025-10-03T15:03:43.000",
+            "filed_date": "2025-10-03T15:03:43.000",
+            "issued_date": null,
+            "description": "prop h:tenant improvement of(e)childcare area within city hall @ ground fl",
+            "estimated_cost": "1100000.0",
+            "neighborhoods_analysis_boundaries": "Tenderloin",
+            "zipcode": "94102"
+           },
+           {
+            "permit_number": "202508143055",
+            "permit_type_definition": "otc alterations permit",
+            "status": "filed",
+            "status_date": "2025-08-14T11:17:47.000",
+            "filed_date": "2025-08-14T11:17:47.000",
+            "issued_date": null,
+            "description": "revision to 202108236905: construction of a steel screen dividez in elevator machine room 4,5,6 in order to separate machine room from skylight well",
+            "estimated_cost": "5000.0",
+            "neighborhoods_analysis_boundaries": "Tenderloin",
+            "zipcode": "94102"
+           },
+           {
+            "permit_number": "202401234440",
+            "permit_type_definition": "otc alterations permit",
+            "status": "withdrawn",
+            "status_date": "2025-08-01T16:02:10.000",
+            "filed_date": "2024-01-23T10:37:06.000",
+            "issued_date": null,
+            "description": "the proposed project is limitted in scope and consists of readily achievable barrier removal. a wheel chair lift is proposed to allow access from the east entry to the main lobby level.",
+            "estimated_cost": "597000.0",
+            "neighborhoods_analysis_boundaries": "Tenderloin",
+            "zipcode": "94102"
+           },
+           {
+            "permit_number": "202507251615",
+            "permit_type_definition": "otc alterations permit",
+            "status": "issued",
+            "status_date": "2025-07-29T10:13:39.000",
+            "filed_date": "2025-07-25T10:37:31.000",
+            "issued_date": "2025-07-29T10:13:39.000",
+            "description": "adding 3 smokes, 3 relay modules to elevators",
+            "estimated_cost": "5000.0",
+            "neighborhoods_analysis_boundaries": "Tenderloin",
+            "zipcode": "94102"
+           }
+          ],
+          "source": "DataSF — Building Permits (i98e-djp9), https://data.sf.gov/d/i98e-djp9",
+          "data_as_of": "2026-10-28T01:05:02.000",
+          "from_cache": false
+         },
+         "isError": false
+        }
+       }
+      }
+     ],
+     "role": "user"
+    },
+    "invocationId": "e-dd5d3171-384d-4636-aa22-6c3c194c4df8",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {
+      "tool_budget": {
+       "invocation": "e-dd5d3171-384d-4636-aa22-6c3c194c4df8",
+       "count": 1
+      },
+      "case": {
+       "address": "1 Dr Carlton B Goodlett Pl",
+       "permit_count": 23
+      }
+     },
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "id": "049b183d-cefc-4642-bdeb-c9487f8462d3",
+    "timestamp": 1795446916.5822039
+   },
+   {
+    "modelVersion": "gemini-3-flash-preview",
+    "content": {
+     "parts": [
+      {
+       "text": "Il y a 23 permis enregistrés pour l'adresse **1 Dr Carlton B Goodlett Pl**. Voici les plus récents :\n\n1.  **Permis n° 202305037014**\n    *   **Type :** otc alterations permit\n    *   **Statut :** Terminé (complete) le 26/10/2026\n    *   **Description :** Retrait de 4 têtes de gicleurs dans la salle des machines de l'ascenseur et tuyauterie selon les plans.\n    *   **Coût estimé :** 2 500,00 $\n\n2.  **Permis n° 202212158453**\n    *   **Type :** additions alterations or repairs\n    *   **Statut :** Terminé (complete) le 20/08/2026\n    *   **Description :** Remplacement de 179 pompes à chaleur à source d'eau existantes, tuyaux flexibles, conduits nécessaires et thermostats par des neufs.\n    *   **Coût estimé :** 5 800 000,00 $\n\n3.  **Permis n° 202603177745**\n    *   **Type :** additions alterations or repairs\n    *   **Statut :** Terminé (complete) le 20/08/2026\n    *   **Description :** Révision des permis 202212158453 et 202508062396, réduction de la portée, mise à jour des unités nécessitant des détecteurs de fumée de conduit.\n    *   **Coût estimé :** 1,00 $\n\n4.  **Permis n° 202607104847**\n    *   **Type :** otc alterations permit\n    *   **Statut :** Terminé (complete) le 16/07/2026\n    *   **Description :** Plans de récolement (as-builts) pour l'alarme incendie incluant les corrections finales de l'inspecteur.\n    *   **Coût estimé :** 1,00 $\n\n5.  **Permis n° 202507301908**\n    *   **Type :** otc alterations permit\n    *   **Statut :** Délivré (issued) le 22/06/2026\n    *   **Description :** Suppression de barrières architecturales : retrait d'un élévateur pour fauteuil roulant et installation d'un nouveau lift pour l'accès depuis l'entrée est vers le hall principal.\n    *   **Coût estimé :** 373 300,00 $\n\nSource : DataSF — Building Permits (28/10/2026)\n\n⚠️ Information générale, pas un avis juridique. Vérifier auprès du Department of Building Inspection.",
+       "thoughtSignature": "EpUBCpIBAWkUfRNGVBgqwjHvQXo_FQOpJkY9Kszi62wFF5-Zt6RBXE9F0xpcvpU7Ym-Oi-5W1ka7Ydd7D9smREaTVyp0S0LwbKQDTJ4O_DIEPD_MYhefbkr58x_w3l1OrtyCb6KqAA0CwzQzplZ0tpLrA2t-1-cBGrsYRyyF9FA9bbat9Xoddvu8YRjyI7zDXQs5mTdHpmA="
+      }
+     ],
+     "role": "model"
+    },
+    "finishReason": "STOP",
+    "usageMetadata": {
+     "candidatesTokenCount": 701,
+     "promptTokenCount": 6451,
+     "promptTokensDetails": [
+      {
+       "modality": "TEXT",
+       "tokenCount": 6451
+      }
+     ],
+     "totalTokenCount": 7152
+    },
+    "invocationId": "e-dd5d3171-384d-4636-aa22-6c3c194c4df8",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {},
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "id": "59528ac2-1449-4a7b-9874-c8ddfb31cbfd",
+    "timestamp": 1795446934.2478125
+   }
+  ]
+ },
+ "quels permis existent au 781 20th ave et ou en sont ils": {
+  "prompt": "Quels permis existent au 781 20th Ave et où en sont-ils ?",
+  "recorded_at": "2026-11-23 16:15",
+  "events": [
+   {
+    "modelVersion": "gemini-3-flash-preview",
+    "content": {
+     "parts": [
+      {
+       "functionCall": {
+        "id": "call_11627196406082455954",
+        "args": {
+         "skill_name": "permit_search"
+        },
+        "name": "activate_skill"
+       },
+       "thoughtSignature": "EvQECvEEAWkUfRMkxA0FZrbutfvOoh4HbRzR1TjZxsHmTGkJOl7IitIMDVXujS-b_XKUTa21QS_DdseXzKGKQPMdwZO1ed34dcvLYXcYVrOPu-6qI9OSVpdmqR7r0G_8l5x3SZDdbLBs5JNiKd3oZunUTzkwsQ5erSWBBOEpRyz9Tx0W4wqqcjRB2Z3VAyR6x5L6Z7n7_dFeFZ2J293zagMfr4mq8nuiWYOrFUJZ9Bi1RMnGOlwrNhNJVNguQyojZofHcBUeIurpNbM54-fbHUmnXpGE5dO-EVOJyNNinI09RPxjWW-njF_mGQIlYoSE8_w_h9B2QaX50xh_BeQ8XCCrIAYVlBK9BMAFacYK7a6U2lJuJ3ZpI_b9H6-ZFuXhnViOezaECmVHoF1agyUpIc1HfR9dEx_G6WwZ5DReq_8UrlZq_4wf6E9ci6Y10sa4o83QiS2HEIl6E4XVKzVloh7ap9BLoenZosYvBt1fNBgkkgJzo5ynPviP-JPBSshXLJY5rDpbYL7GYykQuj03oheQVBICmWAK_TFWJK42w-mu_SWolz5uaDnqTTJVzpD4Q1pMg_rSthxHhrUrKoJNybkCRFeN1iT61WPI9tHBJUIGoKOBBOib-n6mCuWcRmyACz1S2r6F_QLsNkW4aTsMPinAotjMZnq99XHo84g0UZYWzeq7CeLHJnbS2OupKEzJGwt-zkynwUrqf1klYj259ciDpZjv4xXmocNdiF5uIbGVk20x9kYXxtBfjkTiUW85fO_K0GVTP60doQanY7GT2VFfkm4YK2YRhSrG_vq28YyzJaB8Wb3cl56CP-NPSIL848_Nmb7Eyg=="
+      }
+     ],
+     "role": "model"
+    },
+    "finishReason": "STOP",
+    "usageMetadata": {
+     "candidatesTokenCount": 20,
+     "promptTokenCount": 1743,
+     "promptTokensDetails": [
+      {
+       "modality": "TEXT",
+       "tokenCount": 1743
+      }
+     ],
+     "thoughtsTokenCount": 127,
+     "totalTokenCount": 1890
+    },
+    "invocationId": "e-a496e12f-077e-41d2-b899-b89a2f717376",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {},
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "longRunningToolIds": [],
+    "id": "e7e0ed0c-b4d2-48fc-ad94-f12a1e0400d5",
+    "timestamp": 1795446936.1778362
+   },
+   {
+    "content": {
+     "parts": [
+      {
+       "functionResponse": {
+        "id": "call_11627196406082455954",
+        "name": "activate_skill",
+        "response": {
+         "active_skill": "permit_search",
+         "allowed_tools": [
+          "search_permits"
+         ]
+        }
+       }
+      }
+     ],
+     "role": "user"
+    },
+    "invocationId": "e-a496e12f-077e-41d2-b899-b89a2f717376",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {
+      "active_skill": "permit_search",
+      "case": {}
+     },
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "id": "d83ec515-8a3a-4b0a-bfa6-5d7aab4ca3a7",
+    "timestamp": 1795446936.1791492
+   },
+   {
+    "modelVersion": "gemini-3-flash-preview",
+    "content": {
+     "parts": [
+      {
+       "functionCall": {
+        "id": "call_3870505145380253669",
+        "args": {
+         "address": "781 20th Ave"
+        },
+        "name": "search_permits"
+       },
+       "thoughtSignature": "Ev4BCvsBAWkUfRMxpsHQg4TQrWj3VPIqswczLop7Uyc71QuasfZBXrYQjpvCXINXKgHGw8LfKqEcfA0tzxdiJLBtTPzRjn_VUe0CYltpFLcqPt9Rw_uOAGcKxjFJ1KBRSgU2aYTaDsOd8kD6eL3c9H7MUkW6enCRHlTSCmhwXqloBgLMu9vjs3fP-x-GTxP0vH5vxrCQAav3owY2E6okZh13lxOPLc9a0sD5bWpb0T-S6i1MySQwRl3MMN-2H6GF7F9cKFoRHWzJm7I6LGeAoQtsVTAeJI2C8AVJEWVzE5OzVOat87UiPa5sRbHO0y3kaH0wXKWhrC2p9_QUdk454o4="
+      }
+     ],
+     "role": "model"
+    },
+    "finishReason": "STOP",
+    "usageMetadata": {
+     "candidatesTokenCount": 24,
+     "promptTokenCount": 2086,
+     "promptTokensDetails": [
+      {
+       "modality": "TEXT",
+       "tokenCount": 2086
+      }
+     ],
+     "thoughtsTokenCount": 34,
+     "totalTokenCount": 2144
+    },
+    "invocationId": "e-a496e12f-077e-41d2-b899-b89a2f717376",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {},
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "longRunningToolIds": [],
+    "id": "75d28635-68d0-4667-97af-ca032123c90e",
+    "timestamp": 1795446937.681798
+   },
+   {
+    "content": {
+     "parts": [
+      {
+       "functionResponse": {
+        "id": "call_3870505145380253669",
+        "name": "search_permits",
+        "response": {
+         "content": [
+          {
+           "type": "text",
+           "text": "{\n  \"address\": \"781 20th Av\",\n  \"neighborhood\": \"Outer Richmond\",\n  \"zipcode\": \"94121\",\n  \"permit_count\": 8,\n  \"permits\": [\n    {\n      \"permit_number\": \"202604270175\",\n      \"permit_type_definition\": \"otc alterations permit\",\n      \"status\": \"issued\",\n      \"status_date\": \"2026-07-27T11:26:44.000\",\n      \"filed_date\": \"2026-04-27T14:04:59.000\",\n      \"issued_date\": \"2026-07-27T11:26:44.000\",\n      \"description\": \"revise bpa 2025-0826-3948 to change beams 3b1 and 3b2 from previously specified steel members to wood members, change beams 1b1 and 1b2 from previously specified steel members to wood, provide additional supporting post and foundation elements, no changes to architectural floor plan.\",\n      \"estimated_cost\": \"1.0\",\n      \"neighborhoods_analysis_boundaries\": \"Outer Richmond\",\n      \"zipcode\": \"94121\"\n    },\n    {\n      \"permit_number\": \"202508263948\",\n      \"permit_type_definition\": \"otc alterations permit\",\n      \"status\": \"issued\",\n      \"status_date\": \"2026-02-24T12:43:25.000\",\n      \"filed_date\": \"2025-08-26T15:30:26.000\",\n      \"issued_date\": \"2026-02-24T12:43:25.000\",\n      \"description\": \"2nd fl: combine e sunroom with bedroom to master bedroom with full bathroom and walk in closet. convert e bedroom to master bedroom with full bath and closet. convert e utility to new full bath. convert e kitchen and breakfast nook to media room, storage, laundry. convert e powder rm to laundry.\",\n      \"estimated_cost\": \"150000.0\",\n      \"neighborhoods_analysis_boundaries\": \"Outer Richmond\",\n      \"zipcode\": \"94121\"\n    },\n    {\n      \"permit_number\": \"202507312004\",\n      \"permit_type_definition\": \"additions alterations or repairs\",\n      \"status\": \"withdrawn\",\n      \"status_date\": \"2025-09-18T00:00:00.000\",\n      \"filed_date\": null,\n      \"issued_date\": null,\n      \"description\": \"1/f: convert storage to an adu to include: 1 bedroom, 1 multi-purpose room, 1 living room, two 3-fixture bathroom and 1 kitchen.\",\n      \"estimated_cost\": \"80000.0\",\n      \"neighborhoods_analysis_boundaries\": \"Outer Richmond\",\n      \"zipcode\": \"94121\"\n    },\n    {\n      \"permit_number\": \"202506168765\",\n      \"permit_type_definition\": \"otc alterations permit\",\n      \"status\": \"withdrawn\",\n      \"status_date\": \"2025-09-16T17:00:26.000\",\n      \"filed_date\": \"2025-06-16T12:51:56.000\",\n      \"issued_date\": null,\n      \"description\": \"2nd & 3rd/f: combine e)sunroom(208) w/ e)bedroom(206) to master bedroom w/full bath & walk-in closet. convert e)utility rm to n)full bath. convert e)kitchen & breakfast nock to bedroom, walk-in closet, stotage & laundry rm. convert e)powder rm to laundry. open up dinning & living to a open kitchen.\",\n      \"estimated_cost\": \"200000.0\",\n      \"neighborhoods_analysis_boundaries\": \"Outer Richmond\",\n      \"zipcode\": \"94121\"\n    },\n    {\n      \"permit_number\": \"202502100025\",\n      \"permit_type_definition\": \"otc alterations permit\",\n      \"status\": \"reinstated\",\n      \"status_date\": \"2025-09-09T15:50:43.000\",\n      \"filed_date\": \"2025-02-10T11:58:25.000\",\n      \"issued_date\": \"2025-02-10T15:15:55.000\",\n      \"description\": \"kitchen and bathroom remodel units (779 and 782) no wall removal. in kind remodels, all fixtures to remain in the same location. each unit (779, 781) to have 2 bathrooms and 1 kitchen remodeled. total of 4 bathrooms and 2 kitchens. each bath approx 48 sq ft. each kitchen approx. 120 sq ft.\",\n      \"estimated_cost\": \"150000.0\",\n      \"neighborhoods_analysis_boundaries\": \"Outer Richmond\",\n      \"zipcode\": \"94121\"\n    },\n    {\n      \"permit_number\": \"202508062425\",\n      \"permit_type_definition\": \"otc alterations permit\",\n      \"status\": \"issued\",\n      \"status_date\": \"2025-08-21T15:00:59.000\",\n      \"filed_date\": null,\n      \"issued_date\": \"2025-08-21T15:00:59.000\",\n      \"description\": \"3rd flr - interior model: combine(e) sunroom(room 308), with (e) bedroom (306) to master bedroom w/full bathroom and walk in closet remodel (307) convert (e) utility room to (n) full bathroom, conver (e) kitchen and breakfast nook to media storage room and laundry room. convert\",\n      \"estimated_cost\": \"150000.0\",\n      \"neighborhoods_analysis_boundaries\": \"Outer Richmond\",\n      \"zipcode\": \"94121\"\n    },\n    {\n      \"permit_number\": \"201006225012\",\n      \"permit_type_definition\": \"otc alterations permit\",\n      \"status\": \"complete\",\n      \"status_date\": \"2011-01-11T00:00:00.000\",\n      \"filed_date\": \"2010-06-22T11:28:05.000\",\n      \"issued_date\": \"2010-10-26T16:07:09.000\",\n      \"description\": \"replacement in kind of damage (e) exterior wood staircase in lightwell\",\n      \"estimated_cost\": \"20000.0\",\n      \"neighborhoods_analysis_boundaries\": \"Outer Richmond\",\n      \"zipcode\": \"94121\"\n    },\n    {\n      \"permit_number\": \"9011117\",\n      \"permit_type_definition\": \"otc alterations permit\",\n      \"status\": \"complete\",\n      \"status_date\": \"1990-10-23T00:00:00.000\",\n      \"filed_date\": \"1990-06-06T00:00:00.000\",\n      \"issued_date\": \"1990-06-06T00:00:00.000\",\n      \"description\": \"install sheetrock at pantry walls and ceiling & cabinets.\",\n      \"estimated_cost\": \"7335.0\",\n      \"neighborhoods_analysis_boundaries\": \"Outer Richmond\",\n      \"zipcode\": \"94121\"\n    }\n  ],\n  \"source\": \"DataSF — Building Permits (i98e-djp9), https://data.sf.gov/d/i98e-djp9\",\n  \"data_as_of\": \"2026-07-29T01:05:04.000\",\n  \"from_cache\": false\n}"
+          }
+         ],
+         "structuredContent": {
+          "address": "781 20th Av",
+          "neighborhood": "Outer Richmond",
+          "zipcode": "94121",
+          "permit_count": 8,
+          "permits": [
+           {
+            "permit_number": "202604270175",
+            "permit_type_definition": "otc alterations permit",
+            "status": "issued",
+            "status_date": "2026-07-27T11:26:44.000",
+            "filed_date": "2026-04-27T14:04:59.000",
+            "issued_date": "2026-07-27T11:26:44.000",
+            "description": "revise bpa 2025-0826-3948 to change beams 3b1 and 3b2 from previously specified steel members to wood members, change beams 1b1 and 1b2 from previously specified steel members to wood, provide additional supporting post and foundation elements, no changes to architectural floor plan.",
+            "estimated_cost": "1.0",
+            "neighborhoods_analysis_boundaries": "Outer Richmond",
+            "zipcode": "94121"
+           },
+           {
+            "permit_number": "202508263948",
+            "permit_type_definition": "otc alterations permit",
+            "status": "issued",
+            "status_date": "2026-02-24T12:43:25.000",
+            "filed_date": "2025-08-26T15:30:26.000",
+            "issued_date": "2026-02-24T12:43:25.000",
+            "description": "2nd fl: combine e sunroom with bedroom to master bedroom with full bathroom and walk in closet. convert e bedroom to master bedroom with full bath and closet. convert e utility to new full bath. convert e kitchen and breakfast nook to media room, storage, laundry. convert e powder rm to laundry.",
+            "estimated_cost": "150000.0",
+            "neighborhoods_analysis_boundaries": "Outer Richmond",
+            "zipcode": "94121"
+           },
+           {
+            "permit_number": "202507312004",
+            "permit_type_definition": "additions alterations or repairs",
+            "status": "withdrawn",
+            "status_date": "2025-09-18T00:00:00.000",
+            "filed_date": null,
+            "issued_date": null,
+            "description": "1/f: convert storage to an adu to include: 1 bedroom, 1 multi-purpose room, 1 living room, two 3-fixture bathroom and 1 kitchen.",
+            "estimated_cost": "80000.0",
+            "neighborhoods_analysis_boundaries": "Outer Richmond",
+            "zipcode": "94121"
+           },
+           {
+            "permit_number": "202506168765",
+            "permit_type_definition": "otc alterations permit",
+            "status": "withdrawn",
+            "status_date": "2025-09-16T17:00:26.000",
+            "filed_date": "2025-06-16T12:51:56.000",
+            "issued_date": null,
+            "description": "2nd & 3rd/f: combine e)sunroom(208) w/ e)bedroom(206) to master bedroom w/full bath & walk-in closet. convert e)utility rm to n)full bath. convert e)kitchen & breakfast nock to bedroom, walk-in closet, stotage & laundry rm. convert e)powder rm to laundry. open up dinning & living to a open kitchen.",
+            "estimated_cost": "200000.0",
+            "neighborhoods_analysis_boundaries": "Outer Richmond",
+            "zipcode": "94121"
+           },
+           {
+            "permit_number": "202502100025",
+            "permit_type_definition": "otc alterations permit",
+            "status": "reinstated",
+            "status_date": "2025-09-09T15:50:43.000",
+            "filed_date": "2025-02-10T11:58:25.000",
+            "issued_date": "2025-02-10T15:15:55.000",
+            "description": "kitchen and bathroom remodel units (779 and 782) no wall removal. in kind remodels, all fixtures to remain in the same location. each unit (779, 781) to have 2 bathrooms and 1 kitchen remodeled. total of 4 bathrooms and 2 kitchens. each bath approx 48 sq ft. each kitchen approx. 120 sq ft.",
+            "estimated_cost": "150000.0",
+            "neighborhoods_analysis_boundaries": "Outer Richmond",
+            "zipcode": "94121"
+           },
+           {
+            "permit_number": "202508062425",
+            "permit_type_definition": "otc alterations permit",
+            "status": "issued",
+            "status_date": "2025-08-21T15:00:59.000",
+            "filed_date": null,
+            "issued_date": "2025-08-21T15:00:59.000",
+            "description": "3rd flr - interior model: combine(e) sunroom(room 308), with (e) bedroom (306) to master bedroom w/full bathroom and walk in closet remodel (307) convert (e) utility room to (n) full bathroom, conver (e) kitchen and breakfast nook to media storage room and laundry room. convert",
+            "estimated_cost": "150000.0",
+            "neighborhoods_analysis_boundaries": "Outer Richmond",
+            "zipcode": "94121"
+           },
+           {
+            "permit_number": "201006225012",
+            "permit_type_definition": "otc alterations permit",
+            "status": "complete",
+            "status_date": "2011-01-11T00:00:00.000",
+            "filed_date": "2010-06-22T11:28:05.000",
+            "issued_date": "2010-10-26T16:07:09.000",
+            "description": "replacement in kind of damage (e) exterior wood staircase in lightwell",
+            "estimated_cost": "20000.0",
+            "neighborhoods_analysis_boundaries": "Outer Richmond",
+            "zipcode": "94121"
+           },
+           {
+            "permit_number": "9011117",
+            "permit_type_definition": "otc alterations permit",
+            "status": "complete",
+            "status_date": "1990-10-23T00:00:00.000",
+            "filed_date": "1990-06-06T00:00:00.000",
+            "issued_date": "1990-06-06T00:00:00.000",
+            "description": "install sheetrock at pantry walls and ceiling & cabinets.",
+            "estimated_cost": "7335.0",
+            "neighborhoods_analysis_boundaries": "Outer Richmond",
+            "zipcode": "94121"
+           }
+          ],
+          "source": "DataSF — Building Permits (i98e-djp9), https://data.sf.gov/d/i98e-djp9",
+          "data_as_of": "2026-07-29T01:05:04.000",
+          "from_cache": false
+         },
+         "isError": false
+        }
+       }
+      }
+     ],
+     "role": "user"
+    },
+    "invocationId": "e-a496e12f-077e-41d2-b899-b89a2f717376",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {
+      "tool_budget": {
+       "invocation": "e-a496e12f-077e-41d2-b899-b89a2f717376",
+       "count": 1
+      },
+      "case": {
+       "address": "781 20th Av",
+       "permit_count": 8
+      }
+     },
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "id": "d0112e9a-56a9-457d-8877-b79a3c4af81c",
+    "timestamp": 1795446938.985741
+   },
+   {
+    "modelVersion": "gemini-3-flash-preview",
+    "content": {
+     "parts": [
+      {
+       "text": "Il y a **8 permis** enregistrés pour l'adresse **781 20th Ave**. Voici les plus récents :\n\n1.  **Permis n° 202604270175**\n    *   **Type** : otc alterations permit\n    *   **Statut** : Délivré (issued) le 27/07/2026\n    *   **Description** : Révision du permis 2025-0826-3948 pour remplacer des poutres en acier par du bois et ajouter des poteaux de support.\n    *   **Coût estimé** : 1 $\n\n2.  **Permis n° 202508263948**\n    *   **Type** : otc alterations permit\n    *   **Statut** : Délivré (issued) le 24/02/2026\n    *   **Description** : Rénovation du 2ème étage : création d'une suite parentale avec salle de bain et dressing, conversion d'espaces en salle multimédia et buanderie.\n    *   **Coût estimé** : 150 000 $\n\n3.  **Permis n° 202507312004**\n    *   **Type** : additions alterations or repairs\n    *   **Statut** : Retiré (withdrawn) le 18/09/2025\n    *   **Description** : Conversion d'un espace de stockage en ADU (logement accessoire) comprenant 1 chambre, une pièce polyvalente et une cuisine.\n    *   **Coût estimé** : 80 000 $\n\n4.  **Permis n° 202502100025**\n    *   **Type** : otc alterations permit\n    *   **Statut** : Rétabli (reinstated) le 09/09/2025\n    *   **Description** : Rénovation de cuisines et salles de bain pour les unités 779 et 782 (remplacement à l'identique, pas de retrait de murs).\n    *   **Coût estimé** : 150 000 $\n\n5.  **Permis n° 202508062425**\n    *   **Type** : otc alterations permit\n    *   **Statut** : Délivré (issued) le 21/08/2025\n    *   **Description** : Rénovation intérieure du 3ème étage (suite parentale, salle de bain, buanderie).\n    *   **Coût estimé** : 150 000 $\n\nSource : DataSF — Building Permits (données au 29/07/2026).\n\n⚠️ Information générale, pas un avis juridique. Vérifier auprès du Department of Building Inspection.",
+       "thoughtSignature": "EuYGCuMGAWkUfRNXgdiScvX72WovLWRIkeO7CTBmhv32Rh0KYK6t9m3ANGevTXus7VBgjO8HBrPC3NVNkxnBTIeyBuVrCWavUOjm0Vu9woDv5ySHzBGaeuNCRDaAiS5Z8yguMa6xqNhBOf5UpIBRwijJXkClX5fUUpHGCjvOKwVR-hP-tBsOjTtTFGPecuRAwmkaNUB5HD71hWggbHw9MdZwlbo19DjTH_dJeYa_-JkWliEVJcaOeVGmGefZqUaTCxWG7EzxaEP6u0PEmhAEtZ7o3DN4Ym7f4wNiTeA3447oPGOBIXyfa08ru4g0h7siZFYKoF0XcsiQ1BddYAemAN-3OSyiopLeKGyzV5bLblm7qp4Y5cKp9W24zsLrXddLaCNguD9H1YAEMiEMUxXzy7kTn4rrMCzqUfuHBYkhUayULJgY5CBQ4OWITi6OIJww7SY5cPBVbETEUqsqHm18GGf26bXRyuoVlmBbPz6CSHUA21zLpaErmWDh90g99Ph7P2Xe9cfprfrILLmgV-2DJG80LROv-E-_jksvahYlkjAgvwy7ituFG6X6qhjB8bIb3AsBuZQj1v5HdB1Y2KgzzTdceX8VCS0M1Xel5nByeyH-PQFT6lm70GJER-JjrGJt69enL9bGV-_swx-5b36dN5i4nrrZtcBV6IQosVvTFEVMiL1wCNnoxzV4ItD7z2y0GkIYs6URFQe9AQ9SIRuZUL-Iv4v9zV38CnxhbWxaDo6c3Csej2EsFoKLvsBEDvJYLSrqJG9ndCKQh16qDQHuTp3gWwHXg3ueruCml6ad_lbh58YgTyrNaO0lgZrSOr4rjBfI5frPErY6xtgoHR2m3_jpPdtfc43puSUU0gRfuykW3hX08g4bLvpsetRZs9Zd6MQCdPgoM0kV3k7Y5RiIpR8S2WZlD8AndmS5BDXd5EkrW-1v55SYgg_ihC8CDvqWAk2PqApHyl3ayQsYNOa2df0vRFAadcAW0VQza0iNfTKENFpqk5pc-00fAVk1b-x4HyDmDVQUAGRrWuW9_kH5HPxWapHfj3QqFYdnnokkPmAUG6R11PWwwCizURYYKq7BClz4z_B64mhBpDOomXRQnFQPzISvkauV5Io_z2wFYXx8AMg338N0_iuU92i55qphhrfo87EjqCNR"
+      }
+     ],
+     "role": "model"
+    },
+    "finishReason": "STOP",
+    "usageMetadata": {
+     "candidatesTokenCount": 680,
+     "promptTokenCount": 6086,
+     "promptTokensDetails": [
+      {
+       "modality": "TEXT",
+       "tokenCount": 6086
+      }
+     ],
+     "thoughtsTokenCount": 345,
+     "totalTokenCount": 7111
+    },
+    "invocationId": "e-a496e12f-077e-41d2-b899-b89a2f717376",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {},
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "id": "ea7ac086-e532-4a16-b643-faa08aa37a37",
+    "timestamp": 1795446944.1792383
+   }
+  ]
+ },
+ "quels documents faut il pour une renovation de cuisine": {
+  "prompt": "Quels documents faut-il pour une rénovation de cuisine ?",
+  "recorded_at": "2026-11-23 16:16",
+  "events": [
+   {
+    "modelVersion": "gemini-3-flash-preview",
+    "content": {
+     "parts": [
+      {
+       "functionCall": {
+        "id": "call_867432543739268480",
+        "args": {
+         "skill_name": "document_requirements"
+        },
+        "name": "activate_skill"
+       },
+       "thoughtSignature": "Es0FCsoFAWkUfRMsDtpKBTQ4MWg9ykktAiXunOlFNnCxJeVvIbpLJEqVi2Oe1d8KpuICCwPx7okbQXYRVSJl6-fiM3Nm8kAotXEgzM_a_KoHAQTUVV6nxqpwph3ggFpaIGOVdvNb0CC4WeThLVZ-K6xK1nU2Hkyxe8vrrJeLgxPGvnOQGDVjoHOEukae7l_jp95wHKNHuEgCtXkMUYc_3nX9v6zmvq_dsTGnoEPrrurB9lfgmZ6_O29TKFFxaaXb-w2TbxhnE9KnAwbeuqegMC1R5XJWwHQl6LLdz1_RlcxjItt8BuyJs_pU9x5XUxBu_jCkoN_fby8wyp97gKF4aiKbxgNv1cHeP0eMUZASx8wXWhuV3CCvuoOmmCwoqSa3AScx4yNZ6JlEFltk3q4hYBYUZ-o70t5GtdyTCmYWojSk15wcjzYCGM37pjtf6CNcOioyaUR6FwhV19PmmwGE9Qn2hpypLXASH4zWTXr8poETCF9UC2qJm5NW2Gyvb3i_FgLMj-7Me_TzpphFFsZxkp7z3Z9naSlFg5zBsFa3zWEG2C8Hmb6Azz2IjaAwgMxBD2HYhRZcgGplkZ669HRKgJte3HsbGTDrxKsxLJ5QB9OdsZwnDW2pYT3xYDZcLL65bM9hVNPItpWkRKb6jDXE2M-NT3xUU46NIGiY97W_BY67JsE6bm1PiKGgXwmSYoGPo_x0bqbSazGHloNDwfFQ_w9wCOiL62gcRnAnC5YUjbLfOsgv4phehXZtwQld6STM56wD38GUBdcqycjvXdWWOMe6Z_Xa3O2C5vxZ0lqhHtk-XoA_2yq0D7lX1Vl5ok8Y7dNZNt4PpsnO1AxKwaVGOPkE1w7a6dL3yDd3J6DQRgIM5H1CkGRzZLnKPexhJRKLHmz7nVZAX-jzhu9QMpXAdOQogJsRZ_qyHjAYuF71na6SllEEZKgj0Hr9TCxKTGai"
+      }
+     ],
+     "role": "model"
+    },
+    "finishReason": "STOP",
+    "usageMetadata": {
+     "candidatesTokenCount": 20,
+     "promptTokenCount": 1735,
+     "promptTokensDetails": [
+      {
+       "modality": "TEXT",
+       "tokenCount": 1735
+      }
+     ],
+     "thoughtsTokenCount": 135,
+     "totalTokenCount": 1890
+    },
+    "invocationId": "e-fb8c4323-b70f-4170-847b-6d9b337e9270",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {},
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "longRunningToolIds": [],
+    "id": "c46343f4-12bf-4fe1-80c2-a70b36654d40",
+    "timestamp": 1795446946.1382196
+   },
+   {
+    "content": {
+     "parts": [
+      {
+       "functionResponse": {
+        "id": "call_867432543739268480",
+        "name": "activate_skill",
+        "response": {
+         "active_skill": "document_requirements",
+         "allowed_tools": [
+          "search_city_docs"
+         ]
+        }
+       }
+      }
+     ],
+     "role": "user"
+    },
+    "invocationId": "e-fb8c4323-b70f-4170-847b-6d9b337e9270",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {
+      "active_skill": "document_requirements",
+      "case": {}
+     },
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "id": "b26a976a-c216-4eda-8e1a-25661398a5e5",
+    "timestamp": 1795446946.1393657
+   },
+   {
+    "modelVersion": "gemini-3-flash-preview",
+    "content": {
+     "parts": [
+      {
+       "functionCall": {
+        "id": "call_8692049697240100379",
+        "args": {
+         "question": "documents required for kitchen remodel permit"
+        },
+        "name": "search_city_docs"
+       },
+       "thoughtSignature": "EokCCoYCAWkUfROLm9tBk6W8WMrDvwuEEoS6CG3srm5-dTVdsM8k9LtnkaZxKdshmMc9Yh712yRw6ph6xGlONHlo95uXHYsKQAGJ2PrJBGxXPPOdbV8C2D2SYp5aRaUz0Vk6VVuubeTeF2rkNnG_gfkQNIYIlM8gQVViiR1-fpPJNsGIA9PMP7x_-1vY-gJoJZTFw_YQro-pbUAl9SY-xngPIy9yMgcxU__BmzJuLXwGlLlXqXkCTOiSl3a_iWn-1jVhGqwpqfYJzgcBn_VfIX2r69agn3kPiLFQ9JSFBsMXwlK_1D9GeJp5lIKBlbHFzR7pPJsClx-dD2obXCi7vwbndn8H4smEwqH9PA=="
+      }
+     ],
+     "role": "model"
+    },
+    "finishReason": "STOP",
+    "usageMetadata": {
+     "candidatesTokenCount": 23,
+     "promptTokenCount": 2204,
+     "promptTokensDetails": [
+      {
+       "modality": "TEXT",
+       "tokenCount": 2204
+      }
+     ],
+     "thoughtsTokenCount": 23,
+     "totalTokenCount": 2250
+    },
+    "invocationId": "e-fb8c4323-b70f-4170-847b-6d9b337e9270",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {},
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "longRunningToolIds": [],
+    "id": "2c7d60c9-7703-4084-a99a-f85c941a6959",
+    "timestamp": 1795446947.3456004
+   },
+   {
+    "content": {
+     "parts": [
+      {
+       "functionResponse": {
+        "id": "call_8692049697240100379",
+        "name": "search_city_docs",
+        "response": {
+         "question": "documents required for kitchen remodel permit",
+         "passages": [
+          {
+           "doc_id": "DOC-02",
+           "title": "Get an Over-the-Counter permit for your interior residential remodel",
+           "url": "https://www.sf.gov/step-by-step--get-otc-permit-your-interior-residential-remodel",
+           "section": "Check if your project needs plans",
+           "page_type": "Step-by-step",
+           "score": 0.721,
+           "text": "Get an Over-the-Counter permit for your interior residential remodel — Check if your project needs plans\nYou need plans for a:\n\n- Kitchen remodel (changing layout, floor plan or removing walls)\n- Bathroom remodel (changing layout, floor plan or removing walls)\n- Residential interior remodel (changing floor plans or removing walls)\n- Structural repairs and alterations\n- Voluntary seismic upgrade\n- New mechanical equipment installed inside or outside the building (when a building permit is required)\n- New laundry center, washer, dryer, or laundry sink hookups in new/existing areas within the existing building\n- In-kind replacement of garage slab (no ceiling height changes) Note: saw-cutting SOG to repair/replace sewer lines does not require plans\n- Brace and bolt seismic upgrade per DBI Information Sheet S-09\n- Projects that do not require Planning Department neighborhood notifications\n\nHire a designer, architect, or engineer to prepare your plans.\n\nCreate your building project plans\n\nBring two sets of plans when you submit your building permit application.\n\nEmail techq@sfgov.org if you are not sure if your project needs plans.\n\nand"
+          },
+          {
+           "doc_id": "DOC-02",
+           "title": "Get an Over-the-Counter permit for your interior residential remodel",
+           "url": "https://www.sf.gov/step-by-step--get-otc-permit-your-interior-residential-remodel",
+           "section": "Introduction",
+           "page_type": "Step-by-step",
+           "score": 0.717,
+           "text": "Get an Over-the-Counter permit for your interior residential remodel — Introduction\nFollow these instructions for projects like kitchen, bath, and other interior residential remodels.\n\nDepartment of Building Inspection\n\nThe Department of Building Inspection reviews every building permit application for life safety and building code compliance.\n\nMost interior residential remodels can be reviewed Over-the-Counter (OTC). Review our instructions to prepare the right forms and book a time to submit your building permit application.\n\nIf you are a registered contractor, you can apply through the PermitSF portal for in-kind, non-structural kitchen and bath remodeling that does not require plans.\n\nIf your interior residential project is not eligible for OTC review, follow the steps for in-house review."
+          },
+          {
+           "doc_id": "DOC-02",
+           "title": "Get an Over-the-Counter permit for your interior residential remodel",
+           "url": "https://www.sf.gov/step-by-step--get-otc-permit-your-interior-residential-remodel",
+           "section": "Submit your application",
+           "page_type": "Step-by-step",
+           "score": 0.717,
+           "text": "Get an Over-the-Counter permit for your interior residential remodel — Submit your application\nTime:\n\n2 to 8 hours\n\nCome to the Permit Center to submit your application.\n\nIf your project needs plans, bring two sets of plans when you submit your building permit application.\n\nYou will get a building permit application number.\n\nWe will review your application, check your plans, and route your application to the required stations in person.\n\nYou may need to come back on a separate day to finish your plans.\n\nPlease note that the Department of Building Inspection (DBI) is now conducting all disabled access review as part of our plan review.\n\nPlans requiring a DBI permit that are not project managed by the Department of Public Works no longer need to go to Mayor’s Office on Disability (MOD) for accessibility review and inspection.\n\nProjects that began with MOD and remain unapproved will stay with the same plan checker at DBI or will be reassigned accordingly. Please refer to MOD's website for additional information.\n\nHomeowners may obtain a confidential third-party code inspection from a licensed contractor to determine the unit’s existing condition or potential scope of building improvements before submitting an application for a permit.\n\nand"
+          }
+         ]
+        }
+       }
+      }
+     ],
+     "role": "user"
+    },
+    "invocationId": "e-fb8c4323-b70f-4170-847b-6d9b337e9270",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {
+      "tool_budget": {
+       "invocation": "e-fb8c4323-b70f-4170-847b-6d9b337e9270",
+       "count": 1
+      },
+      "rag_sources_this_request": {
+       "invocation": "e-fb8c4323-b70f-4170-847b-6d9b337e9270",
+       "sources": [
+        [
+         "https://www.sf.gov/step-by-step--get-otc-permit-your-interior-residential-remodel",
+         "Get an Over-the-Counter permit for your interior residential remodel — Check if your project needs plans"
+        ],
+        [
+         "https://www.sf.gov/step-by-step--get-otc-permit-your-interior-residential-remodel",
+         "Get an Over-the-Counter permit for your interior residential remodel — Introduction"
+        ],
+        [
+         "https://www.sf.gov/step-by-step--get-otc-permit-your-interior-residential-remodel",
+         "Get an Over-the-Counter permit for your interior residential remodel — Submit your application"
+        ]
+       ]
+      },
+      "case": {
+       "cited_sources": [
+        "https://www.sf.gov/step-by-step--get-otc-permit-your-interior-residential-remodel"
+       ]
+      }
+     },
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "id": "3dd3deae-3696-4d19-9cd8-d9f7d42428fa",
+    "timestamp": 1795446951.6823623
+   },
+   {
+    "modelVersion": "gemini-3.6-flash",
+    "content": {
+     "parts": [
+      {
+       "functionCall": {
+        "id": "call_17344791699317584736",
+        "args": {
+         "question": "forms building permit application interior remodel"
+        },
+        "name": "search_city_docs"
+       },
+       "thoughtSignature": "EtICCs8CAWkUfRPrPcrEnxNFX7B4-pwML3apCU8NdT5JwRYsoQ3ZXa9MmW9Qn9CeOOpikBvJ0QHl0SM-OxE9xAI_3qH35ODUVWFuLrr51eX_OE8xzryw6xKynksyNpPjW1dA9avP8PmXHm_KzhIlKBaRcDksEpbhgFDSvSEv0XwSPuG3RFC3ZckUmrysD8gt7BxqI9JFaNFuxBFGlO22lS1VMg6lVTX_J_sy6XgUQi4dD2eVtMRi4wLKxNBL869_QRs4P5cw9JoT7_HehECbrfjZNrAFZnkr8T9cf5QNxe8ImhZURRVcdkXFHiF44nwzIJqaWwytx4WqKQYpUL0L_JCsomkcP2Eu_qteDzz5-6F-h4SEGVOKRCBue8-ZJKaWzW8B7axU5edENt0ZsBUjLOfYWIFxy-Bqpv16EuVgq0I-AnoLsspnhQYq-kVRdJGAbr_Zv2U="
+      }
+     ],
+     "role": "model"
+    },
+    "finishReason": "STOP",
+    "usageMetadata": {
+     "candidatesTokenCount": 23,
+     "promptTokenCount": 3240,
+     "promptTokensDetails": [
+      {
+       "modality": "TEXT",
+       "tokenCount": 3240
+      }
+     ],
+     "thoughtsTokenCount": 37,
+     "totalTokenCount": 3300
+    },
+    "invocationId": "e-fb8c4323-b70f-4170-847b-6d9b337e9270",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {},
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "longRunningToolIds": [],
+    "id": "d7a5ee06-0e10-4e44-bbd7-821a140f5c4b",
+    "timestamp": 1795446979.6792605
+   },
+   {
+    "content": {
+     "parts": [
+      {
+       "functionResponse": {
+        "id": "call_17344791699317584736",
+        "name": "search_city_docs",
+        "response": {
+         "question": "forms building permit application interior remodel",
+         "passages": [
+          {
+           "doc_id": "DOC-02",
+           "title": "Get an Over-the-Counter permit for your interior residential remodel",
+           "url": "https://www.sf.gov/step-by-step--get-otc-permit-your-interior-residential-remodel",
+           "section": "Fill out the Green Building form",
+           "page_type": "Step-by-step",
+           "score": 0.791,
+           "text": "Get an Over-the-Counter permit for your interior residential remodel — Fill out the Green Building form\nAll building permit applications must fill out our Green Building forms.\n\nFill out the Green Building forms\n\nand"
+          },
+          {
+           "doc_id": "DOC-02",
+           "title": "Get an Over-the-Counter permit for your interior residential remodel",
+           "url": "https://www.sf.gov/step-by-step--get-otc-permit-your-interior-residential-remodel",
+           "section": "Fill out the building form",
+           "page_type": "Step-by-step",
+           "score": 0.789,
+           "text": "Get an Over-the-Counter permit for your interior residential remodel — Fill out the building form\nYou will need property and construction details to fill out the building permit application.\n\nFill out your Over-the-Counter building permit application form\n\nand"
+          },
+          {
+           "doc_id": "DOC-02",
+           "title": "Get an Over-the-Counter permit for your interior residential remodel",
+           "url": "https://www.sf.gov/step-by-step--get-otc-permit-your-interior-residential-remodel",
+           "section": "Submit your application",
+           "page_type": "Step-by-step",
+           "score": 0.765,
+           "text": "Get an Over-the-Counter permit for your interior residential remodel — Submit your application\nTime:\n\n2 to 8 hours\n\nCome to the Permit Center to submit your application.\n\nIf your project needs plans, bring two sets of plans when you submit your building permit application.\n\nYou will get a building permit application number.\n\nWe will review your application, check your plans, and route your application to the required stations in person.\n\nYou may need to come back on a separate day to finish your plans.\n\nPlease note that the Department of Building Inspection (DBI) is now conducting all disabled access review as part of our plan review.\n\nPlans requiring a DBI permit that are not project managed by the Department of Public Works no longer need to go to Mayor’s Office on Disability (MOD) for accessibility review and inspection.\n\nProjects that began with MOD and remain unapproved will stay with the same plan checker at DBI or will be reassigned accordingly. Please refer to MOD's website for additional information.\n\nHomeowners may obtain a confidential third-party code inspection from a licensed contractor to determine the unit’s existing condition or potential scope of building improvements before submitting an application for a permit.\n\nand"
+          }
+         ]
+        }
+       }
+      }
+     ],
+     "role": "user"
+    },
+    "invocationId": "e-fb8c4323-b70f-4170-847b-6d9b337e9270",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {
+      "tool_budget": {
+       "invocation": "e-fb8c4323-b70f-4170-847b-6d9b337e9270",
+       "count": 2
+      },
+      "rag_sources_this_request": {
+       "invocation": "e-fb8c4323-b70f-4170-847b-6d9b337e9270",
+       "sources": [
+        [
+         "https://www.sf.gov/step-by-step--get-otc-permit-your-interior-residential-remodel",
+         "Get an Over-the-Counter permit for your interior residential remodel — Fill out the Green Building form"
+        ],
+        [
+         "https://www.sf.gov/step-by-step--get-otc-permit-your-interior-residential-remodel",
+         "Get an Over-the-Counter permit for your interior residential remodel — Fill out the building form"
+        ],
+        [
+         "https://www.sf.gov/step-by-step--get-otc-permit-your-interior-residential-remodel",
+         "Get an Over-the-Counter permit for your interior residential remodel — Submit your application"
+        ]
+       ]
+      },
+      "case": {
+       "cited_sources": [
+        "https://www.sf.gov/step-by-step--get-otc-permit-your-interior-residential-remodel"
+       ]
+      }
+     },
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "id": "cafaf87b-e82a-4232-930e-52ef8e19f874",
+    "timestamp": 1795446979.839772
+   },
+   {
+    "modelVersion": "gemini-3.6-flash",
+    "content": {
+     "parts": [
+      {
+       "text": "Pour une rénovation de cuisine à San Francisco, les documents et formulaires requis sont les suivants :\n\n1. **Formulaire de demande de permis de construire (Over-the-Counter / OTC)** :\n   * Le formulaire de demande de permis de construire renseigné avec les détails de la propriété et du projet. \n   * Source : Get an Over-the-Counter permit for your interior residential remodel, Fill out the building form (https://www.sf.gov/step-by-step--get-otc-permit-your-interior-residential-remodel)\n\n2. **Formulaires de construction écologique (Green Building forms)** :\n   * Les formulaires Green Building obligatoires pour toutes les demandes de permis de construire.\n   * Source : Get an Over-the-Counter permit for your interior residential remodel, Fill out the Green Building form (https://www.sf.gov/step-by-step--get-otc-permit-your-interior-residential-remodel)\n\n3. **Plans du projet (si applicables)** :\n   * **Deux jeux de plans complets** sont nécessaires si la rénovation implique un changement de disposition/agencement, de plan d'étage ou la démolition/modification de murs.\n   * *Exception :* Pour une rénovation à l'identique (*in-kind*) et non structurelle ne nécessitant pas de plans, un entrepreneur enregistré peut effectuer la demande en ligne via le portail PermitSF sans soumettre de plans.\n   * En cas de doute sur l'obligation d'avoir des plans, vous pouvez contacter l'équipe technique par courriel à `techq@sfgov.org`.\n   * Source : Get an Over-the-Counter permit for your interior residential remodel, Check if your project needs plans & Introduction & Submit your application (https://www.sf.gov/step-by-step--get-otc-permit-your-interior-residential-remodel)\n\n⚠️ Information générale, pas un avis juridique. Vérifier auprès du Department of Building Inspection.",
+       "thoughtSignature": "EvgRCvURAWkUfRNxciFcGe40FqzzPpzIc5x-3hVUc9fpdwjx2SosGeKT2-C9qnF2FfMP91shnet8wGyj4Owy5BZ-yP3B9-mWmEuhQt4OHHvbQ6gN3anLvU8C7PO-E3AmF-1i_7z9yNAqZMQ06xzYT1ddXWkd7aqBhUXCchq1FYzqLCIR5UMUwxzDinOf0t5Cthh16bh5bT9EUL25uSHAiFxVU3Jx_dCpWNasoyzF2XDmqUh3wPeYGUTgaVUAOxYtrFKdrNq_RLN8qf64T1sIaywo043dqwJvgV1Ez15SDgvpjCu8LrlAm5KTNIlFhv4B4W8onlvYD3dHQW0u8RCRubh8NA6Dhl3gK5yqzzZYTMTNNznCk4-e7F5P-m1Lvv0URM_SAFANK_GR9-yBjtBQi0-GG_fMRhXZaoAUz0o_5Q6zr6JXLLwlADTo2LJkDcKe4TU1KtBInF_5-XgrSmJXZGOLn2MgxSgFaPkcoMmixWWOMbFC41Q4P7eI-GRPsofLqvvFJyjSpUjtnDJYrvMBpVxnQ5vHYMyXp1loF8Bg66fZzk7W06dSEtq4QwRunRS8TNG4thiydkhvGgz_n0TOtKJczDQGMDw4iVuqSLFgR4tnv6AOuYAgiJRe35JHKlBwVh095kwgfET_LzGfetvIayVbmJVudD9V3Ff2OknqiDEKHnOCztlsKaZ0prTjVh3gfDObzh_7thNGVLZYRTWjcD6Q9EYFAu5PFSi0J86oZhaZUyPYy-i11pz_6DjzsAhKWXCcjht49W7HxLXWuGwZop0ygvwLSlvb3XOTWF05jMiLgaY5qjkWRUkhH2oWAdcFGlgOXoQt_1K8zKVGkQAaobpyfV5YYkc1l2NhJH0_FZTEA5OgklHkJpvJ21UioEN4N5cPNNDf2_ddSqxNr8a0dd0S9vclGP1sIZz3liOc9zeOLmDGk5Z-U9iQISJ6HXQZXN_VcgAE-4dea-PWVfsUBqzhNFXiDddWLcjPJAEw7k6WqsA5yqlrPncoGMAZbdR2r5eoZ9zxJiqD5UPfEeqyuX8aphcaN7sUhx__2MmgGMXHeQox1qfNYwj4Vqi47mrWV8E5F13ojOYtMU6C6FTr8R11JNuLXM9Nljo2JvU0aG-oybtMKamaDS5etGVnXbAVMpECEuh1HrAvu1n8z_ILeGH1S5mFHDpzigHJBpWdR4MKUG_bZjAj7kjRC5zJJPKAiLgN0gZ5s97v_y7ekNhYSuuLlnJfe3ewEmxL-Vv98VCkE6lgHC1PskXSF23TnyDK8NUAFIPjFHhY4KgeVMiBb86So1_SaJm34w6PlwymN8B1MlAboWOeD5JlYojBVrsoklEbL3CJoBR_piPFNXLFifn_TCjs1mSi2au04azI21wlxsfrAhdg3pk77yK4f-Z_qwrnnAg5HfOSVLC59122nlAC9ePpR2Mr0L_Zftw5h0OuP3zYMYqACEDmQwzxMjG-BLuroSibAHrAOKZ_P5rAP-YwBo3sBU4TpGpTj_XzTDzhzuS-O3l94GwmdTt7gdmSbK7Lrcf731_QKKtxjDO_lIzx6cwax8npcPXFtmA-FxZyH9SxAW8kY3pbgQJi9BCfSzYe37WXKlFilavROJb2L9eJgWOpmpovctJnoktbabWkMkv1OZFBXqm9QkmxmlmIHNtDhWQOW_7XOwZdgLYA17a6EIo8krUDVJ_tVPiHooLZ3rix6hrW0LO_67qgeEioXWxWy6y55EReu0D1Sgj3f2GB9HwzLfthA-ou62_m4xX6Aq-RrIbBSbryrobcmOaClbtWGuYgrbrYqAOVwbbFhNy4pyFs1FLQkqLp2o3fqW20PwkRXAO-LebHHExeJaYwf454GlaefjcmizM87UCkFbm31DKRnqjt3eYWXrCIECQV-bmP1aQTSudoQNp6f1blJRocFHnG3Tg8U-D9M3l4ockKUWZaGQEKFEdAmkDFptl5TeefWSt4RGsgVjfTnF-EsafkjZqPZCfTjTvsgA5KHtKGQHmfyzPfb3Lekipb1O9kKwKpaZOubQfkUVbYnMunj6Zyo2tduLeL97ShoA4JjbapDwO6STNL98Fp7c2yfNkk8pr8uFKF6PHDGjr35CNPV-ALiyYtJvTkGOcZvZnhvR8-LYODLbFhraIGEdYKnXRgygOhk1PQRCsbMDHT2sgRwQHdKK1HPuEePktKJmF44fPk4pipcK5MBb64R2IcKASJGHDcBzo0sZl3ZH_g9DXw3lhQrPbtlKh2YzC2xKuwu5UcSnPKgCEeAvMbT3KPTd-2NPwqzra7kAZInbF-jEP3SxovmHoq1Xotmhb6fb4vTdtcrnjrLAfY-D-kvW9dn-FS3hMDlMhIx_RLq06Pdj8QDGe-9NjRr97ns55IJqAXe5KLtb4thKrz07e78vuhkuoiNw00SU2TYMAKaWqB0IndTRXe_CR4Q7g30jEJzOkaYHeoA4uaIZw1t1fnv7kxUOsTdkRrNGCIxqFAlnxlRH_KSt-M4e9Rib5h1v_RwvOjgPcKiI6l6qMYdPrJyP7LCtDFtoHRa9RSeUY98nBa3lQ8jN6dQZeajJ_H5FhJbbdUCvtaw5elk6HE4ovQ7-MxG-QPGvShyzeCSrz7Tjpsf1plHK2k84PEPS9AGtk4b2IEf-JioeBTbe8ByOVQLbEIIBjBl6lNMq85Q_AsNfU5YOuSAn-DwEnuq3aybBPnLDRhXk_QBDGe1Kng8pN08nsGb4OmT_kyG6cMNMWjLjKh34X9jQpt90qtrPnBpRpBuNhXfv0NIaFppFpxMitW7Uwh_qCE_-X4qeXJ6aM8c5JqeeVqYiv6QFmJw_6C3iPoAg7Q3boQmg8Anu4OiFm50XG6mwUeJTVWTs4PmFyu42almeJ8621wovE_DnjvHg1VmoSBrwS5irljyH4lSqKNJ-3BbRQGBPV2AV42lvSo1eeLwo_jQnjswC3B_W8G1ZpFzkk83AfAKjotHy7L8ntZpw9X7xizP79mt8g7_jxwZmbWv8eLszZ4bCQX_N_Lnu9OfPDOK85ewtA7vxnjRm0RfoDpDh0BiM2npdZPgShXKg=="
+      }
+     ],
+     "role": "model"
+    },
+    "finishReason": "STOP",
+    "usageMetadata": {
+     "candidatesTokenCount": 437,
+     "promptTokenCount": 3957,
+     "promptTokensDetails": [
+      {
+       "modality": "TEXT",
+       "tokenCount": 3957
+      }
+     ],
+     "thoughtsTokenCount": 548,
+     "totalTokenCount": 4942
+    },
+    "invocationId": "e-fb8c4323-b70f-4170-847b-6d9b337e9270",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {},
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "id": "65ee39fc-6303-465f-a64b-c7cd008f4f06",
+    "timestamp": 1795446984.466934
+   }
+  ]
+ },
+ "quels documents faut il pour poser des panneaux solaires": {
+  "prompt": "Quels documents faut-il pour poser des panneaux solaires ?",
+  "recorded_at": "2026-11-23 16:16",
+  "events": [
+   {
+    "modelVersion": "gemini-3.6-flash",
+    "content": {
+     "parts": [
+      {
+       "functionCall": {
+        "id": "call_6776093966374042845",
+        "args": {
+         "skill_name": "document_requirements"
+        },
+        "name": "activate_skill"
+       },
+       "thoughtSignature": "EpMGCpAGAWkUfRPWYtvopkYLd7Ui9ij72WShjPKBzRauc-IWJfohMbGjAaDLGexI18LY1Jc2cmxBg9fprYF7TrY_XwVBx1wFbSk_Tv0DRXlCqe3VNonYWrrFh4NrrVRh6un0Qov9X8yfXeBru6_mdPPpv3aW6AyNveF2wT4Mo2lTISNP2gve3FBqzu6HpC0BOjz-mTkmzz8CtnbjeVn-nf4v1tkmUYXdS3g9p_TSYth5sOPbyj8VpaR0yXsVSnhpQo11L5Sji97FaoNjNL7U0lJ5iTniiYGOSt7bjQwx6QhoCLYyMGpQv12tKtCPkFvseWYdg7a27OYmCoSCC7s9Sj8oSmP9pkohZT1MShGxRfjxj6Y45eQEznmSIAwt-CIfta70YTpdwdy3tLLhmwL0HUnQqon1uPota85zlPV5-5lC6rj51iorVpUxVs5R4pVGgolPIavSIu6D3TGR5OB9oAwq72T0sdlSO_SUfqC9bZDhYmFVueg5atRonGGfzw1JHvetqQMsYvavD8vBcKb6M4B1sH6eZl4SI9mt6U3rPrdbPmJFv96exBTyESNZGC605yJ8s9U2WvAiEAjo1bsnBBi71NFkVF1VsEmo_rPnVtIv8ewVkxYvd8HeWszGbmUiExnV8x2_a3J0uqBlxUGforuH4zDKoB_uFp4ZkwITsuMc4RnIxo1eeCBfz6rKjBpTWc8MM4SksnYmwmoaIyiXrNfEGUUUQ93tZU7lHehrdX0QMyygXQsbrw9ODZNykhZ6WY3XxrgYdOl8KsnzOmBkHwzrVJ3BSQrjXoOqbQ0rPgHvVbmyD5LPD1TNdBwb96rcahY7u5Pj-Am2351GH4VZC2UxoeTodW0Si7q5-hUaTWle-DAoifb-KbT4g0SKgpvqC2XUhXW7Ruzm-4Gh3vdUi9SbPNnZjAd0mn4wRUY6qA7f1SsYEsChUygaNOuOE2OUv34OEgqLh9Rn28k0f8JS4omyqbc0NrKAOKw0_2mLYZEkBFaZk3AUcYvKwPkRV0V2WDspvhNGDdRaayYt35dPXrd7AJhqnA=="
+      }
+     ],
+     "role": "model"
+    },
+    "finishReason": "STOP",
+    "usageMetadata": {
+     "candidatesTokenCount": 20,
+     "promptTokenCount": 1735,
+     "promptTokensDetails": [
+      {
+       "modality": "TEXT",
+       "tokenCount": 1735
+      }
+     ],
+     "thoughtsTokenCount": 149,
+     "totalTokenCount": 1904
+    },
+    "invocationId": "e-b04e0fac-c934-4afb-b7c7-48204a626075",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {},
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "longRunningToolIds": [],
+    "id": "ec289027-3050-4822-9df8-c13444ee5e08",
+    "timestamp": 1795446987.021014
+   },
+   {
+    "content": {
+     "parts": [
+      {
+       "functionResponse": {
+        "id": "call_6776093966374042845",
+        "name": "activate_skill",
+        "response": {
+         "active_skill": "document_requirements",
+         "allowed_tools": [
+          "search_city_docs"
+         ]
+        }
+       }
+      }
+     ],
+     "role": "user"
+    },
+    "invocationId": "e-b04e0fac-c934-4afb-b7c7-48204a626075",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {
+      "active_skill": "document_requirements",
+      "case": {}
+     },
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "id": "37492950-2b10-4ff3-974c-101180091d72",
+    "timestamp": 1795446987.022319
+   },
+   {
+    "modelVersion": "gemini-3.6-flash",
+    "content": {
+     "parts": [
+      {
+       "functionCall": {
+        "id": "call_1199940714446967914",
+        "args": {
+         "question": "documents required for solar panels permit"
+        },
+        "name": "search_city_docs"
+       },
+       "thoughtSignature": "EuEHCt4HAWkUfRMaDK5ktmjoe1ydaXt_E0a0h78OnrcPrhmn8lWKaXGmFK_sf25rwgxhKjyBQ80VRLFB-pd3esK8hgfpJp3cl8sG9mq1JdLHbyHywV2Brqg8J8Zrvf2IPheLpCinhTS7MZV9eFq1qIcdYOLcfh1v9OQ0Mga4eh4e5m1LXkAvxy6JVZrKi6fgJVmosaHYjZzwmDoTBkX_CImVlP78yqZsH5a5Mds3qgGBGIFziP16PIwR8BDAigS7p8OGD_8Z9q6iBfNwUr6QB43kfDcjK2YRRE5xWpglWKpeguRyGDIRuqGAu0d9mQTz4NxKXf7hbx-lmlMPK8aotK9qN4rVVtDaUvaLl6KN-n2v5nMrsQf59cxVzLcllYt6pxqYwWQVu8sI-VMo4jnE6cQ7_V53jyUGwUScxJ6IZO3XY94mNNFphAQglm0j0RJQJc7qMtbuCFztv2Sel7lP6xUr5NFZaT1hL6SeyaQhKNkGKYcKFakgX1orTl5mTDn5eEU0PkLbNdC4txyfELjoNQMG9UAJyQC6U8w6AcPGYOuP-63tfrtRTfaE0X-gAfrRSNedGUdH9YnM1cKisqEctE9gC5Mz_HqyNqRjK6LBeaGF0Zl7zWBNpAM297j5soQ3QGnctCPANKBtlVYTrOWBa0rl9jf-OeGr_0Cj3PqmCvZy9y6Uq_Tzlsq-VvGOcM6RxZ4liw4GX7Uc_QZZte_CwvBABxO6iW_4W-MpVL6cBdznx4b5-WZELTyncRk55eqKaq8giTnpXYSUUx-YozhuYa5xuq3okT0rC8dntK7d2lrmxn0WXEjruxni4S2n6UqU5me2grB5EthlTBHqifDKXbp2mLacmOsF8wDGMhef_LDHVUsXAlkBNhFVPeCqTaz6ebev8oiFvnLjk6Ydd8p0O-3JdwKsj2-uRuUB9y7NYOGJL98gkxbNJU9Ffk7ktYkX3PH4y5338IZPDSTCnPP0Ld28bGF1jOiQMFn6qWXsCr6VNtOK4KyENrsvvszP9TVw-5J-4raDKfrPr3O_9R0gnAQNIhdM654JJw_ivaDimKebwvD8bomhOTTmTEIoL2pYJ8jKQ9s3tKjH1CIy_KV4UFLqgLdtaS8jMGnS1UC9ONEZLdYtDdaCruK7feg5QZEbQ7B-tMw084_xwb8z-KXOUmbMKm_WH2JUJfB0isgrnSYA4PhYCy9pDakcHWDDW1kTnAH4uPVN9Akn-vvAVRBEyVg2b2EGFokg1Qm0hubcfj78UG21n-PUBqTy9kJZ16l5ArURf4UnVVPe3b42JAb-a7ecntz6JrQks3JzRlhCcwzUj8MH"
+      }
+     ],
+     "role": "model"
+    },
+    "finishReason": "STOP",
+    "usageMetadata": {
+     "candidatesTokenCount": 23,
+     "promptTokenCount": 2218,
+     "promptTokensDetails": [
+      {
+       "modality": "TEXT",
+       "tokenCount": 2218
+      }
+     ],
+     "thoughtsTokenCount": 192,
+     "totalTokenCount": 2433
+    },
+    "invocationId": "e-b04e0fac-c934-4afb-b7c7-48204a626075",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {},
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "longRunningToolIds": [],
+    "id": "7553f0aa-9bb9-4999-9894-58ba029c9104",
+    "timestamp": 1795446991.0955565
+   },
+   {
+    "content": {
+     "parts": [
+      {
+       "functionResponse": {
+        "id": "call_1199940714446967914",
+        "name": "search_city_docs",
+        "response": {
+         "question": "documents required for solar panels permit",
+         "passages": [
+          {
+           "doc_id": "DOC-11",
+           "title": "Get a permit for a solar photovoltaic system",
+           "url": "https://www.sf.gov/step-by-step--get-permit-solar-photovoltaic-system",
+           "section": "Solar Permit and PV Plans",
+           "page_type": "Step-by-step",
+           "score": 0.769,
+           "text": "Get a permit for a solar photovoltaic system — Solar Permit and PV Plans\nProvide structural drawings and calculations stamped and signed by a California-licensed civil or structural engineer, along with the following information:\n\n- Number and type roof coverings installed\n- Type of roof framing, size of members, and spacing\n- Weight of panels, support locations, and method of attachment\n- Framing plan and details for any work necessary to strengthen the existing roof structure\n- Site-specific structural calculations\n- Where an approved racking system is used, provide documentation showing manufacturer of the rack system, maximum allowable weight the system can support, attachment method to the roof or ground and product evaluation information or structural design for the rack system\n\nThe City will review your submittal and provide comments via email or in a Bluebeam session. You will revise the plans and either return them via email or in the project Bluebeam session.\n\nSolar Permit holders will also receive a permit number that can be used to track the plan review and inspection process online.\n\nOnce all the comments are addressed, the application will be approved.\n\nSolar Permit applicants will receive an email notice with a link to pay any remaining permit fees. Once the fees are paid, you will be emailed an electrical permit and job card."
+          },
+          {
+           "doc_id": "DOC-11",
+           "title": "Get a permit for a solar photovoltaic system",
+           "url": "https://www.sf.gov/step-by-step--get-permit-solar-photovoltaic-system",
+           "section": "Solar Permit and PV Plans",
+           "page_type": "Step-by-step",
+           "score": 0.756,
+           "text": "Get a permit for a solar photovoltaic system — Solar Permit and PV Plans\n3C. Solar Permit and PV Plans\n\nThe building type determines which of two PV system permits you should apply for:\n\nSolar permits are available for projects in single-family homes, duplexes and townhouses.\n\n- Permit application is submitted online using a digital permit application form – Apply here.\n- All supporting documentation is uploaded through a web portal.\n- Comments will be emailed to you for plan revisions or additional information. Bluebeam account holders can also access and respond to comments in the program.\n\nSolar permit fees are paid when the application is filed and again when the permit is issued.\n\nPV Plan permits are available for projects in all other residential and commercial buildings including apartments, condominiums, retail, churches, etc…\n\n- Prepare your PV plans using this format.\n- Use our solar permit application PDF generator to complete your application form.\n- Permit application is submitted through email using an online permit application pdf generator.\n- Email your application and supporting documentation to DBI.pvplans@sfgov.org.\n- Use the subject line “New PV Application from (Your Name or Project Name).”\n- Comments will be emailed to you for plan revisions or additional information.\n\nPV Plan permit fees are paid when the permit is issued.\n\nAside from the applications and format, both permits require the same documentation and the same information:\n\n- Plan drawings for projects.\n- Data sheets for projects.\n- Structural review for projects."
+          },
+          {
+           "doc_id": "DOC-11",
+           "title": "Get a permit for a solar photovoltaic system",
+           "url": "https://www.sf.gov/step-by-step--get-permit-solar-photovoltaic-system",
+           "section": "Determine the type of permit needed for your solar PV system",
+           "page_type": "Step-by-step",
+           "score": 0.747,
+           "text": "Get a permit for a solar photovoltaic system — Determine the type of permit needed for your solar PV system\nSome solar projects require an electrical permit and building permit while other projects can obtain an electrical permit using SolarAPP+, applying for an online solar permit or by submitting solar PV plans to the Department of Building Inspection (DBI).\n\nGo to step 3A - Building Permit to apply for a building permit for your solar PV system if your project is being installed on a newly constructed building.\n\nYou will also need to obtain an electrical permit after the building permit is issued.\n\nGo to step 3B - SolarAPP+ to get your Approval ID, Inspection Checklist, and Specification Sheet enabling the issuance of an instant, online electrical permit from DBI if your project meets all the following criteria:\n\n1. Is proposed for an existing single or two family home (R3 occupancy), including PV systems 4kWdc and under.\n2. Is the only PV and energy storage system onsite.\n3. Does not include a ballasted or ground-mounted PV system.\n4. Is not a new service or panel upgrade.\n5. Meets all the additional technical specifications detailed here. Chinese Spanish Tagalog.\n6. Complies with SFFD AB 5.12 Energy Storage Systems in R-3 Occupancies.\n\nSolarAPP+ electrical permits are only available to California-licensed C-10 and C-46 contractors registered with DBI. Go here to register.\n\nGo to step 3C – Solar Permit or PV Plans to apply for an electrical permit for your solar PV system if your project meets any of the following criteria:"
+          }
+         ]
+        }
+       }
+      }
+     ],
+     "role": "user"
+    },
+    "invocationId": "e-b04e0fac-c934-4afb-b7c7-48204a626075",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {
+      "tool_budget": {
+       "invocation": "e-b04e0fac-c934-4afb-b7c7-48204a626075",
+       "count": 1
+      },
+      "rag_sources_this_request": {
+       "invocation": "e-b04e0fac-c934-4afb-b7c7-48204a626075",
+       "sources": [
+        [
+         "https://www.sf.gov/step-by-step--get-permit-solar-photovoltaic-system",
+         "Get a permit for a solar photovoltaic system — Solar Permit and PV Plans"
+        ],
+        [
+         "https://www.sf.gov/step-by-step--get-permit-solar-photovoltaic-system",
+         "Get a permit for a solar photovoltaic system — Determine the type of permit needed for your solar PV system"
+        ]
+       ]
+      },
+      "case": {
+       "cited_sources": [
+        "https://www.sf.gov/step-by-step--get-permit-solar-photovoltaic-system"
+       ]
+      }
+     },
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "id": "57255f9c-5da5-4d55-a51b-bd211b1f857c",
+    "timestamp": 1795446991.2799895
+   },
+   {
+    "modelVersion": "gemini-3.6-flash",
+    "content": {
+     "parts": [
+      {
+       "text": "Pour installer des panneaux solaires photovoltaïques à San Francisco, les documents et éléments requis dépendent du type de permis, mais nécessitent généralement les pièces suivantes :\n\n### 1. Documents et études structurales\n* **Dessins et calculs structuraux** tamponnés et signés par un ingénieur civil ou structural agréé en Californie, incluant :\n  * Nombre et type de revêtements de toit installés\n  * Type de charpente de toit, taille des éléments et espacement\n  * Poids des panneaux, emplacements des supports et méthode de fixation\n  * Plan de charpente et détails de tout travail nécessaire pour renforcer la structure de toit existante\n  * Calculs structuraux spécifiques au site\n  * En cas d'utilisation d'un système de support/rayonnage (*racking system*) approuvé : documentation indiquant le fabricant, le poids maximal admissible supporté, la méthode de fixation au toit ou au sol, ainsi que les informations d'évaluation du produit ou de conception structurale.\n*(Source : Get a permit for a solar photovoltaic system, Solar Permit and PV Plans - https://www.sf.gov/step-by-step--get-permit-solar-photovoltaic-system)*\n\n### 2. Pièces administratives et plans du projet\n* Formulaire de demande de permis (rempli en ligne ou via le générateur PDF de demande de permis solaire selon le type de bâtiment)\n* Dessins des plans du projet (*Plan drawings*)\n* Fiches techniques (*Data sheets*)\n* Évaluation structurale (*Structural review*)\n*(Source : Get a permit for a solar photovoltaic system, Solar Permit and PV Plans - https://www.sf.gov/step-by-step--get-permit-solar-photovoltaic-system)*\n\n### 3. Cas particulier : Procédure simplifiée via SolarAPP+\nPour les maisons unifamiliales ou duplex existantes éligibles, la procédure en ligne délivre les documents suivants permettant l'émission immédiate du permis électrique :\n* Identifiant d'approbation (*Approval ID*)\n* Liste de contrôle d'inspection (*Inspection Checklist*)\n* Fiche de spécifications (*Specification Sheet*)\n*(Source : Get a permit for a solar photovoltaic system, Determine the type of permit needed for your solar PV system - https://www.sf.gov/step-by-step--get-permit-solar-photovoltaic-system)*\n\n⚠️ Information générale, pas un avis juridique. Vérifier auprès du Department of Building Inspection.",
+       "thoughtSignature": "EsgqCsUqAWkUfRP6Y3w5dL5aK0FyNAU659fHGT4ohpv0OBumzFFQzKyGPfs7VXyAoDo1tNpXe0R_QkdOme9xedeg8z22kTfxIczyrRnFNh51ENN6j6nVdbUL4OSqu0sG-KLY5_sbIWUa4avgcDqKUKm7n87wdrAe8UmlGeDLpiL1mgSJMWHg9JjUD_jBxHabAHM9sn-WKvmwtZzS8ehTqjePCNwUZxQx5Hfiotst5Tq2pfYCSDk7wpDZpALv6OQZ7WtNXyza5kPxC-dkgZFqplBpZvwOI8X81FZgAVOYTu_K1qkMDAFCxkHHAJitJW61Wi6lGLrGM7jpJhFeAHZVcah95WfYF2IMS5cotZ1jamSbroY4h4u56AYwp-l5FC5lqIrQ5YbXgeOXEFpGUSzAQNsEG3c1kPXlVjU2-hZmB6g0g-gyeNH4TcEU584UEcyOQ2tLWvKtQfvDwNdB_kKtKRkfIGOkU7pcVDAEFa7Q27IfVpZQl4Af2fAA7HdYAR3Gx7cwmwg0tRx9tdwRvLKoNpd5baoA1CRIjgiZIIBc6Q11iDeWVTDoFNCFposOB5hNYRDjTH9rTLLIJJgamRR8t3rLI7_U8our4ulnSeQT2F1bMZlxt345W_tMppFFB8sCN3hWwS43CbZS7FKVQPpzkz47bPF8ya8fyg9TxcmO5g0zZaGy3jiY-1bgI5qgdg8cfZoNj5VK4zIa9n3Ols2xr9ZvdZ2BRakvyjFyXMMKh1Q33rVZ282QOS7y4NDS_RE6J7pGnkCSM1VoJs98uhwWN2g2tC_wc5QCz0qOANIWTQYkYl21bHiu-l6iVCXOXPb4H0Y0vBWQyC17nj6ptSP7MZxiAdtqdsgfnErXOuDswey62fFVe-XSvdI75kxFS8WGPjSluXBAzYp7lQSFNbwkOFsIbTOWM873V3_KJEviZ1ut5xXdYQ-PZNCV5UqmCt1Qr1k5XX0KMlfvrExjEOMjoi2LqjxWhMtgXpTP2TYjyYyhj-qgI7CuU5dMceTmkkZ5JTBE74cE_yfYcf0aiNQwLibYQLY65mnXshNtakkAnCuSqQCXciPzXLs642FY8xRg1ydCglRLh7QvJjGJ32FMSzpYhbQ1fQ0S2cvecOdyWMvT0ChhTVGBHFxvwSWXbueHNWvjy3KQ3eKSYrLX9idK1WOWvdf6Fi640xhUAdIlVKzr8sVDF-yxE2tKKVvsZm3qxHdkeWmTN-TWjKVZczb2SjXcNDTICVjGQykOaSr4NPMEeQp5QZGAS6LvzAlCpgsmJcBSeaGq6KnVvkrdUtvf_wJTPjTt9Pj7Sl0MUIKlNia6ndGBHL8FeH6KQw_V4HeC2zdVFgP75deeBj5EficiuLlaftSxBKVkk-mFafivn-gqQ08iV7G7HmieofT_nCY4PEssOuOVBj47JFytDMFEDqlTc94Ttc-LW4HaCYL4kFtzsNshYXKZAC37mkRIFY5-eu7tsdo3oaR-6OVJXfCOl__8K37G6R0LGVDze7Ucrytf5tYivC93_I6VfJLVclLp5zTf0poal42Y5e-7dH-aT-n1K2FvQY56GmRLUp2WytF9aN9wvSRNkuoFboqBf5dKFjppoNY2kryfi-Jf4p7hei_J9c_ClwYvzeyDOt__9xH2vqqRA0KvSKmHMh8pB8Dm7HeDOr4XcPUeGL30pQpRv4q7voxJtRVY66zaMHGePmpSE0FQzfYO7sFjSQd5DlMnEiPvkd20AkSgtnBOeoYxhf4f2W9Mx_LZMMlZhly3Kju4By64Mi3p5rwU7tRtrV-_A1gcmLO9EcuNRDkxu9tI7RmmABWquuSpz_D7Ija9Qli9XaKv---6JkN-g3fA3HxZaUYVHP1kQd9XXCWherT0p76b6ILupT0TR9Qs7AUwLnvabkSmLT4HpmDHb8hVkYqPoopS09-U7qTnjFL_QbtjjygMS4rC-IcfszAHs1SaOGlt37lAtKFJAkDoE8yd39IVbqUGNimBj_CeE6IHvMGhqp4OwR11OZcWsplbihGloOx6-duFNbxYUeFOmNihp00_EffQckqpXRHKjjYKhBZ1-NgLv9MUrKaHphb1tlswsNkPjPBl7l3F7cecLRPAqD5EF-S95GFV_zR128WRozzLJAtygXsut-ToXl9XCryjR7VxsP-j2DuOKKDRLR_m66GQCYFWd3mxezGLaMFboRZ9PUuXIs9KntRw4QSyjsn1Bk7ThZbqqkkE3U-BUhUyTyHmMSGAQeA7uEx9CSGpdJamm2uovLrCDlWaEBZ3JY3w0chpxKv23GtD7QS1CskvHWc2gboJJY6xDtjQZdGSytVAn0naAvt1PIfC3zHkQ5LLzsMFbnmtbumFGzXk2CvhO8GkNmpBIjeoGMylim8ZbVgyQ7f_xD5h0rtWTltv305Zeneky1N-rjG3Phq6Vgp0JPSghGBjGWOQECzfMhb19-ZFsrLZxGOhLSmPvhA0Qk5iJX2pVVOuH5K--Uhl3AXaleeXex0Mu0oMWCPfCoRYP-NeurWhalz9sWHKcbcpXQayycDTYvW9kh2hhjP-Bv2Z26wTCX4OfDTnHsFcoa9nIiwP8gQC5D5FSZjbDjpYzg0fM5lgRKMZm78BfHIWj_l1NG4UKzQptLaT7zeY3RgEHLOFxPPshhbsQPP5PxFFHnFAKduzAJrjE5LXFm0yb1yef8RCyiAxLrnoU4adAH-kjL-vfwS-YvgpGc4-TwV0j8yDBI93xdm1izkI86q5JdXZvXBKKTNeVUH66wIuzb8E8WXrCJU1TDk_YRhUi3johtGc5dtKRNydLpDMUXd-7heTLnbL_85C3jWhvzURLa0YH5P0_Ln7VNvyp74_65MW673rGWCgOJQOjchroTHy4t9mL1t6WlTf-bvBWp2U3PIx5TEWcm_4q049-BehA7ntMRz8NgKn4nNv5Ql7c0lp9EZwfJUtB1K8o9aGOMrVD677eaI6zJcYAGLNzvhV2FlyMw4ghM8q9e6dYb9VZu9w1TptPFclaBhiwO68Bp-IXCPc2IPRtRImaLWGqmmqLZzWDpKkXumimOARq9UV8TUXv5RZjYR2ivW8ksxNCirwyOpf7PIGI6S1q-bMPsVQrR5OkOhCLUxMtgznkgNk_snQOY9EHNa9SrIlPsunVmSxXzKrRYyETQ7kb-Qeif0313kr1OQ8lLkuLCYx3h2Tu_pceaWwPvjMt9q4RPVkim_nZ_m3H4B0MH7RUq90CcaObRlwDoApFr9KETjP7UZrWhl9HQ0pNbMmbzFORkCUdGfZ3DIgZufzxYG23ftYhFLrqljhmisHiv-xx1Em8iPS1MQL1NIdpHdGHkgKXs2W46MTZmp5P4Nc-lpn7aT7lpyb9AcYJE3-rzKfZImLdJDfoVbRNlZCERYoeYEyVP0BPnXzVy37TiL2AFxk1ii7hIF9tGi0mrdVS-V4z9r36yxVxxcasX1DwrVsWrlC2VGJ1PWN88u2vMajWHl33SiAXXsvHEwxxsbR2Ah8C_J84yIN4jxoM3X1yGwyxfMrwN37foGcc5K8bh2tKcljqrKOSTyYHOdon5VJgDaw5ssmn6_EhsCwOX6kVTlrfvfAX6p563PPphCfIj4vK3GchasrkLSd5Vy0vol-Rj3wxihkjjY3sw9oZM7lArWQOZ25jwkqTJskllnbnuniTsWyytcD0gXYk9TyifL5tf8pqLAk6BqG5T_n9aHmkiDCVdK-9IwM1lOYlHYepw9xgKfMPuz8mZJ8kSEGLch8AFvYYIx1EJpMM7iS3_9TGZJ3-H-8DgIKrZt7lnj0-kHLG3Perqi-INZg-cj7D72VW7PREJH7Hc5qJQMsBphju23ptFUKvoLnYCFRRE9wIaYQtHyWzcBALzxn-V7Un5sN986jIPK4dFJayeU6ysRwzWcK4felune8zO_s1OdyryWu1cddyzXdb-LWnfpVSCfJ0hBZqOaG745H4cmKEljfVhEWwubrXVHd9Eu94lx0BNGgFXTBX-C5VU94V2_bSPsnl5SO4lXq9-8ay9I6NAdNTMChn5JDCvam70iE7ZlLHgnQlocM0YbuvJrB2Br26XJyRmnS91YohDf48W080MNrQ-RaNjgJYOYQZj2PVhe6Eh_GyuACS2xiNcM0jhwcep6CUzT6blebsAR0uEHm3Lo78w0uk-KVMYhKiugcessTzPLWDHy9BcFWulheXuzjrkZ0m_CYvw18jtEvuXLyqW8qiETNtSuXLa4QcR7AhUmW22lOmcN3vReYqyUcIsDHelePZPqPHFTvRMPSCREiIsBr2w8hdpO1g5t_Ch-nwkqzLbsSUOKYUPb4KPCcVFIA5AaMm1jgxgAHsGeprI02BREGw-XwVO1Rm2xc6k8tTtFn5FkvcN3UaOj1Ds_zCjnrI-OUxWj1Sx3GhFSbcSEOCvqFl7AXjCKQ-IV4FY2aUVjOsYve59Khqy4YTJ4Zc8NBjCz2MauhDdKuLcgw8Grd9pr86MFvWWuSEm232HFTJaq9_GAY3KbPgsImoqRwx7qMiZHu7ZyPWRlzVzmF4FclNfHaDd5_FhgfwhtVwDx1-sH1McOM4O-CTokT8_yyObn_duJxKvFEXj9xssvIuSCDUkupKBRoqskdr2HQef214v4nWOgFxcDeacn6tLYycLFpyzVNmpBmx1QMNFibKKiGhomXyR457uBnBFHokRhDvK_CPptfFzZFI6YmoQrmnFcL6bdEG2oP6-VOI6J1HgjbsyUZGpvS5Lp2T9HRNUagYo0KIxh5ngposj4_GsvxWLXX3D-5xRFHgPTGQAwjJKdjHsi81hJwsVH71k7oeZILBMwdZQ8H_CJKAxYmAtk3As06Fjoesf4EioQlAEpcanCTuk8UQYea4h8xdvb5F5DetUeyUMPgmD3zhCO1FWt0XXJGtn3VlwdSvLYtYYyQPBIXr60j_81im50qw8965PX4kK8SGnopEHo_px2eO1kgoHcrvqtIIxIdyfLf1IL5-r-WE-LsL6Bm2PpX8AvAJFlakLB0msb7b9aiAXM-4UhEBQsFRwtT7o8Z4A_LVPnNmddtk7WZETpMlx4or5OIUIdBV4hQmA_rQFm0m2RKt6YpK-cjis6V2TijedkEdasJeW-pyY0TxCSjHPkT-pNWXKkQu4wEAB0Fcm5QetltnxOsEK4Ctzh9sU3VpfWJP7xEmvO2fJU9kVcw0yPOX81sJ4IzNozAF7z3FweUpdMgQAY2AGpen0_hxxGuiWnr84kvb8SuDHDsJfodzEp6QDoETAX_telQZsh2uRkq5p4f-pP4Y7lSSkyjyC1poRzNPChvT0IsllWJlfD6Y5erzaIRPEpf1g7njj7alR7lW4sz80uboHy7TPtNJuKm-X846vYZGOK-zchzGePpo9uI9xbdsA1rFNe-2U41ZiInW0efGnDJQZOlmbMpDVlHuyL4ehXjEODjxEk2IgXL5XjKilxclJJEUL-gr9HBnS9T-027brUba2plcQX66ZjQbztPV76A_LeriBhKnZ3sRujsz9PQQ-02Z_ce8c5-clbeqZknBQRA6oY3W0SD0QFG5K_KtJbGhoDLpm4smC6BnqpiMbSVnN1w2nx4WMr_zWjVipqipGPRKE33E3R6Caw3M5DFX8yrq2nmSYnNHL_oVflR9FjGxc0JmuWgH9lqO8lJDek_8kyHImoNqA41MLB6rXOT2JJzgqvOIi2dpSWLpJGJBOvMm4NJ9byu03f4ntIPrv93Myn7Hf1Q1oGkQ6cCluCevJQcwehKdZDdDABct-y3QI85-s-noENbF_0zrDu_uxtonnjzsalOLSu6tv0K-HLnLcFbYz3cxD8yFRGDMLQpsp3cnQIYHGujT8fjVQxBO056G25YFouxlaUyGpPdwgmjowLreAnCA2umTwgz42vWjflTQGxwWPyhTgaS4gIf6R_WAXpA--uzAku74mJSZVnMIANbZwhszJmOtALVVH2-1HjmtZO4XUQTLrdgxFTvyHdniC-MKm-PYjwW_1h75vairGagjjuuNovGZvuuIfrGiqgluugINwVq0IbpPh7xb-kLYBvk0gcGr_8AhAC_sn7jNGzs-8xY1Np51Ks06OHWEDkIW3YXYswaEuQR1Jf2sP1osh8kdr66X1jLuRRJsL6E-ICTUexv8TWXKZcx1wQvwCTBSyzHZ4tIE2Vz6jHmlFyOZ9zQAbsz64x9_ozxWtE9bBpHI3lSinsBDHKMI2Wdbuy6-A7x3cXxNsL5L9Nsfjd1pGUyHyHMlKaGlaRkFJE1J7NlMnUNEV81Ty1g0jp6jsyuehyOKnUG3BBcgQq_9eSVkO7DeTiWBwxD7mviBELEvHGInC9gjacWGF-1VoefL8GE-vyn7lg4Ttz-otKRR9lmjma5OnRRnBgLZioeYed_VK5f73wp32bJZ9JdoPPoEtPMpEqb7qWrCj4B2LDA2UFiBbi9BNrd4kk2TghbOfCp1pKOrGKnN4xwGysbl-yTCCDXmR8LBpAjQjgl5hVMnnSZ6S9KxIlFMzFQH5xagZDO6PvG5sSif20HiPcyHEV1xOjl_CNEEQOwvFLGgaAulPNBN5f4LFgEbVTJOrQxvi_nkSo0GTHQgxBE7rsDiEvmuDrnHDervIoRwbSE2K_TgLcsXMAiwJDvhXR3l4uCtDrGmnnM6K9QCAQvqbCSFE-yx-DP223BtY3x0LyMalHrs7MfjLxtaxYGqH16s-rdTlhVuFcwS5-8RUfBJzOW8pxFQ02ojvoYPB1lj1bcpCH5VWe6suNo_Yf9rzLVEzlHeWwO1ynMDGwA-GXuUAj_sc7sQxPviNiEIT1LdhN5ptVphhdvPGyzTZmFrij0IFUn84W1NAREhy-vyulDX7PIYRKRSM-Fb7EUV1Xc1T1iPVe6tWZ-U7MIIEMmEHjBJAiLoYFPmV1y6Oay3BSX93usBBzzzS_1bf1QMNaVTxp0cUzbGNe_3a6z87wfB3Pr8n3K49DbYqRonE7rtnZSA8WiqXBHxC1X5qQ-UmRt1ggv-s9y0eqh7yVV0eJHgJnmPxGFPdkgUDPaNBtjvrdbdxSExHIoyvm78ghmv0sDinsuM3Wz1X5E32W0ltw3k36Q2xcXiBtXPAA4E2teLW2333WEHCsztXqSdAtiv6GGhW8KUTRwiVmaQy1QTPbSOqZyTtPtef67a9HnwZCJbOakdSzC7jGQQPZX8IDoguLdZXYDQ_maynnJLpma7MWq4uMmFGXhigwvVbSGddwhR0v5M59HWJyOBKNZsqNaJ2I9eKf3yLU5v0Q95jkF7RjX"
+      }
+     ],
+     "role": "model"
+    },
+    "finishReason": "STOP",
+    "usageMetadata": {
+     "candidatesTokenCount": 536,
+     "promptTokenCount": 3669,
+     "promptTokensDetails": [
+      {
+       "modality": "TEXT",
+       "tokenCount": 3669
+      }
+     ],
+     "thoughtsTokenCount": 1256,
+     "totalTokenCount": 5461
+    },
+    "invocationId": "e-b04e0fac-c934-4afb-b7c7-48204a626075",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {},
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "id": "61a9c60c-0cce-46f9-9f46-df49cc01c010",
+    "timestamp": 1795447015.298436
+   }
+  ]
+ },
+ "prepare le dossier du projet 9 du cabinet": {
+  "prompt": "Prépare le dossier du projet 9 du cabinet.",
+  "recorded_at": "2026-11-23 16:17",
+  "events": [
+   {
+    "modelVersion": "gemini-3.6-flash",
+    "content": {
+     "parts": [
+      {
+       "functionCall": {
+        "id": "call_12036751123907702260",
+        "args": {
+         "skill_name": "submission_prep"
+        },
+        "name": "activate_skill"
+       },
+       "thoughtSignature": "ErkECrYEAWkUfRP-h3fVXDg6xpx4qZkdQ58Hfcg5bGq740p3R4py_AN6gzEvuVIXk05rEiu0WiKK4mzI-8aoIimY4361bOJ1sWORT5hWiWxT04QrUdyXaWM-sUr-yGiEp-R7K_AgmppYJzl8Wal_JrxgSXBt3rRF7vcRpwzpDV70O6-ByTspV2ekDipVfhwEZM5H3A56RkDgbTwEC6U_XBmjIrlgqvKm9Yk3nskALv1VcCFBuLvD3FIqd-dsb3roYvEtOadEv4Af5TaX12xHA0bUHvsxPcyiV6ByH80N0bcRP7O56ee_Z3S6PJDgkyX4UaOzNOLjYwK-ut3SNRdydHjzdj78tg_AR4ImsARCudLMCBG3oKSGEvx6RFSUXH4MeiWPkNvcqWVyw03IWOJjxMTT7zx9d1z3LcrDdyZXZLfKBbF8HkKcwnGAn8TMUNj2AI-o8E1cnxH5fE1DeS_jkR8tKs2aensNSM8Pq84GaXIEa6YzBX_N1ACo4HuXZLcmgO6NfXGQjnl_jv2h0Dzog9cwhNz0cRec0TfKwsgDxy4FYGmHb2UKI4J3OKu6SyQHw8C1sdiwSlodfZ29ZrZ0oZ4TIiXV018l2FhId_OYQex5yC8Izsoo347bNzWj5V8Tlv_5aHdWQgoB37mOz4728Ok7ShGXl8PZciG7v9nv6QE02Am-ZXDlwXB8ahvxBxNv0s-az2g5G7McPtujyd8FEIqwLKm09DSKsrBvROFfV92lu7oRUyeSGmZMu74="
+      }
+     ],
+     "role": "model"
+    },
+    "finishReason": "STOP",
+    "usageMetadata": {
+     "candidatesTokenCount": 20,
+     "promptTokenCount": 1734,
+     "promptTokensDetails": [
+      {
+       "modality": "TEXT",
+       "tokenCount": 1734
+      }
+     ],
+     "thoughtsTokenCount": 107,
+     "totalTokenCount": 1861
+    },
+    "invocationId": "e-22395011-ceca-4a22-a1b2-e9c7dfe5bf80",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {},
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "longRunningToolIds": [],
+    "id": "c60715fd-961e-48dd-87ba-3959e3245e7d",
+    "timestamp": 1795447019.0719967
+   },
+   {
+    "content": {
+     "parts": [
+      {
+       "functionResponse": {
+        "id": "call_12036751123907702260",
+        "name": "activate_skill",
+        "response": {
+         "active_skill": "submission_prep",
+         "allowed_tools": [
+          "list_projects",
+          "get_project",
+          "search_city_docs",
+          "search_permits",
+          "create_submission_draft",
+          "send_submission"
+         ]
+        }
+       }
+      }
+     ],
+     "role": "user"
+    },
+    "invocationId": "e-22395011-ceca-4a22-a1b2-e9c7dfe5bf80",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {
+      "active_skill": "submission_prep",
+      "case": {}
+     },
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "id": "aee857ad-5aac-475c-ace6-a653f25b5b54",
+    "timestamp": 1795447019.0730274
+   },
+   {
+    "modelVersion": "gemini-3.6-flash",
+    "content": {
+     "parts": [
+      {
+       "functionCall": {
+        "id": "call_5253537965665086002",
+        "args": {
+         "project_id": 9
+        },
+        "name": "get_project"
+       },
+       "thoughtSignature": "EtQCCtECAWkUfRMbsaIISDKT3IXwm2RXxPTYi7yq_rgmDXvUGgkWu5HaqWHfR0Z0Lo1V1X86I8RunoodGKw3S-Z9h6jwZ-P5mjvVmAeiZPehG6zYbhL5NtCOtjMn2cLJg--5DrpH9L629Sn_pa9VF32x1C2VZaR2IK4PfyZczKkFKCz236pFOEZGE1UGMBdbD-2c229U1GA4bODByJV5FX8cRtv12YefQjlKEPhFwHMVtmPHsVoueX1IuBqEy1UJoj3gsouU_zvZU34ef01tK6ZMIwAGNeVlL8CPVytINSgfxYrifmC-6uS27Z3DeklOqmdSjrAXtMYutA183hS1zQ3W7672RrhkVLZ2gYDn7oLU-ZQMvlEWtpBZUeLNtN_nB2V24SVPNlofLdz8Z4a_JdEMMEGbex3ZNXcjxzhghB7SSzQ7gtFfBQQX3Rw9AxmmV1V7jreC3g=="
+      }
+     ],
+     "role": "model"
+    },
+    "finishReason": "STOP",
+    "usageMetadata": {
+     "candidatesTokenCount": 16,
+     "promptTokenCount": 2177,
+     "promptTokensDetails": [
+      {
+       "modality": "TEXT",
+       "tokenCount": 2177
+      }
+     ],
+     "thoughtsTokenCount": 53,
+     "totalTokenCount": 2246
+    },
+    "invocationId": "e-22395011-ceca-4a22-a1b2-e9c7dfe5bf80",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {},
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "longRunningToolIds": [],
+    "id": "39e621c7-5617-4e85-88f6-ce2e4ba33038",
+    "timestamp": 1795447020.1886394
+   },
+   {
+    "content": {
+     "parts": [
+      {
+       "functionResponse": {
+        "id": "call_5253537965665086002",
+        "name": "get_project",
+        "response": {
+         "content": [
+          {
+           "type": "text",
+           "text": "{\n  \"id\": 9,\n  \"client\": \"Client fictif I. Nakamura\",\n  \"address\": \"30 Jersey St\",\n  \"work_type\": \"adu\",\n  \"description\": \"ADU détaché en fond de parcelle.\",\n  \"estimated_cost\": 350000.0,\n  \"status\": \"ready_to_file\",\n  \"submissions\": []\n}"
+          }
+         ],
+         "structuredContent": {
+          "id": 9,
+          "client": "Client fictif I. Nakamura",
+          "address": "30 Jersey St",
+          "work_type": "adu",
+          "description": "ADU détaché en fond de parcelle.",
+          "estimated_cost": 350000.0,
+          "status": "ready_to_file",
+          "submissions": []
+         },
+         "isError": false
+        }
+       }
+      }
+     ],
+     "role": "user"
+    },
+    "invocationId": "e-22395011-ceca-4a22-a1b2-e9c7dfe5bf80",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {
+      "tool_budget": {
+       "invocation": "e-22395011-ceca-4a22-a1b2-e9c7dfe5bf80",
+       "count": 1
+      },
+      "case": {
+       "project_id": 9,
+       "address": "30 Jersey St",
+       "work_type": "adu"
+      }
+     },
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "id": "4e1b90a5-012c-47c4-90e9-a44ebf81da49",
+    "timestamp": 1795447020.1996446
+   },
+   {
+    "modelVersion": "gemini-3.5-flash-lite",
+    "content": {
+     "parts": [
+      {
+       "functionCall": {
+        "id": "call_12251433991176112992",
+        "args": {
+         "question": "documents required for an ADU building permit San Francisco"
+        },
+        "name": "search_city_docs"
+       },
+       "thoughtSignature": "Eo4BCosBAWkUfROcwYj6t7qY9Ct2E7vaOfUhUa0VlF5eWoHq8Mkl4ISbxU-d7FLJxcMKZJXozm8dXmBIQkPJQU0fhkgef-49VZuT1hMI0P-075SDjXBunLA8ylON1XseO1V2Axy6Yuy7JppQh27mGoFvAfyg4ss6qA-bFzHhlrMfGhe7lbDTkHblgEmR5opx7g=="
+      }
+     ],
+     "role": "model"
+    },
+    "finishReason": "STOP",
+    "usageMetadata": {
+     "candidatesTokenCount": 27,
+     "promptTokenCount": 2315,
+     "promptTokensDetails": [
+      {
+       "modality": "TEXT",
+       "tokenCount": 2315
+      }
+     ],
+     "totalTokenCount": 2342
+    },
+    "invocationId": "e-22395011-ceca-4a22-a1b2-e9c7dfe5bf80",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {},
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "longRunningToolIds": [],
+    "id": "0eab9268-63b3-4bcb-ad04-09d74d9c0500",
+    "timestamp": 1795447023.2256641
+   },
+   {
+    "content": {
+     "parts": [
+      {
+       "functionResponse": {
+        "id": "call_12251433991176112992",
+        "name": "search_city_docs",
+        "response": {
+         "question": "documents required for an ADU building permit San Francisco",
+         "passages": [
+          {
+           "doc_id": "DOC-05",
+           "title": "Get a building permit for an Accessory Dwelling Unit (ADU)",
+           "url": "https://www.sf.gov/get-a-building-permit-for-an-accessory-dwelling-unit-adu",
+           "section": "Complete additional application requirements as necessary",
+           "page_type": "Step-by-step",
+           "score": 0.769,
+           "text": "Get a building permit for an Accessory Dwelling Unit (ADU) — Complete additional application requirements as necessary\nYour project may require additional documentation when applying for a building permit. Please review all of these requirements to determine which of them are applicable to your project.\n\nGeotechnical report or third-party engineering review - Building Inspection\n\nLearn when your project may need a geotechnical report or heightened engineering review to protect San Francisco’s hillside properties and ensure safe construction.\n\nUnauthorized Dwelling Unit - Building Inspection\n\nProjects to legalize an existing dwelling unit that was constructed without a permit are required to submit an unauthorized dwelling unit screening form; additional information is available in Information Sheet G-17.\n\nDisabled Access\n\nPlan sets for projects in existing commercial buildings or publicly-financed or managed residential buildings must include a completed disabled access checklist and the design must meet the checklist requirements for the project.\n\nResidential water sub-metering - SF Public Utilities Commission\n\nNew multi-family developments must document that sub- meters will be installed. Guidelines and exemption details are available here.\n\nWater, Power, Sewer checklist - SF Public Utilities Commission\n\nNew construction or alternation projects must submit this form if answering \"yes' to any question on the checklist.\n\nTree planting and protection – Public Works"
+          },
+          {
+           "doc_id": "DOC-05",
+           "title": "Get a building permit for an Accessory Dwelling Unit (ADU)",
+           "url": "https://www.sf.gov/get-a-building-permit-for-an-accessory-dwelling-unit-adu",
+           "section": "Complete other pre-application requirements as necessary",
+           "page_type": "Step-by-step",
+           "score": 0.768,
+           "text": "Get a building permit for an Accessory Dwelling Unit (ADU) — Complete other pre-application requirements as necessary\nYour project may require additional analysis and certifications prior to applying for a building permit.\n\nPlease review all of these requirements to determine which of them are applicable to your project and complete them prior to submitting your building permit application.\n\nIf any required pre-application reviews are not completed, your building permit application will not be accepted.\n\nHistoric Resource Review - Planning Department\n\nIf you use the Local ADU program, and depending on your property's historic status, you may need a historic preservation review.\n\nCheck your property's historic resource status to see if this is required.\n\nMost properties in San Francisco are category B, which means potentially significant and not yet evaluated.\n\nIf your property is category B and your project involves major alterations visible from the street, you may choose to file a Historic Resource Review before filing your building permit to determine if your property is historic.\n\nPublic Notification – Planning Department\n\nIf you are using the Local ADU program you must post on the building a notice that you are adding an ADU and a declaration of ADU construction. Photographs of these posted notices are to be sent to the Rent Board.\n\nYou must post this notice and declaration in your building at least 15 days before you apply for your ADU application.\n\nPost a notice for your ADU.\n\nProduce Legal Notices – Planning Department"
+          },
+          {
+           "doc_id": "DOC-05",
+           "title": "Get a building permit for an Accessory Dwelling Unit (ADU)",
+           "url": "https://www.sf.gov/get-a-building-permit-for-an-accessory-dwelling-unit-adu",
+           "section": "Complete other pre-application requirements as necessary",
+           "page_type": "Step-by-step",
+           "score": 0.767,
+           "text": "Get a building permit for an Accessory Dwelling Unit (ADU) — Complete other pre-application requirements as necessary\nConstruction waste must be tracked for the following projects:\n\n- New construction\n- Commercial additions 1.000 square feet or greater\n- Commercial remodels or alterations that cost $200,000 or more\n- Full building demolitions\n- Residential additions or alterations that increase the building's conditioned area, volume or size\n\nRegister to track your construction waste.\n\nPublic Right of Way Permits - Public Works\n\nProjects including work within the public right of way, such as construction and/or occupancy of the street or sidewalks, including installation of utilities, require separate permit(s) from the Department of Public Works.\n\nThe project scope determines the types of Public Right of Way permits required based on this criteria.\n\nContact PublicWorksPermits@sfdpw.org with specific questions about Public Works permitting requirements.\n\nApply for public right of way permits.\n\nSite Assessment and Mitigation - Public Health\n\nProjects that disturb 50 cubic yards of soil and are located in the Maher Ordinance area may be required to perform site assessment and mitigation.\n\nThe Maher Ordinance area is any area considered by the Department of Public Health to have known or suspected contamination, including sites with historical industrial uses, areas near freeways, and current or historical underground storage tanks.\n\nReview the Maher Ordinance webpage and submit an application to Public Health.\n\nAsbestos Remediation - Building Inspection"
+          }
+         ]
+        }
+       }
+      }
+     ],
+     "role": "user"
+    },
+    "invocationId": "e-22395011-ceca-4a22-a1b2-e9c7dfe5bf80",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {
+      "tool_budget": {
+       "invocation": "e-22395011-ceca-4a22-a1b2-e9c7dfe5bf80",
+       "count": 2
+      },
+      "rag_sources_this_request": {
+       "invocation": "e-22395011-ceca-4a22-a1b2-e9c7dfe5bf80",
+       "sources": [
+        [
+         "https://www.sf.gov/get-a-building-permit-for-an-accessory-dwelling-unit-adu",
+         "Get a building permit for an Accessory Dwelling Unit (ADU) — Complete additional application requirements as necessary"
+        ],
+        [
+         "https://www.sf.gov/get-a-building-permit-for-an-accessory-dwelling-unit-adu",
+         "Get a building permit for an Accessory Dwelling Unit (ADU) — Complete other pre-application requirements as necessary"
+        ]
+       ]
+      },
+      "case": {
+       "project_id": 9,
+       "address": "30 Jersey St",
+       "work_type": "adu",
+       "cited_sources": [
+        "https://www.sf.gov/get-a-building-permit-for-an-accessory-dwelling-unit-adu"
+       ]
+      }
+     },
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "id": "e7a7d4ae-b803-42af-8733-098a8deb6a9a",
+    "timestamp": 1795447023.405347
+   },
+   {
+    "modelVersion": "gemini-3.5-flash-lite",
+    "content": {
+     "parts": [
+      {
+       "functionCall": {
+        "id": "call_17842143273598724504",
+        "args": {
+         "address": "30 Jersey St"
+        },
+        "name": "search_permits"
+       },
+       "thoughtSignature": "Eo4BCosBAWkUfRPpcgOOEwGXi_1kPuIeBKb14DrvSP1SKxxcsxPJ5x9daR4YvDgWdgJdW0A54O8Pxpy1TLFON-sPuXs0bGncpaZKn10_XRUP8E-P8Q4a71nlRNGQHuFjcKiCSiUhq2xIsajeogEcpm3BTjx1BbdRKmWxUu3-kw_B67cC0W3RTaFY_lSTlcUTog=="
+      }
+     ],
+     "role": "model"
+    },
+    "finishReason": "STOP",
+    "usageMetadata": {
+     "candidatesTokenCount": 20,
+     "promptTokenCount": 3556,
+     "promptTokensDetails": [
+      {
+       "modality": "TEXT",
+       "tokenCount": 3556
+      }
+     ],
+     "totalTokenCount": 3576
+    },
+    "invocationId": "e-22395011-ceca-4a22-a1b2-e9c7dfe5bf80",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {},
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "longRunningToolIds": [],
+    "id": "849badcc-8f6f-470f-b457-66cb751dbc0f",
+    "timestamp": 1795447024.0776427
+   },
+   {
+    "content": {
+     "parts": [
+      {
+       "functionResponse": {
+        "id": "call_17842143273598724504",
+        "name": "search_permits",
+        "response": {
+         "content": [
+          {
+           "type": "text",
+           "text": "{\n  \"address\": \"30 Jersey St\",\n  \"neighborhood\": \"Noe Valley\",\n  \"zipcode\": \"94114\",\n  \"permit_count\": 28,\n  \"permits\": [\n    {\n      \"permit_number\": \"202606022362\",\n      \"permit_type_definition\": \"otc alterations permit\",\n      \"status\": \"filed\",\n      \"status_date\": \"2026-06-02T12:54:22.000\",\n      \"filed_date\": \"2026-06-02T12:54:22.000\",\n      \"issued_date\": null,\n      \"description\": \"revision to 202512182095. revision to 4th fl windows with aboo9. sprinkers will be installed in lieu of 45 min windows per 202508294184\",\n      \"estimated_cost\": \"1.0\",\n      \"neighborhoods_analysis_boundaries\": \"Noe Valley\",\n      \"zipcode\": \"94114\"\n    },\n    {\n      \"permit_number\": \"202602256479\",\n      \"permit_type_definition\": \"otc alterations permit\",\n      \"status\": \"issued\",\n      \"status_date\": \"2026-05-14T09:40:02.000\",\n      \"filed_date\": \"2026-02-25T11:17:33.000\",\n      \"issued_date\": \"2026-05-14T09:40:02.000\",\n      \"description\": \"revision 202502180460- install gas fireplace on 4th floor and install garage vent.\",\n      \"estimated_cost\": \"1500.0\",\n      \"neighborhoods_analysis_boundaries\": \"Noe Valley\",\n      \"zipcode\": \"94114\"\n    },\n    {\n      \"permit_number\": \"202601143808\",\n      \"permit_type_definition\": \"otc alterations permit\",\n      \"status\": \"issued\",\n      \"status_date\": \"2026-01-28T13:02:22.000\",\n      \"filed_date\": \"2026-01-14T10:42:00.000\",\n      \"issued_date\": \"2026-01-28T13:02:22.000\",\n      \"description\": \"revision to pa #202502180460; new plumbing fixture count total; additional bar sinks, ice makers, and hosebibs.\",\n      \"estimated_cost\": \"3200.0\",\n      \"neighborhoods_analysis_boundaries\": \"Noe Valley\",\n      \"zipcode\": \"94114\"\n    },\n    {\n      \"permit_number\": \"202512182095\",\n      \"permit_type_definition\": \"otc alterations permit\",\n      \"status\": \"issued\",\n      \"status_date\": \"2026-01-07T14:15:57.000\",\n      \"filed_date\": \"2025-12-18T09:05:15.000\",\n      \"issued_date\": \"2026-01-07T14:15:57.000\",\n      \"description\": \"revision 202502180460 to install garage door facing street with intergrated pass through door to approved adu and revise 4th floor windows\",\n      \"estimated_cost\": \"7500.0\",\n      \"neighborhoods_analysis_boundaries\": \"Noe Valley\",\n      \"zipcode\": \"94114\"\n    },\n    {\n      \"permit_number\": \"202512242595\",\n      \"permit_type_definition\": \"otc alterations permit\",\n      \"status\": \"issued\",\n      \"status_date\": \"2025-12-26T14:29:25.000\",\n      \"filed_date\": \"2025-12-24T09:25:25.000\",\n      \"issued_date\": \"2025-12-26T14:29:25.000\",\n      \"description\": \"revision 202508299184 to correct hydraulic calculate and change water supply type to include 2 inch combo service at the request of the owner\",\n      \"estimated_cost\": \"46325.0\",\n      \"neighborhoods_analysis_boundaries\": \"Noe Valley\",\n      \"zipcode\": \"94114\"\n    },\n    {\n      \"permit_number\": \"202511129443\",\n      \"permit_type_definition\": \"otc alterations permit\",\n      \"status\": \"issued\",\n      \"status_date\": \"2025-12-04T09:43:45.000\",\n      \"filed_date\": \"2025-11-12T14:41:34.000\",\n      \"issued_date\": \"2025-12-04T09:43:45.000\",\n      \"description\": \"revision to pa# 202502180460, radiant flrs @ ground flr, ducted mini-split heat pump system at 2nd, 3rd, and 4th flr. mini-split condensors located at roof. title 24 revision.\",\n      \"estimated_cost\": \"1000.0\",\n      \"neighborhoods_analysis_boundaries\": \"Noe Valley\",\n      \"zipcode\": \"94114\"\n    },\n    {\n      \"permit_number\": \"202508294184\",\n      \"permit_type_definition\": \"otc alterations permit\",\n      \"status\": \"issued\",\n      \"status_date\": \"2025-08-29T10:29:01.000\",\n      \"filed_date\": \"2025-08-29T08:33:23.000\",\n      \"issued_date\": \"2025-08-29T10:29:01.000\",\n      \"description\": \"install new fire sprinkler system, install new warr system line fire sprinkler system from curb to the building. ref adu 202502180460\",\n      \"estimated_cost\": \"44000.0\",\n      \"neighborhoods_analysis_boundaries\": \"Noe Valley\",\n      \"zipcode\": \"94114\"\n    },\n    {\n      \"permit_number\": \"202508223704\",\n      \"permit_type_definition\": \"otc alterations permit\",\n      \"status\": \"issued\",\n      \"status_date\": \"2025-08-27T13:56:04.000\",\n      \"filed_date\": \"2025-08-22T09:36:21.000\",\n      \"issued_date\": \"2025-08-27T13:56:04.000\",\n      \"description\": \"structural revision to bpa#2025-0218-0460: add foundation underpinning and remove mechanical chase trench\",\n      \"estimated_cost\": \"1.0\",\n      \"neighborhoods_analysis_boundaries\": \"Noe Valley\",\n      \"zipcode\": \"94114\"\n    },\n    {\n      \"permit_number\": \"202502180460\",\n      \"permit_type_definition\": \"additions alterations or repairs\",\n      \"status\": \"issued\",\n      \"status_date\": \"2025-06-23T14:44:23.000\",\n      \"filed_date\": \"2025-03-18T12:50:22.000\",\n      \"issued_date\": \"2025-06-23T14:44:23.000\",\n      \"description\": \"convert ground floor den and bathroom into 1-new adu. work includes a small rear addition 1-bedroom / 1-bathroom per goverment code section 65852.2 renovate and expand single family home includeing small rear addition at all levels and a new vertical addition for a total of 4 stories.\",\n      \"estimated_cost\": \"240000.0\",\n      \"neighborhoods_analysis_boundaries\": \"Noe Valley\",\n      \"zipcode\": \"94114\"\n    },\n    {\n      \"permit_number\": \"202405293137\",\n      \"permit_type_definition\": \"additions alterations or repairs\",\n      \"status\": \"cancelled\",\n      \"status_date\": \"2024-07-08T15:29:19.000\",\n      \"filed_date\": null,\n      \"issued_date\": null,\n      \"description\": \"convert ground floor den and bathroom into 1-new adu. work includes a small rear addition 1-bedroom / 1-bathroom per goverment code section 65852.2 renovate and expand single family home includeing small rear addition at all levels and a new vertical addition for a total of 4 stories.\",\n      \"estimated_cost\": \"240000.0\",\n      \"neighborhoods_analysis_boundaries\": \"Noe Valley\",\n      \"zipcode\": \"94114\"\n    }\n  ],\n  \"source\": \"DataSF — Building Permits (i98e-djp9), https://data.sf.gov/d/i98e-djp9\",\n  \"data_as_of\": \"2026-06-04T01:05:02.000\",\n  \"from_cache\": false\n}"
+          }
+         ],
+         "structuredContent": {
+          "address": "30 Jersey St",
+          "neighborhood": "Noe Valley",
+          "zipcode": "94114",
+          "permit_count": 28,
+          "permits": [
+           {
+            "permit_number": "202606022362",
+            "permit_type_definition": "otc alterations permit",
+            "status": "filed",
+            "status_date": "2026-06-02T12:54:22.000",
+            "filed_date": "2026-06-02T12:54:22.000",
+            "issued_date": null,
+            "description": "revision to 202512182095. revision to 4th fl windows with aboo9. sprinkers will be installed in lieu of 45 min windows per 202508294184",
+            "estimated_cost": "1.0",
+            "neighborhoods_analysis_boundaries": "Noe Valley",
+            "zipcode": "94114"
+           },
+           {
+            "permit_number": "202602256479",
+            "permit_type_definition": "otc alterations permit",
+            "status": "issued",
+            "status_date": "2026-05-14T09:40:02.000",
+            "filed_date": "2026-02-25T11:17:33.000",
+            "issued_date": "2026-05-14T09:40:02.000",
+            "description": "revision 202502180460- install gas fireplace on 4th floor and install garage vent.",
+            "estimated_cost": "1500.0",
+            "neighborhoods_analysis_boundaries": "Noe Valley",
+            "zipcode": "94114"
+           },
+           {
+            "permit_number": "202601143808",
+            "permit_type_definition": "otc alterations permit",
+            "status": "issued",
+            "status_date": "2026-01-28T13:02:22.000",
+            "filed_date": "2026-01-14T10:42:00.000",
+            "issued_date": "2026-01-28T13:02:22.000",
+            "description": "revision to pa #202502180460; new plumbing fixture count total; additional bar sinks, ice makers, and hosebibs.",
+            "estimated_cost": "3200.0",
+            "neighborhoods_analysis_boundaries": "Noe Valley",
+            "zipcode": "94114"
+           },
+           {
+            "permit_number": "202512182095",
+            "permit_type_definition": "otc alterations permit",
+            "status": "issued",
+            "status_date": "2026-01-07T14:15:57.000",
+            "filed_date": "2025-12-18T09:05:15.000",
+            "issued_date": "2026-01-07T14:15:57.000",
+            "description": "revision 202502180460 to install garage door facing street with intergrated pass through door to approved adu and revise 4th floor windows",
+            "estimated_cost": "7500.0",
+            "neighborhoods_analysis_boundaries": "Noe Valley",
+            "zipcode": "94114"
+           },
+           {
+            "permit_number": "202512242595",
+            "permit_type_definition": "otc alterations permit",
+            "status": "issued",
+            "status_date": "2025-12-26T14:29:25.000",
+            "filed_date": "2025-12-24T09:25:25.000",
+            "issued_date": "2025-12-26T14:29:25.000",
+            "description": "revision 202508299184 to correct hydraulic calculate and change water supply type to include 2 inch combo service at the request of the owner",
+            "estimated_cost": "46325.0",
+            "neighborhoods_analysis_boundaries": "Noe Valley",
+            "zipcode": "94114"
+           },
+           {
+            "permit_number": "202511129443",
+            "permit_type_definition": "otc alterations permit",
+            "status": "issued",
+            "status_date": "2025-12-04T09:43:45.000",
+            "filed_date": "2025-11-12T14:41:34.000",
+            "issued_date": "2025-12-04T09:43:45.000",
+            "description": "revision to pa# 202502180460, radiant flrs @ ground flr, ducted mini-split heat pump system at 2nd, 3rd, and 4th flr. mini-split condensors located at roof. title 24 revision.",
+            "estimated_cost": "1000.0",
+            "neighborhoods_analysis_boundaries": "Noe Valley",
+            "zipcode": "94114"
+           },
+           {
+            "permit_number": "202508294184",
+            "permit_type_definition": "otc alterations permit",
+            "status": "issued",
+            "status_date": "2025-08-29T10:29:01.000",
+            "filed_date": "2025-08-29T08:33:23.000",
+            "issued_date": "2025-08-29T10:29:01.000",
+            "description": "install new fire sprinkler system, install new warr system line fire sprinkler system from curb to the building. ref adu 202502180460",
+            "estimated_cost": "44000.0",
+            "neighborhoods_analysis_boundaries": "Noe Valley",
+            "zipcode": "94114"
+           },
+           {
+            "permit_number": "202508223704",
+            "permit_type_definition": "otc alterations permit",
+            "status": "issued",
+            "status_date": "2025-08-27T13:56:04.000",
+            "filed_date": "2025-08-22T09:36:21.000",
+            "issued_date": "2025-08-27T13:56:04.000",
+            "description": "structural revision to bpa#2025-0218-0460: add foundation underpinning and remove mechanical chase trench",
+            "estimated_cost": "1.0",
+            "neighborhoods_analysis_boundaries": "Noe Valley",
+            "zipcode": "94114"
+           },
+           {
+            "permit_number": "202502180460",
+            "permit_type_definition": "additions alterations or repairs",
+            "status": "issued",
+            "status_date": "2025-06-23T14:44:23.000",
+            "filed_date": "2025-03-18T12:50:22.000",
+            "issued_date": "2025-06-23T14:44:23.000",
+            "description": "convert ground floor den and bathroom into 1-new adu. work includes a small rear addition 1-bedroom / 1-bathroom per goverment code section 65852.2 renovate and expand single family home includeing small rear addition at all levels and a new vertical addition for a total of 4 stories.",
+            "estimated_cost": "240000.0",
+            "neighborhoods_analysis_boundaries": "Noe Valley",
+            "zipcode": "94114"
+           },
+           {
+            "permit_number": "202405293137",
+            "permit_type_definition": "additions alterations or repairs",
+            "status": "cancelled",
+            "status_date": "2024-07-08T15:29:19.000",
+            "filed_date": null,
+            "issued_date": null,
+            "description": "convert ground floor den and bathroom into 1-new adu. work includes a small rear addition 1-bedroom / 1-bathroom per goverment code section 65852.2 renovate and expand single family home includeing small rear addition at all levels and a new vertical addition for a total of 4 stories.",
+            "estimated_cost": "240000.0",
+            "neighborhoods_analysis_boundaries": "Noe Valley",
+            "zipcode": "94114"
+           }
+          ],
+          "source": "DataSF — Building Permits (i98e-djp9), https://data.sf.gov/d/i98e-djp9",
+          "data_as_of": "2026-06-04T01:05:02.000",
+          "from_cache": false
+         },
+         "isError": false
+        }
+       }
+      }
+     ],
+     "role": "user"
+    },
+    "invocationId": "e-22395011-ceca-4a22-a1b2-e9c7dfe5bf80",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {
+      "tool_budget": {
+       "invocation": "e-22395011-ceca-4a22-a1b2-e9c7dfe5bf80",
+       "count": 3
+      },
+      "case": {
+       "project_id": 9,
+       "address": "30 Jersey St",
+       "work_type": "adu",
+       "cited_sources": [
+        "https://www.sf.gov/get-a-building-permit-for-an-accessory-dwelling-unit-adu"
+       ],
+       "permit_count": 28
+      }
+     },
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "id": "8f57b6f1-0e3b-4372-b855-e5b3df64505c",
+    "timestamp": 1795447029.2527726
+   },
+   {
+    "modelVersion": "gemini-3.5-flash-lite",
+    "content": {
+     "parts": [
+      {
+       "functionCall": {
+        "id": "call_12666205248329984612",
+        "args": {
+         "project_id": 9,
+         "content": "# Dossier de Projet : 30 Jersey St (Projet n°9)\n\n- **Client :** Client fictif I. Nakamura\n- **Adresse :** 30 Jersey St, San Francisco, CA 94114\n- **Type de travaux :** ADU (Accessory Dwelling Unit - ADU détaché en fond de parcelle)\n- **Coût estimé :** 350 000 $\n- **Statut actuel du projet :** ready_to_file\n\n## Procédure probable et exigences préalables\nPour un projet d'ADU à San Francisco, les étapes et exigences suivantes s'appliquent selon les directives officielles de la ville :\n- **Revues préalables (Pre-application) :**\n  - Examen des ressources historiques (Historic Resource Review - Planning Department) si applicable, notamment pour les catégories B.\n  - Notification publique (Public Notification) : publication d'un avis sur le bâtiment et déclaration de construction d'ADU au moins 15 jours avant le dépôt de la demande, avec envoi des photographies au Rent Board.\n- **Documents et formulaires additionnels :**\n  - Rapport géotechnique ou revue d'ingénierie (Building Inspection) si requis pour les propriétés en pente.\n  - Formulaire de liste de contrôle pour l'eau, l'électricité et les égouts (Water, Power, Sewer checklist - SF Public Utilities Commission) si applicable.\n  - Suivi des déchets de construction (Construction Waste Management) pour les nouvelles constructions et extensions.\n\n*Source : Get a building permit for an Accessory Dwelling Unit (ADU), Pre-application and Additional requirements sections ([https://www.sf.gov/get-a-building-permit-for-an-accessory-dwelling-unit-adu](https://www.sf.gov/get-a-building-permit-for-an-accessory-dwelling-unit-adu)).*\n\n## Permis existants à cette adresse\nPlusieurs permis ont été enregistrés pour cette adresse, notamment le permis principal de création d'ADU et d'extension (`202502180460`, émis le 23/06/2025) ainsi que plusieurs révisions et permis connexes récents (notamment le permis de révision d'OTC `202606022362` déposé en juin 2026).\n\n---\n⚠️ Information générale, pas un avis juridique. Vérifier auprès du Department of Building Inspection."
+        },
+        "name": "create_submission_draft"
+       },
+       "thoughtSignature": "Eo4BCosBAWkUfROnRj2MYKUyD4chJCEUJJDQKmuW9gKOaNT5pDaFUDFR5LtF8baiKC9TjFds1ookhbwBqIpycNZ4NygWnSXy4jHD-FG7faVBGZq_NtIXZCdz9n4Rv0BFUG6mW8H5r2uBEMPLEqCmrxS1w2aXxVywj8NeUugX6ssUGiBTcEDUiS53k9Op8xwxmQ=="
+      }
+     ],
+     "role": "model"
+    },
+    "finishReason": "STOP",
+    "usageMetadata": {
+     "candidatesTokenCount": 571,
+     "promptTokenCount": 8284,
+     "promptTokensDetails": [
+      {
+       "modality": "TEXT",
+       "tokenCount": 8284
+      }
+     ],
+     "totalTokenCount": 8855
+    },
+    "invocationId": "e-22395011-ceca-4a22-a1b2-e9c7dfe5bf80",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {},
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "longRunningToolIds": [],
+    "id": "6960b8d0-4ffc-4c68-8d68-5066c7810a13",
+    "timestamp": 1795447045.729024
+   },
+   {
+    "content": {
+     "parts": [
+      {
+       "functionResponse": {
+        "id": "call_12666205248329984612",
+        "name": "create_submission_draft",
+        "response": {
+         "content": [
+          {
+           "type": "text",
+           "text": "{\n  \"submission_id\": 4,\n  \"status\": \"pending_approval\",\n  \"updated_existing\": false,\n  \"project_id\": 9,\n  \"message\": \"Brouillon enregistré, EN ATTENTE DE VALIDATION HUMAINE. Il n'est pas envoyé.\"\n}"
+          }
+         ],
+         "structuredContent": {
+          "submission_id": 4,
+          "status": "pending_approval",
+          "updated_existing": false,
+          "project_id": 9,
+          "message": "Brouillon enregistré, EN ATTENTE DE VALIDATION HUMAINE. Il n'est pas envoyé."
+         },
+         "isError": false
+        }
+       }
+      }
+     ],
+     "role": "user"
+    },
+    "invocationId": "e-22395011-ceca-4a22-a1b2-e9c7dfe5bf80",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {
+      "tool_budget": {
+       "invocation": "e-22395011-ceca-4a22-a1b2-e9c7dfe5bf80",
+       "count": 4
+      },
+      "case": {
+       "project_id": 9,
+       "address": "30 Jersey St",
+       "work_type": "adu",
+       "cited_sources": [
+        "https://www.sf.gov/get-a-building-permit-for-an-accessory-dwelling-unit-adu"
+       ],
+       "permit_count": 28,
+       "submission_id": 4
+      }
+     },
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "id": "05a5faef-7e25-4d87-91a6-6e280373800b",
+    "timestamp": 1795447045.7389996
+   },
+   {
+    "modelVersion": "gemini-3.5-flash-lite",
+    "content": {
+     "parts": [
+      {
+       "text": "Le brouillon de dossier pour le projet 9 (30 Jersey St, ADU) a été préparé et enregistré avec succès sous l'identifiant de dossier **4**. \n\nLe dossier est actuellement **en attente de validation humaine** et n'a pas été envoyé.\n\n⚠️ Information générale, pas un avis juridique. Vérifier auprès du Department of Building Inspection.\n\n**Sources :**\n- Get a building permit for an Accessory Dwelling Unit (ADU) — Complete additional application requirements as necessary (https://www.sf.gov/get-a-building-permit-for-an-accessory-dwelling-unit-adu)\n- Get a building permit for an Accessory Dwelling Unit (ADU) — Complete other pre-application requirements as necessary (https://www.sf.gov/get-a-building-permit-for-an-accessory-dwelling-unit-adu)"
+      }
+     ],
+     "role": "model"
+    },
+    "finishReason": "STOP",
+    "usageMetadata": {
+     "candidatesTokenCount": 78,
+     "promptTokenCount": 9018,
+     "promptTokensDetails": [
+      {
+       "modality": "TEXT",
+       "tokenCount": 9018
+      }
+     ],
+     "totalTokenCount": 9096
+    },
+    "invocationId": "e-22395011-ceca-4a22-a1b2-e9c7dfe5bf80",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {},
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "id": "22e2c059-3344-447f-950a-290cabc12fd5",
+    "timestamp": 1795447053.3889296
+   }
+  ]
+ },
+ "quel temps fera t il demain": {
+  "prompt": "Quel temps fera-t-il demain ?",
+  "recorded_at": "2026-11-23 16:18",
+  "events": [
+   {
+    "modelVersion": "gemini-3-flash-preview",
+    "content": {
+     "parts": [
+      {
+       "text": "Je ne peux pas répondre à votre question sur la météo. En tant qu'assistant spécialisé pour ce cabinet d'architectes, je ne traite que les demandes concernant les permis de construire à San Francisco.\n\nVoici les trois services que je peux vous proposer :\n1. **Recherche de permis existants** : Je peux consulter l'historique et le statut des permis déposés à une adresse précise à San Francisco.\n2. **Informations sur les démarches** : Je peux vous indiquer les documents requis et les étapes à suivre pour certains travaux (cuisine, salle de bain, ADU, toiture, panneaux solaires, fenêtres).\n3. **Gestion de vos dossiers** : Je peux préparer les brouillons de dossiers pour les projets du cabinet et tenter l'envoi des dossiers approuvés.\n\n⚠️ Information générale, pas un avis juridique. Vérifier auprès du Department of Building Inspection.",
+       "thoughtSignature": "EuQGCuEGAWkUfRNM0VuRsdB7-U3QL8npeG74ICWag9LCvHmwGiUrxghuvl0GxWr7Y85K3Ektl4fWu5wCzwwcv_HNCC3OYVqQRumv40BXVBs4mOiXzBCdYCGx9boqYptlDCE160Rsn_ma1w3tQy7PM9Wt3iedrGPOoXpaicdbIz9mo9pLyrUyR3zmP4MxTlUVSs9voHxVkiEnJ4IlPL0rQceEtbgz1eahZoPvWqZBGH6w62SMgmR4cQjw2HKARRyfvQAxR893TBoxhnPo_pJSbvk_H2GoY1felGU35D5wJlP7h26o39xJyyuPDvu7_Ib2hCWHeBwbR6KalIrAis42_1LCkspqQ9l_X8hH-Bagic_PAlmCPq4-4nwEg3bojTWkJgt8zUNLevF0x4Cm5pzkimrtwnVuJVZjvCKT7h4oBO90MUwbdr1B8vUZ6O8PqIhkzaX465UrShLehUFNfJUeDqC5MyrjgTNEBU0ey2AUddjsouHF3V3uU0HKvHxIwHoWSh_vitWluyVn0LhFAOnITknLyKgRdapBlaFVTR_2phxQngjJe1NPWeCvYHW-3B3D6XINaYAkrpnEBnnJa-OfYj50C68ebbDl7fV2vTr6UaesTp_ICd2vq2nXUWN13usUiKTIUlXBD2_Abc_-yxaKzbD1hqnX0wL1G4LDPE_tUwjkcpvGn_x98_QRQaWrZO6t-ujcZQyK96vIbNDjmOX0P-vsDtgJWHh6-mWSgiVzyg5wIuhGz40EY-lY0yRRjlSu16KcNDmnHeZjXjqaCx_oNW0wO0p7rGBGyZc1JVg19CQO_Ms-dO1BWULhAU8CTf9M7rtZcohWbxyJACb3_RlcJd0hNpk55OBuyko_2s8XGWUOcN7nLR5gk1kumwhOaiWBCR_N1YPEnrHjAQhUJ54i7lz4uctZfyHgEz45gho7kM3DIv7PjiU1rWoRH2Hr9wS0qIpAdZfdGbaDfng73qO9xEahAHuqgwQ-158t07TIA85qJB5u7iVPtBSEc61z81-1yisVwRwBfOnoeJkhHK-0xNJfrQZAoDucMc9rm_K1NjfOF6Ut9XyXBa8X-DOMTpFliQHBhyh2f9QRWv2AhzrpZ9cp_VD6tWaHqqv7mfMCRZK2DQ2EkbXAbURiU_HRW9Zyc6svuanNRA=="
+      }
+     ],
+     "role": "model"
+    },
+    "finishReason": "STOP",
+    "usageMetadata": {
+     "candidatesTokenCount": 188,
+     "promptTokenCount": 1731,
+     "promptTokensDetails": [
+      {
+       "modality": "TEXT",
+       "tokenCount": 1731
+      }
+     ],
+     "thoughtsTokenCount": 173,
+     "totalTokenCount": 2092
+    },
+    "invocationId": "e-796d86f2-e2e8-4bb6-89f9-3a418fe60e04",
+    "author": "sf_permit_assistant",
+    "actions": {
+     "stateDelta": {},
+     "artifactDelta": {},
+     "requestedAuthConfigs": {},
+     "requestedToolConfirmations": {}
+    },
+    "nodeInfo": {
+     "path": "sf_permit_assistant@1"
+    },
+    "id": "d9cf7b67-8b6c-4025-9e7d-ea7ef0b7a8d3",
+    "timestamp": 1795447081.7308545
+   }
+  ]
+ }
+}
