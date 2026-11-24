@@ -138,6 +138,8 @@ def describe_event(ev: dict) -> str | None:
                     f"{n} passage(s) pertinent(s)" if n else "aucun passage pertinent"
                 )
                 return f"✅ {found} · Gemini analyse les résultats…"
+            if name == "activate_skill":
+                return "🧠 Compétence activée · Gemini prépare la recherche…"
             return f"✅ Résultat de {name} reçu · Gemini analyse les résultats…"
         if part.get("text") and not part.get("thought"):
             return "✍️ Réponse rédigée"
