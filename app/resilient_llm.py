@@ -1,4 +1,4 @@
-"""Gemini model that survives free-tier saturation, without long waits.
+"""Gemini model that survives free-tier saturation: always end with an answer.
 
 On the free tier of Google AI Studio, a model can be overloaded (503 "high
 demand"), rate limited (429) or simply hang, and which model is saturated
@@ -13,8 +13,14 @@ changes over the day. ``ResilientGemini`` therefore *hedges* its calls:
 
 The model that won is tried first on the next calls (``LLM_STICKY_S``), so a
 saturated model does not slow every call down. The chain is configurable with
-``AGENT_FALLBACK_MODELS``; past ``LLM_TOTAL_BUDGET_S`` the call gives up and
-the UI shows a clear "Gemini is saturated" message.
+``AGENT_FALLBACK_MODELS``.
+
+When every model is saturated, the call does **not** give up quickly: it keeps
+cycling through the models, with growing pauses (up to 20 s), for up to
+``LLM_TOTAL_BUDGET_S`` (14 min). To spare the small daily free quotas of the
+fallback models (20 requests/day), every other pass only tries the "lite"
+models, and a model whose daily quota is used up is skipped until the quota
+resets. A call stuck for more than ``LLM_CALL_MAX_S`` is restarted.
 """
 
 from __future__ import annotations
@@ -24,6 +30,8 @@ import logging
 import os
 import time
 from collections.abc import AsyncGenerator
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 from google.adk.models import Gemini
 from google.adk.models.llm_request import LlmRequest
@@ -39,26 +47,43 @@ DEFAULT_FALLBACKS = (
 HEDGE_DELAY_S = float(os.getenv("LLM_HEDGE_DELAY_S", "4"))
 # Maximum number of models running at the same time for one call.
 MAX_PARALLEL = int(os.getenv("LLM_MAX_PARALLEL", "3"))
-# Seconds after which the whole model call gives up.
-TOTAL_BUDGET_S = float(os.getenv("LLM_TOTAL_BUDGET_S", "60"))
+# Seconds after which the whole model call gives up (keep it long: an answer
+# late is better than no answer). Cloud Run's request timeout is 30 min.
+TOTAL_BUDGET_S = float(os.getenv("LLM_TOTAL_BUDGET_S", "840"))
+# Seconds after which a call that is still running is cancelled and retried.
+CALL_MAX_S = float(os.getenv("LLM_CALL_MAX_S", "90"))
+# Longest pause between two passes when every model failed fast.
+MAX_PAUSE_S = 20.0
 # The model that answered is tried first for this many seconds.
 STICKY_S = float(os.getenv("LLM_STICKY_S", "300"))
 
 RETRYABLE_CODES = {408, 429, 500, 502, 503, 504}
 
 _preferred: dict[str, tuple[str, float]] = {}  # primary -> (model, valid until)
+_exhausted: dict[str, float] = {}  # model -> daily quota used up until (epoch s)
 
 
 class AllModelsUnavailableError(RuntimeError):
     """Every model of the chain was saturated or too slow."""
 
 
-def fallback_chain(primary: str) -> list[str]:
+def _next_quota_reset() -> float:
+    """Free-tier daily quotas reset at midnight Pacific time (9 h in Paris)."""
+    tz = ZoneInfo("America/Los_Angeles")
+    tomorrow = datetime.now(tz).date() + timedelta(days=1)
+    return datetime(tomorrow.year, tomorrow.month, tomorrow.day, tzinfo=tz).timestamp()
+
+
+def fallback_chain(primary: str, lite_only: bool = False) -> list[str]:
     extra = os.getenv("AGENT_FALLBACK_MODELS", DEFAULT_FALLBACKS)
     chain = [primary] + [m.strip() for m in extra.split(",") if m.strip()]
     pref = _preferred.get(primary)
     if pref and pref[1] > time.monotonic():
         chain.insert(0, pref[0])  # the model that answered last goes first
+    now = time.time()
+    chain = [m for m in chain if _exhausted.get(m, 0) <= now]
+    if lite_only:
+        chain = [m for m in chain if "lite" in m] or chain
     return list(dict.fromkeys(chain))  # dedupe, keep order
 
 
@@ -70,6 +95,10 @@ def _retryable(exc: BaseException) -> bool:
     return False
 
 
+def reason_daily_quota() -> str:
+    return "quota gratuit du jour épuisé (remis à zéro à 9 h, heure de Paris)"
+
+
 def reason(exc: BaseException | None) -> str:
     """Human-readable (French) reason why a model did not answer."""
     if exc is None or isinstance(exc, asyncio.TimeoutError | TimeoutError):
@@ -77,7 +106,7 @@ def reason(exc: BaseException | None) -> str:
     code = getattr(exc, "code", None)
     if code == 429:
         if "PerDay" in str(exc):
-            return "quota gratuit du jour épuisé (remis à zéro à 9 h, heure de Paris)"
+            return reason_daily_quota()
         return "limite de requêtes par minute atteinte"
     if code in (500, 502, 503, 504):
         return f"serveurs Google surchargés ({code})"
@@ -104,19 +133,31 @@ class ResilientGemini(Gemini):
         primary = self.model
         queue = fallback_chain(primary)
         deadline = time.monotonic() + TOTAL_BUDGET_S
-        running: dict[asyncio.Task, str] = {}
+        running: dict[asyncio.Task, tuple[str, float]] = {}  # task -> (model, start)
         last_exc: BaseException | None = None
         failures: dict[str, str] = {}  # model -> last reason
-        passes = 0
+        passes = 1  # the first queue is pass 1 (all models)
 
         def launch() -> None:
             model = queue.pop(0)
             req = _request_for(llm_request, model)
-            running[asyncio.create_task(self._collect(req, stream))] = model
+            task = asyncio.create_task(self._collect(req, stream))
+            running[task] = (model, time.monotonic())
 
         try:
-            launch()
             while True:
+                if not running and not queue:
+                    if deadline - time.monotonic() < 2:
+                        break
+                    # Every model failed fast: pause, then a new pass.
+                    await asyncio.sleep(min(3.0 * passes, MAX_PAUSE_S))
+                    passes += 1
+                    # Odd passes: lite models only, to spare the daily quotas.
+                    queue = fallback_chain(primary, lite_only=passes % 2 == 0)
+                    if not queue:  # every daily quota is used up: no hope today
+                        break
+                if queue and (not running or len(running) < MAX_PARALLEL):
+                    launch()
                 remaining = deadline - time.monotonic()
                 if remaining <= 0:
                     break
@@ -126,7 +167,7 @@ class ResilientGemini(Gemini):
                     return_when=asyncio.FIRST_COMPLETED,
                 )
                 for task in done:
-                    model = running.pop(task)
+                    model, _start = running.pop(task)
                     exc = task.exception()
                     if exc is None:
                         self._remember(primary, model)
@@ -137,33 +178,30 @@ class ResilientGemini(Gemini):
                         raise exc
                     last_exc = exc
                     failures[model] = reason(exc)
-                    logger.warning(
-                        "Model %s unavailable (%s)",
-                        model,
-                        getattr(exc, "code", type(exc).__name__),
-                    )
-                # No answer yet (slow) or a model failed: start the next one.
-                if queue and len(running) < MAX_PARALLEL:
-                    if not done:
-                        logger.info("No answer after %.0f s, hedging", HEDGE_DELAY_S)
-                    launch()
-                elif not running:
-                    if deadline - time.monotonic() < 4:
-                        break
-                    # Every model failed fast (503 burst): new pass after a pause.
-                    passes += 1
-                    await asyncio.sleep(min(2.0 * passes, 6.0))
-                    queue = fallback_chain(primary)
-                    launch()
+                    if getattr(exc, "code", None) == 429 and "PerDay" in str(exc):
+                        _exhausted[model] = _next_quota_reset()
+                    logger.warning("Model %s unavailable (%s)", model, failures[model])
+                # A call stuck for too long is cancelled (its slot is freed).
+                for task, (model, start) in list(running.items()):
+                    if time.monotonic() - start > CALL_MAX_S:
+                        task.cancel()
+                        del running[task]
+                        failures[model] = f"pas de réponse en {CALL_MAX_S:.0f} s"
+                if not done and queue and len(running) < MAX_PARALLEL:
+                    logger.info("No answer after %.0f s, hedging", HEDGE_DELAY_S)
         finally:
-            for model in running.values():
+            for model, _start in running.values():
                 failures.setdefault(model, reason(None))
             for task in running:
                 task.cancel()
+        for model, until in _exhausted.items():
+            if until > time.time():
+                failures[model] = reason_daily_quota()
         details = " ; ".join(f"{m} : {r}" for m, r in failures.items())
+        waited = TOTAL_BUDGET_S - max(0.0, deadline - time.monotonic())
         raise AllModelsUnavailableError(
-            f"Aucun modèle Gemini gratuit n'a répondu en {TOTAL_BUDGET_S:.0f} s. "
-            f"Détail : {details}."
+            f"Aucun modèle Gemini gratuit n'a répondu après {waited / 60:.0f} min "
+            f"d'essais. Détail : {details}."
         ) from last_exc
 
     @staticmethod

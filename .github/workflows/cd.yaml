@@ -52,4 +52,4 @@ jobs:
       - name: Deploy to Cloud Run (build from source with Cloud Build)
         run: |
           gcloud run deploy "$SERVICE" --source . --region "$REGION" --project "$PROJECT_ID" \
-            --update-env-vars "AGENT_VERSION=${GITHUB_SHA::7}" --quiet
+            --timeout 1800 --update-env-vars "AGENT_VERSION=${GITHUB_SHA::7}" --quiet

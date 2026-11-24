@@ -278,9 +278,13 @@ modèle saturé change selon l'heure. Les appels sont donc **mis en concurrence*
 `gemini-3.5-flash-lite` n'a pas répondu en 4 s, le modèle gratuit suivant (`gemini-3-flash-preview`,
 `gemini-3.5-flash`… ; variable `AGENT_FALLBACK_MODELS`) est lancé en parallèle, sans couper le
 premier. La première réponse complète gagne et les autres appels sont annulés. Le modèle gagnant est
-réessayé en premier pendant 5 minutes. Au-delà de 60 s, l'interface affiche « Gemini est saturé »
-au lieu de tourner sans fin. Limite : sur l'offre gratuite, ces modèles de secours n'ont droit qu'à
-20 requêtes par jour chacun, soit environ 5 questions. L'interface enregistre aussi chaque réponse
+réessayé en premier pendant 5 minutes. Si tous les modèles sont saturés, l'agent n'abandonne pas :
+il continue de les essayer, avec des pauses croissantes (jusqu'à 20 s), pendant 14 minutes au plus
+par appel. Sur l'offre gratuite, les modèles de secours n'ont droit qu'à 20 requêtes par jour
+chacun, soit environ 5 questions : un passage sur deux n'essaie donc que les modèles « lite », et
+un modèle dont le quota du jour est épuisé est ignoré jusqu'à sa remise à zéro. Un appel bloqué
+plus de 90 s est relancé. L'interface affiche chaque étape en direct et, en cas d'échec, la
+raison pour chaque modèle. L'interface enregistre aussi chaque réponse
 réelle (`frontend/demo_replays.json`) et la rejoue si Gemini est saturé, avec une mention
 explicite, ou en « mode démo hors ligne ».
 

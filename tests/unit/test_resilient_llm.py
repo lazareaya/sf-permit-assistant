@@ -13,6 +13,13 @@ from app import resilient_llm
 from app.resilient_llm import AllModelsUnavailableError, fallback_chain, make_model
 
 
+@pytest.fixture(autouse=True)
+def _fresh_state(monkeypatch):
+    monkeypatch.setattr(resilient_llm, "_preferred", {})
+    monkeypatch.setattr(resilient_llm, "_exhausted", {})
+    monkeypatch.setattr(resilient_llm, "MAX_PAUSE_S", 0.3)
+
+
 def _fake_parent(behaviour: dict, calls: list):
     """Replace Gemini.generate_content_async.
 
@@ -153,3 +160,69 @@ def test_failure_message_gives_the_reason_per_model(monkeypatch):
     msg = str(err.value)
     assert "m1 : serveurs Google surchargés (503)" in msg
     assert "m2 : quota gratuit du jour épuisé" in msg
+
+
+def test_keeps_trying_until_a_model_answers(monkeypatch):
+    """A long saturation burst: the call keeps cycling instead of giving up."""
+    monkeypatch.setenv("AGENT_FALLBACK_MODELS", "m2-lite,m3")
+    calls: list = []
+    state = {"n": 0}
+
+    async def fake(self, llm_request, stream=False):
+        calls.append(llm_request.model)
+        state["n"] += 1
+        if state["n"] < 12:  # 11 failures in a row, over several passes
+            raise errors.ServerError(503, {"error": {"message": "high demand"}})
+        yield LlmResponse(
+            content=types.Content(role="model", parts=[types.Part(text="enfin")])
+        )
+
+    monkeypatch.setattr(Gemini, "generate_content_async", fake)
+    out = _run(make_model("m1-lite"), LlmRequest(model="m1-lite"))
+    assert out[0].content.parts[0].text == "enfin"
+    # every other pass only tries the lite models (m3 is spared)
+    assert calls.count("m3") < calls.count("m1-lite")
+
+
+def test_daily_quota_model_is_skipped_afterwards(monkeypatch):
+    monkeypatch.setenv("AGENT_FALLBACK_MODELS", "m2")
+    daily = errors.ClientError(
+        429, {"error": {"message": "GenerateRequestsPerDayPerProjectPerModel-FreeTier"}}
+    )
+    calls: list = []
+
+    async def fake(self, llm_request, stream=False):
+        calls.append(llm_request.model)
+        if llm_request.model == "m1":
+            raise daily
+        yield LlmResponse(
+            content=types.Content(role="model", parts=[types.Part(text="ok")])
+        )
+
+    monkeypatch.setattr(Gemini, "generate_content_async", fake)
+    model = make_model("m1")
+    _run(model, LlmRequest(model="m1"))
+    calls.clear()
+    _run(model, LlmRequest(model="m1"))
+    assert calls == ["m2"]  # m1 is not called again before its quota resets
+
+
+def test_stuck_call_is_restarted(monkeypatch):
+    monkeypatch.setenv("AGENT_FALLBACK_MODELS", "")
+    monkeypatch.setattr(resilient_llm, "CALL_MAX_S", 0.3)
+    monkeypatch.setattr(resilient_llm, "HEDGE_DELAY_S", 0.1)
+    state = {"n": 0}
+
+    async def fake(self, llm_request, stream=False):
+        state["n"] += 1
+        if state["n"] == 1:
+            await asyncio.sleep(10)  # the first call hangs
+        yield LlmResponse(
+            content=types.Content(role="model", parts=[types.Part(text="relancé")])
+        )
+
+    monkeypatch.setattr(Gemini, "generate_content_async", fake)
+    start = time.monotonic()
+    out = _run(make_model("m1"), LlmRequest(model="m1"))
+    assert out[0].content.parts[0].text == "relancé"
+    assert time.monotonic() - start < 3

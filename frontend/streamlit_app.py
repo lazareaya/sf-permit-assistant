@@ -29,7 +29,9 @@ import streamlit as st
 API = os.getenv("AGENT_API_URL", "http://localhost:8000").rstrip("/")
 APP_NAME = os.getenv("AGENT_APP_NAME", "app")
 USER_ID = "architecte-demo"
-TIMEOUT = float(os.getenv("AGENT_TIMEOUT_S", "120"))
+# Long on purpose: when Gemini's free tier is saturated, the agent keeps trying
+# (up to ~14 min per model call) rather than giving up. Cloud Run allows 30 min.
+TIMEOUT = float(os.getenv("AGENT_TIMEOUT_S", "1800"))
 REPLAYS_PATH = Path(
     os.getenv("DEMO_REPLAYS", Path(__file__).with_name("demo_replays.json"))
 )
@@ -77,7 +79,11 @@ def run_agent(session_id: str, text: str, on_event=None) -> list[dict]:
     }
     events: list[dict] = []
     with httpx.stream(
-        "POST", f"{API}/run_sse", json=body, headers=_headers(), timeout=TIMEOUT
+        "POST",
+        f"{API}/run_sse",
+        json=body,
+        headers=_headers(),
+        timeout=httpx.Timeout(TIMEOUT, connect=30),
     ) as r:
         if r.status_code >= 400:
             r.read()
@@ -158,8 +164,8 @@ def explain_failure(exc: Exception) -> str:
         return f"⚠️ L'agent a rencontré une erreur : {msg}"
     if isinstance(exc, httpx.TimeoutException):
         return (
-            f"⏳ Pas de réponse de l'agent en {TIMEOUT:.0f} s : Gemini (offre gratuite) "
-            "est très lent ou saturé. Réessayez dans un instant."
+            f"⏳ Pas de réponse de l'agent en {TIMEOUT / 60:.0f} min : Gemini (offre "
+            "gratuite) est saturé. Réessayez plus tard."
         )
     if isinstance(exc, httpx.HTTPStatusError):
         code = exc.response.status_code
@@ -370,7 +376,11 @@ with col_chat:
             st.code(ex, language=None)
     if prompt:
         st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.status("🧠 Gemini analyse la question…", expanded=True) as status:
+        with st.status(
+            "🧠 Gemini analyse la question… (si les serveurs gratuits sont saturés, "
+            "l'agent continue d'essayer : cela peut prendre quelques minutes)",
+            expanded=True,
+        ) as status:
             failed = []
 
             def progress(label: str) -> None:

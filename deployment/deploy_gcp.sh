@@ -79,6 +79,10 @@ uvx google-agents-cli deploy --project "$PROJECT" --region "$REGION" \
   --env-vars "GOOGLE_GENAI_USE_ENTERPRISE=false,RAG_EMBEDDINGS=gemini,OTEL_TO_CLOUD=true,AGENT_MODEL=${AGENT_MODEL:-gemini-3.5-flash-lite}" \
   --secrets "$SECRETS"
 
+# Requests may last long when Gemini's free tier is saturated: the agent keeps
+# trying other models rather than giving up (app/resilient_llm.py).
+gcloud run services update sf-permit-assistant --region "$REGION" --timeout 1800 --quiet
+
 # CPU stays allocated for the instance lifetime (agents-cli default): with
 # request-based CPU, OpenTelemetry's background exporters never get CPU after
 # the response and no trace reaches Cloud Trace. With min 0 instances an
