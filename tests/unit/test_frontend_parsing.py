@@ -70,4 +70,125 @@ def test_saturated_agent_falls_back_to_recording(tmp_path, monkeypatch):
     assert "saturé" in text
     ui.save_replay("Question enregistrée", [{"content": {"parts": [{"text": "OK"}]}}])
     text, _ = ui.answer("Question enregistrée", offline=False)
-    assert text.endswith("OK") and "Gemini saturé" in text
+    assert text.endswith("OK") and "Pas de réponse de l'agent" in text
+
+
+def test_progress_labels_for_each_step():
+    from frontend.streamlit_app import describe_event
+
+    call = {
+        "content": {
+            "parts": [
+                {
+                    "functionCall": {
+                        "name": "search_permits",
+                        "args": {"address": "781 20th Ave"},
+                    }
+                }
+            ]
+        }
+    }
+    assert "781 20th Ave" in describe_event(call) and "DataSF" in describe_event(call)
+    skill = {
+        "content": {
+            "parts": [
+                {
+                    "functionCall": {
+                        "name": "activate_skill",
+                        "args": {"skill_name": "document_requirements"},
+                    }
+                }
+            ]
+        }
+    }
+    assert "documents requis" in describe_event(skill)
+    mcp = {
+        "content": {
+            "parts": [
+                {
+                    "functionResponse": {
+                        "name": "search_permits",
+                        "response": {
+                            "content": [{"text": '{"permit_count": 8, "permits": []}'}]
+                        },
+                    }
+                }
+            ]
+        }
+    }
+    assert "8 permis trouvés" in describe_event(mcp)
+    err = {
+        "content": {
+            "parts": [
+                {
+                    "functionResponse": {
+                        "name": "search_permits",
+                        "response": {"error": "DATASF_TIMEOUT", "message": "API lente"},
+                    }
+                }
+            ]
+        }
+    }
+    assert "DATASF_TIMEOUT" in describe_event(err)
+    assert (
+        describe_event({"content": {"parts": [{"text": "Réponse"}]}})
+        == "✍️ Réponse rédigée"
+    )
+
+
+def test_failure_reasons_are_explicit():
+    import httpx
+
+    from frontend.streamlit_app import AgentError, explain_failure
+
+    saturated = AgentError(
+        "AllModelsUnavailableError: Aucun modèle Gemini gratuit n'a répondu en 60 s. "
+        "Détail : gemini-3.5-flash : quota gratuit du jour épuisé."
+    )
+    assert "quota gratuit du jour épuisé" in explain_failure(saturated)
+    req = httpx.Request("POST", "https://agent/run_sse")
+    expired = httpx.HTTPStatusError(
+        "x", request=req, response=httpx.Response(403, request=req)
+    )
+    assert "jeton" in explain_failure(expired)
+    assert "Pas de réponse" in explain_failure(httpx.ReadTimeout("slow"))
+    assert "injoignable" in explain_failure(httpx.ConnectError("refused"))
+
+
+def _serve(monkeypatch, ui, body: str) -> None:
+    """Make ui.run_agent read ``body`` as the /run_sse response."""
+    import httpx
+
+    client = httpx.Client(
+        transport=httpx.MockTransport(lambda req: httpx.Response(200, text=body))
+    )
+
+    def stream(method, url, **kwargs):
+        kwargs.pop("timeout", None)
+        return client.stream(method, url, **kwargs)
+
+    monkeypatch.setattr(ui.httpx, "stream", stream)
+
+
+def test_sse_stream_is_read_step_by_step(monkeypatch):
+    import frontend.streamlit_app as ui
+
+    _serve(
+        monkeypatch,
+        ui,
+        'data: {"content": {"parts": [{"functionCall": {"name": "list_projects", "args": {}}}]}}\n\n'
+        'data: {"content": {"parts": [{"text": "20 projets."}]}}\n\n',
+    )
+    seen: list = []
+    events = ui.run_agent("s", "q", on_event=seen.append)
+    assert len(events) == 2 and seen == events
+
+
+def test_sse_error_event_is_raised(monkeypatch):
+    import pytest
+
+    import frontend.streamlit_app as ui
+
+    _serve(monkeypatch, ui, 'data: {"error": "AllModelsUnavailableError: saturé"}\n\n')
+    with pytest.raises(ui.AgentError, match="saturé"):
+        ui.run_agent("s", "q")

@@ -131,3 +131,25 @@ def test_working_fallback_is_tried_first_next_time(monkeypatch):
     out = _run(model, LlmRequest(model="m1"))
     assert calls == ["m3"]  # the saturated models are not waited for again
     assert out[0].content.parts[0].text == "answer from m3"
+
+
+def test_failure_message_gives_the_reason_per_model(monkeypatch):
+    monkeypatch.setattr(resilient_llm, "_preferred", {})
+    monkeypatch.setenv("AGENT_FALLBACK_MODELS", "m2")
+    monkeypatch.setattr(resilient_llm, "TOTAL_BUDGET_S", 3)
+    daily = errors.ClientError(
+        429, {"error": {"message": "GenerateRequestsPerDayPerProjectPerModel-FreeTier"}}
+    )
+
+    async def fake(self, llm_request, stream=False):
+        if llm_request.model == "m1":
+            raise errors.ServerError(503, {"error": {"message": "high demand"}})
+        raise daily
+        yield  # pragma: no cover
+
+    monkeypatch.setattr(Gemini, "generate_content_async", fake)
+    with pytest.raises(AllModelsUnavailableError) as err:
+        _run(make_model("m1"), LlmRequest(model="m1"))
+    msg = str(err.value)
+    assert "m1 : serveurs Google surchargés (503)" in msg
+    assert "m2 : quota gratuit du jour épuisé" in msg

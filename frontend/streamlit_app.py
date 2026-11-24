@@ -33,10 +33,11 @@ TIMEOUT = float(os.getenv("AGENT_TIMEOUT_S", "120"))
 REPLAYS_PATH = Path(
     os.getenv("DEMO_REPLAYS", Path(__file__).with_name("demo_replays.json"))
 )
-SATURATED = (
-    "⏳ Gemini (offre gratuite) est saturé en ce moment : l'agent n'a pas pu répondre. "
-    "Réessayez dans un instant."
-)
+SKILL_LABELS = {
+    "permit_search": "recherche de permis",
+    "document_requirements": "documents requis",
+    "submission_prep": "préparation de dossier",
+}
 DISCLAIMER = "Information générale, pas un avis juridique. Vérifier auprès du Department of Building Inspection."
 
 st.set_page_config(
@@ -62,16 +63,117 @@ def new_session() -> str:
     return sid
 
 
-def run_agent(session_id: str, text: str) -> list[dict]:
+class AgentError(RuntimeError):
+    """The agent run failed on the server (error event of the SSE stream)."""
+
+
+def run_agent(session_id: str, text: str, on_event=None) -> list[dict]:
+    """Run the agent through ADK ``/run_sse``: events arrive step by step."""
     body = {
         "appName": APP_NAME,
         "userId": USER_ID,
         "sessionId": session_id,
         "newMessage": {"role": "user", "parts": [{"text": text}]},
     }
-    r = httpx.post(f"{API}/run", json=body, headers=_headers(), timeout=TIMEOUT)
-    r.raise_for_status()
-    return r.json()
+    events: list[dict] = []
+    with httpx.stream(
+        "POST", f"{API}/run_sse", json=body, headers=_headers(), timeout=TIMEOUT
+    ) as r:
+        if r.status_code >= 400:
+            r.read()
+            r.raise_for_status()
+        for line in r.iter_lines():
+            if not line.startswith("data:"):
+                continue
+            ev = json.loads(line[5:])
+            if "error" in ev and "content" not in ev:
+                raise AgentError(ev["error"])
+            events.append(ev)
+            if on_event:
+                on_event(ev)
+    return events
+
+
+def describe_event(ev: dict) -> str | None:
+    """Progress label for one agent event (None: nothing to show)."""
+    for part in (ev.get("content") or {}).get("parts", []) or []:
+        call = part.get("functionCall") or part.get("function_call")
+        resp = part.get("functionResponse") or part.get("function_response")
+        if call:
+            name, args = call.get("name"), call.get("args") or {}
+            if name == "activate_skill":
+                skill = args.get("skill_name", "")
+                return f"🧭 Choix de la compétence : {SKILL_LABELS.get(skill, skill)}"
+            if name == "search_permits":
+                return (
+                    f"🏛️ Recherche des permis au {args.get('address', '?')} "
+                    "(API DataSF de la ville)…"
+                )
+            if name == "search_city_docs":
+                return (
+                    "📚 Recherche dans les pages officielles de la ville : "
+                    f"« {args.get('question', '')} »…"
+                )
+            if name == "list_projects":
+                return "🗂️ Lecture de la liste des projets du cabinet…"
+            if name == "get_project":
+                return f"🗂️ Lecture du projet n°{args.get('project_id', '?')}…"
+            if name == "create_submission_draft":
+                return (
+                    "📝 Rédaction du brouillon de dossier (validation humaine requise)…"
+                )
+            if name == "send_submission":
+                return f"📤 Tentative d'envoi du dossier n°{args.get('submission_id', '?')}…"
+            return f"🔧 Appel de l'outil {name}…"
+        if resp:
+            data = unwrap(resp.get("response"))
+            name = resp.get("name")
+            if isinstance(data, dict) and data.get("error"):
+                return f"⚠️ {name} : {data['error']} — {data.get('message', '')}"[:200]
+            if isinstance(data, dict) and "permit_count" in data:
+                return f"✅ {data['permit_count']} permis trouvés · Gemini analyse les résultats…"
+            if isinstance(data, dict) and "passages" in data:
+                n = len(data["passages"])
+                found = (
+                    f"{n} passage(s) pertinent(s)" if n else "aucun passage pertinent"
+                )
+                return f"✅ {found} · Gemini analyse les résultats…"
+            return f"✅ Résultat de {name} reçu · Gemini analyse les résultats…"
+        if part.get("text") and not part.get("thought"):
+            return "✍️ Réponse rédigée"
+    return None
+
+
+def explain_failure(exc: Exception) -> str:
+    """Why the agent could not answer, in plain French."""
+    if isinstance(exc, AgentError):
+        msg = str(exc)
+        if "AllModelsUnavailableError" in msg:
+            return (
+                "⏳ Gemini (offre gratuite) n'a pas pu répondre. "
+                + msg.split(": ", 1)[-1]
+            )
+        return f"⚠️ L'agent a rencontré une erreur : {msg}"
+    if isinstance(exc, httpx.TimeoutException):
+        return (
+            f"⏳ Pas de réponse de l'agent en {TIMEOUT:.0f} s : Gemini (offre gratuite) "
+            "est très lent ou saturé. Réessayez dans un instant."
+        )
+    if isinstance(exc, httpx.HTTPStatusError):
+        code = exc.response.status_code
+        if code in (401, 403):
+            return (
+                "🔒 Cloud Run refuse l'accès : le jeton d'identité a expiré (il dure "
+                "1 h). Relancez l'interface avec un nouveau jeton."
+            )
+        if code == 404:
+            return "⚠️ Conversation introuvable côté agent : cliquez sur « Nouvelle conversation »."
+        if code == 429:
+            return "⏳ Trop de requêtes vers l'agent : réessayez dans un instant."
+        return f"⚠️ Erreur serveur de l'agent (HTTP {code})."
+    if isinstance(exc, httpx.HTTPError):
+        return f"🔌 Agent injoignable ({API}) : {exc}"
+    return f"⚠️ Erreur inattendue : {exc}"
 
 
 # ----------------------------------------------------------- recorded answers
@@ -107,38 +209,53 @@ def replay_for(prompt: str) -> dict | None:
     return load_replays().get(_norm(prompt))
 
 
-def answer(prompt: str, offline: bool) -> tuple[str, list[dict]]:
-    """Live answer from the agent; recorded answer if Gemini is saturated."""
+def answer(prompt: str, offline: bool, progress=None) -> tuple[str, list[dict]]:
+    """Live answer from the agent; recorded answer if it cannot answer.
+
+    ``progress(label)`` is called at each step of the agent run, and with a
+    label starting with "❌" when the run fails.
+    """
     if not offline:
         try:
-            events = run_agent(st.session_state.session_id, prompt)
+            try:
+                events = run_agent(
+                    st.session_state.session_id,
+                    prompt,
+                    on_event=lambda ev: (
+                        progress and (lbl := describe_event(ev)) and progress(lbl)
+                    ),
+                )
+            except httpx.HTTPStatusError as exc:
+                if exc.response.status_code != 404:
+                    raise
+                # The instance that held the conversation was recycled: new session.
+                st.session_state.session_id = new_session()
+                events = run_agent(st.session_state.session_id, prompt)
             text, steps = parse_events(events)
             if text != "(pas de réponse)":
                 save_replay(prompt, events)
             return text, steps
-        except httpx.TimeoutException:
-            problem = SATURATED
-        except httpx.HTTPStatusError as exc:
-            problem = (
-                SATURATED
-                if exc.response.status_code >= 500
-                else f"Erreur d'appel à l'agent : {exc}"
-            )
-        except httpx.HTTPError as exc:
-            problem = f"Agent injoignable : {exc}"
+        except (AgentError, httpx.HTTPError) as exc:
+            problem = explain_failure(exc)
     else:
         problem = (
             "Mode démo hors ligne : aucune réponse enregistrée pour cette question."
         )
+    if progress and not offline:
+        progress("❌ " + problem)
     rec = replay_for(prompt)
     if rec is None:
         return problem, []
     text, steps = parse_events(rec["events"])
-    note = (
-        f"*📼 Réponse réelle de l'agent enregistrée le {rec['recorded_at']}"
-        + ("" if offline else " (Gemini saturé à l'instant)")
-        + ".*\n\n"
-    )
+    if offline:
+        note = (
+            f"*📼 Réponse réelle de l'agent enregistrée le {rec['recorded_at']}.*\n\n"
+        )
+    else:
+        note = (
+            f"{problem}\n\n*📼 Voici la réponse réelle de l'agent à cette question, "
+            f"enregistrée le {rec['recorded_at']} :*\n\n"
+        )
     return note + text, steps
 
 
@@ -251,8 +368,22 @@ with col_chat:
             st.code(ex, language=None)
     if prompt:
         st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.spinner("L'assistant travaille..."):
-            reply, steps = answer(prompt, offline)
+        with st.status("🧠 Gemini analyse la question…", expanded=True) as status:
+            failed = []
+
+            def progress(label: str) -> None:
+                if label.startswith("❌"):
+                    failed.append(label)
+                status.update(label=label[:120])
+                status.write(label)
+
+            reply, steps = answer(prompt, offline, progress)
+            if failed:
+                status.update(label="❌ L'agent n'a pas pu répondre", state="error")
+            else:
+                status.update(
+                    label="✅ Réponse prête", state="complete", expanded=False
+                )
         st.session_state.messages.append({"role": "assistant", "content": reply})
         st.session_state.traces.append({"prompt": prompt, "steps": steps})
         st.rerun()

@@ -70,6 +70,20 @@ def _retryable(exc: BaseException) -> bool:
     return False
 
 
+def reason(exc: BaseException | None) -> str:
+    """Human-readable (French) reason why a model did not answer."""
+    if exc is None or isinstance(exc, asyncio.TimeoutError | TimeoutError):
+        return "pas de réponse dans le délai"
+    code = getattr(exc, "code", None)
+    if code == 429:
+        if "PerDay" in str(exc):
+            return "quota gratuit du jour épuisé (remis à zéro à 9 h, heure de Paris)"
+        return "limite de requêtes par minute atteinte"
+    if code in (500, 502, 503, 504):
+        return f"serveurs Google surchargés ({code})"
+    return f"erreur {code or type(exc).__name__}"
+
+
 def _request_for(llm_request: LlmRequest, model: str) -> LlmRequest:
     """Independent copy for one model (the parent call mutates its request)."""
     return llm_request.model_copy(
@@ -92,6 +106,7 @@ class ResilientGemini(Gemini):
         deadline = time.monotonic() + TOTAL_BUDGET_S
         running: dict[asyncio.Task, str] = {}
         last_exc: BaseException | None = None
+        failures: dict[str, str] = {}  # model -> last reason
         passes = 0
 
         def launch() -> None:
@@ -121,6 +136,7 @@ class ResilientGemini(Gemini):
                     if not _retryable(exc):
                         raise exc
                     last_exc = exc
+                    failures[model] = reason(exc)
                     logger.warning(
                         "Model %s unavailable (%s)",
                         model,
@@ -140,11 +156,14 @@ class ResilientGemini(Gemini):
                     queue = fallback_chain(primary)
                     launch()
         finally:
+            for model in running.values():
+                failures.setdefault(model, reason(None))
             for task in running:
                 task.cancel()
+        details = " ; ".join(f"{m} : {r}" for m, r in failures.items())
         raise AllModelsUnavailableError(
-            "Gemini (offre gratuite) est saturé sur tous les modèles essayés. "
-            "Réessayez dans un instant."
+            f"Aucun modèle Gemini gratuit n'a répondu en {TOTAL_BUDGET_S:.0f} s. "
+            f"Détail : {details}."
         ) from last_exc
 
     @staticmethod
